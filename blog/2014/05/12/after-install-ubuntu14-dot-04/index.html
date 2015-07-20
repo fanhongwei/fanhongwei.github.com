@@ -1,0 +1,293 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>After install Ubuntu 14.04 LTS - vicvan</title>
+	<meta name="author" content="vicvan">
+
+	
+	<meta name="description" content="前奏 之前从ubuntu 13.10升级到ubuntu 14.04 LTS,由于输入法的问题,在删除iBus的时候不小心删除了Unity的一些东西,结果桌面环境挂掉了,无奈重装系统,装完系统倒是焕然一新了,可是各种缺环境.然后开始了一系列配置环境的艰辛历程,通过这篇博文记录这艰辛历程， &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="vicvan" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">vicvan</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="https://www.google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:yoursite.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="https://www.google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:yoursite.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">After Install Ubuntu 14.04 LTS</h2>
+	<div class="entry-content"><h1>前奏</h1>
+
+<p>之前从ubuntu 13.10升级到ubuntu 14.04 LTS,由于输入法的问题,在删除iBus的时候不小心删除了Unity的一些东西,结果桌面环境挂掉了,无奈重装系统,装完系统倒是焕然一新了,可是各种缺环境.然后开始了一系列配置环境的艰辛历程,通过这篇博文记录这艰辛历程，以备下次强迫症患了再一次作大死。</p>
+
+<h1>开工</h1>
+
+<h3><em>基本系统配置</em></h3>
+
+<p><strong>换源:</strong> 果断将源换成我大<a href="http://hustunique.com">联创</a>自己的源 <a href="http://mirrors.hustunique.com">mirrors.hustunique.com</a>.之后<code>sudo apt-get update</code>更新一下.</p>
+
+<p><strong>安装chrome:</strong> 直接<a href="https://www.google.com/intl/zh-CN/chrome/browser/">chrome官网</a>下载chrome的deb包,然后通过软件中心安装即可.很庆幸的14.04中没有之前版本中出现的缺少lib的问题.</p>
+
+<p><strong>终端配置:</strong> 安装Termiantor终端,此终端比自带的终端强悍很多.</p>
+
+<p><strong>终端环境：</strong> 弃用bash,换上高大上的zsh.通过github上的 <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>来管理zsh配置,执行以下shell即可</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install zsh
+</span><span class='line'>curl -L http://install.ohmyz.sh | sh  //自动安装
+</span><span class='line'>chsh -s /bin/zsh
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!--more-->
+
+
+<p><strong>键盘映射修改:</strong> 由于个人习惯,总是喜欢将CapsLk替换为Ctrl,通过Xmodmap来修改键盘映射,在/home下添加.Xmodmap文件</p>
+
+<p>.Xmodmap</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>remove Lock = Caps_Lock
+</span><span class='line'>keysym Caps_Lock = Control_L
+</span><span class='line'>add control = Control_L</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>主题配置:</strong> 首先安装Ubuntu Tweak这个主题管理软件.</p>
+
+<p>然后安装我自己喜欢的Numix主题</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:numix/ppa
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install numix-gtk-theme</span></code></pre></td></tr></table></div></figure>
+
+
+<p>字体选择钟爱的Manaco.
+最后通过Ubuntu Tweak工具去管理设置这些配置。</p>
+
+<p><strong>输入法：</strong> 好不容易搜狗支持Linux就用它吧,前往<a href="http://pinyin.sogou.com/linux/">官网</a>下载deb包,之后安装即可,前提是得安装fcitx.关于输入法这一块会出不少问题,耐心点,慢慢来.</p>
+
+<h3><em>Android 开发配置</em></h3>
+
+<p><strong>jdk安装：</strong> 终端通过<code>sudo apt-get install XXX</code>安装即可.</p>
+
+<p><strong>Android Studio:</strong> 前往 <a href="http://developer.android.com/sdk/installing/studio.html">Android开发者网站</a>下载Android Studio.另外,Android Studio有creat Desktop Entry这个功能,不再需要我们自己去写.desktop文件.</p>
+
+<p><strong>GIMP:</strong> 这个主要就是平时设计师给图之后用来取色或者切图之类的.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:otto-kesselgulasch/gimp
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install gimp</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>DropBox:</strong> 方便与设计师进行图片的同步,前往 <a href="https://www.dropbox.com/install?os=lnx">DropBox官网</a>下载deb包即可。</p>
+
+<p><strong>Genymotion:</strong> 目前作为一个学生党开发者，没有大量的手持设备用来适配，通过Genymotion这些虚拟设备可以达到同样的效果。为了方便,在/usr/share/applications目录下创建genymotion.desktop文件用于快捷启动</p>
+
+<p>genmotion.desktop</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[Desktop Entry]
+</span><span class='line'>Type=Application
+</span><span class='line'>Name=Genymotion
+</span><span class='line'>Icon=/home/dsnc/Downloads/genymotion/icons/icon.png
+</span><span class='line'>Exec="/home/dsnc/Downloads/genymotion/genymotion"
+</span><span class='line'>Terminal=false
+</span><span class='line'>Categories=Development;IDE;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><em>博客管理</em></h3>
+
+<p><strong>Ruby环境配置:</strong> 个人博客是用Octopress搭建的,所以得配置ruby环境,因为14.04比较新,配置起来比较纠结,缺少各种依赖库,一下是我的成功配置过程</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install curl
+</span><span class='line'>\curl -sSL https://get.rvm.io | bash -s stable       //install RVM by using curl
+</span><span class='line'>source ~/.rvm/scripts/rvm          //load RVM
+</span><span class='line'>type rvm | head -n 1          //if install success,there is "rvm is a function"
+</span><span class='line'>
+</span><span class='line'>//install lib,without these the "rvm requirements will failed"
+</span><span class='line'>sudo apt-get install gawk g++ libreadline6-dev zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake libtool bison libffi-dev
+</span><span class='line'>rvm requirements  
+</span><span class='line'>rvm install ruby</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><ul>
+<li>RVM:Ruby Version Manager</li>
+</ul>
+</blockquote>
+
+<p><strong>ReText:</strong> 用来写markdown,直接软件中心下载即可.</p>
+
+<h3><em>其他常用应用</em></h3>
+
+<p><strong>Docky:</strong> 应用中心搜索</p>
+
+<p><strong>WPS:</strong> 前往 <a href="http://linux.wps.cn/">WPS官网</a>下载deb包即可.</p>
+
+<p><strong>Synapse:</strong> 快速启动器</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:synapse-core/testing
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install synapse</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>截图工具：</strong> 这个我习惯使用的是Shutter</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:shutter/ppa
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install shutter</span></code></pre></td></tr></table></div></figure>
+
+
+<h2><em>越来越发现Ubuntu softerware center还是有很多好玩的应用,并且博文中提到的很多软件也都可以同多软件中心直接安装,不用通过添加PPA源的方式安装</em></h2>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+May 12th, 2014</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/linux/'>linux</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		
+	</div>
+	
+</div>
+
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    vicvan
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+</body>
+</html>

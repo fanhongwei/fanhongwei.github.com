@@ -1,0 +1,567 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Android Develop Tips(一) - vicvan</title>
+	<meta name="author" content="vicvan">
+
+	
+	<meta name="description" content="Android常用项目结构 在Android的开发过程中一直在不断的调整自己对于项目结构的架构方式，经过了多次的调整之后，现在基本每个项目都会以如下方式来架构： api
+放置一些API口类
+app
+放置一些与整个东西pp相关的类，如继承自Application的当前应用的Appliation类、 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="vicvan" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">vicvan</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="https://www.google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:yoursite.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="https://www.google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:yoursite.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Android Develop Tips(一)</h2>
+	<div class="entry-content"><h2>Android常用项目结构</h2>
+
+<p>在Android的开发过程中一直在不断的调整自己对于项目结构的架构方式，经过了多次的调整之后，现在基本每个项目都会以如下方式来架构：</p>
+
+<ul>
+<li><strong><em>api</em></strong>
+放置一些API口类</li>
+<li><strong><em>app</em></strong>
+放置一些与整个东西pp相关的类，如继承自Application的当前应用的Appliation类、继承自系统Resources写的当前应用的Resurces类、应用的版本管理VersionManager类等</li>
+<li><strong><em>bean</em></strong>
+主要用来放置java bean的类</li>
+<li><strong><em>io</em></strong>
+放置一些io操作的类，如网络请求、文件读写、数据库操作等等</li>
+<li><strong><em>provider</em></strong>
+放置provider相关的类</li>
+<li><strong><em>receiver</em></strong><br/>
+放置整应用里边需要的reiver类</li>
+<li><strong><em>service</em></strong>
+放置整个应用里边的sevice类</li>
+<li><strong><em>ui</em></strong>
+
+<ul>
+<li><strong><em>activity</em></strong>
+整个应用的actvity类</li>
+<li><strong><em>adapter</em></strong>
+整个应用的adapter类</li>
+<li><strong><em>controller</em></strong>
+整个用中用到的ew层进行操纵的roller类</li>
+<li><strong><em>fragment</em></strong>
+整个应中的fragemnt类</li>
+<li><strong><em>util</em></strong>
+对应用中ui进行操作的一些helper类</li>
+<li><strong><em>view</em></strong>
+整个应中可以分离出来的view</li>
+<li><strong><em>widget</em></strong>
+整个应用的自定义控件</li>
+</ul>
+</li>
+<li><strong><em>util</em></strong>
+各种各样的工具类</li>
+</ul>
+
+
+<p>我现在基本上每个项目都是这种架构方式了，另外，我习惯将自己平时的积累的一些工具类之类的类整理到一个Common的library module中，自己的每个项目都会把这个common module倒入进来，这样子方便了很多。</p>
+
+<!--more-->
+
+
+<h2>Gradle</h2>
+
+<p>Gradle只是提供了一个构建项目的框架,然后通过各种各样的Plugin来构建我们自己的项目。Gradle本身的领域对象主要有Project和Task，Project为task的执行提供了上下文。Gradle默认会将当前目录下的build.gradle作为项目的构建文件。接下来以一个实际项目为例类详细介绍gradle构建Android项目。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">android</span><span class="o">.</span><span class="na">application</span><span class="err">&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">android</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">compileSdkVersion</span> <span class="mi">21</span>
+</span><span class='line'>    <span class="n">buildToolsVersion</span> <span class="err">&#39;</span><span class="mf">21.1</span><span class="o">.</span><span class="mi">1</span><span class="err">&#39;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">defaultConfig</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">applicationId</span> <span class="s">&quot;us.drilight.android&quot;</span>
+</span><span class='line'>        <span class="n">minSdkVersion</span> <span class="mi">14</span>
+</span><span class='line'>        <span class="n">targetSdkVersion</span> <span class="mi">21</span>
+</span><span class='line'>        <span class="n">versionCode</span> <span class="mi">1</span>
+</span><span class='line'>        <span class="n">versionName</span> <span class="s">&quot;1.0&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">lintOptions</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">checkReleaseBuilds</span> <span class="kc">false</span>
+</span><span class='line'>        <span class="c1">// Or, if you prefer, you can continue to check for errors in release builds,</span>
+</span><span class='line'>        <span class="c1">// but continue the build even when errors are found:</span>
+</span><span class='line'>        <span class="n">abortOnError</span> <span class="kc">false</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">signingConfigs</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">YourApp</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">storeFile</span> <span class="nf">file</span><span class="o">(</span><span class="s">&quot;Your keystore path&quot;</span><span class="o">)</span>
+</span><span class='line'>            <span class="n">storePassword</span> <span class="s">&quot;Your keystore password&quot;</span>
+</span><span class='line'>            <span class="n">keyAlias</span> <span class="s">&quot;Your keyAlias&quot;</span>
+</span><span class='line'>            <span class="n">keyPassword</span> <span class="s">&quot;Your keyPassword&quot;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">buildTypes</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">release</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">signingConfig</span> <span class="n">signingConfigs</span><span class="o">.</span><span class="na">YourApp</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">sourceSets</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">main</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">jniLibs</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">libs</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">productFlavors</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">baidu_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;baidu_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">meizu_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;meizu_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">mumayi_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;mumayi_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">xiaomi_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;xiaomi_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">wandoujia_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;wandoujia_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">play_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;play_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="nf">fileTree</span><span class="o">(</span><span class="nl">dir:</span> <span class="err">&#39;</span><span class="n">libs</span><span class="err">&#39;</span><span class="o">,</span> <span class="nl">include:</span> <span class="o">[</span><span class="err">&#39;</span><span class="o">*.</span><span class="na">jar</span><span class="err">&#39;</span><span class="o">])</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="nf">project</span><span class="o">(</span><span class="err">&#39;</span><span class="o">:</span><span class="n">common</span><span class="err">&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">io</span><span class="o">.</span><span class="na">realm</span><span class="o">:</span><span class="n">realm</span><span class="o">-</span><span class="nl">android:</span><span class="mf">0.71</span><span class="o">.</span><span class="mi">0</span><span class="err">&#39;</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">code</span><span class="o">.</span><span class="na">gson</span><span class="o">:</span><span class="nl">gson:</span><span class="mf">2.3</span><span class="err">&#39;</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">mcxiaoke</span><span class="o">.</span><span class="na">volley</span><span class="o">:</span><span class="nl">library:</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">6</span><span class="err">&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>apply plugin: 'com.android.application'</code> 显然这是一个构建Android项目Gradle Plugin，另外，如果希望当前module是以一个library project被编译的话应该使用 <code>apply plugin: 'com.android.library'</code> 这个plugin。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">android</span><span class="o">{</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是plugin中的android</span> <span class="n">project构建</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">compileSdkVersion</span> <span class="mi">21</span>
+</span><span class='line'><span class="n">buildToolsVersion</span> <span class="err">&#39;</span><span class="mf">21.1</span><span class="o">.</span><span class="mi">1</span><span class="err">&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是用来指定CompileSdkVersion和BuildToolsVersion的</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">defaultConfig</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">applicationId</span> <span class="s">&quot;us.drilight.android&quot;</span>
+</span><span class='line'>        <span class="n">minSdkVersion</span> <span class="mi">14</span>
+</span><span class='line'>        <span class="n">targetSdkVersion</span> <span class="mi">21</span>
+</span><span class='line'>        <span class="n">versionCode</span> <span class="mi">1</span>
+</span><span class='line'>        <span class="n">versionName</span> <span class="s">&quot;1.0&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是用来对project进行一个初步的配置</span><span class="err">，</span><span class="n">包括applicationId</span><span class="o">,</span><span class="n">minSdkVersion</span><span class="o">,</span><span class="n">versionCode</span><span class="o">,</span><span class="n">versionName</span><span class="err">。</span>
+</span><span class='line'><span class="n">这个地方有个需要注意的就是在gradle构建的project中versionCode和versionName以这个地方的为准</span><span class="err">，</span>
+</span><span class='line'><span class="n">AndroidMainfest</span><span class="o">.</span><span class="na">xml中关于这一块的配置不再有效</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">lintOptions</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">checkReleaseBuilds</span> <span class="kc">false</span>
+</span><span class='line'>        <span class="c1">// Or, if you prefer, you can continue to check for errors in release builds,</span>
+</span><span class='line'>        <span class="c1">// but continue the build even when errors are found:</span>
+</span><span class='line'>        <span class="n">abortOnError</span> <span class="kc">false</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块主要是对编译过程的配置</span><span class="err">，</span><span class="n">如果这个地方不做处理的话</span><span class="err">，</span><span class="n">在编译的时候就连warning之类的都会导致编译通不过</span><span class="err">，</span><span class="n">所以配</span>
+</span><span class='line'><span class="n">置这一块基本是必须的</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">signingConfigs</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">YourApp</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">storeFile</span> <span class="nf">file</span><span class="o">(</span><span class="s">&quot;Your keystore path&quot;</span><span class="o">)</span>
+</span><span class='line'>            <span class="n">storePassword</span> <span class="s">&quot;Your keystore password&quot;</span>
+</span><span class='line'>            <span class="n">keyAlias</span> <span class="s">&quot;Your keyAlias&quot;</span>
+</span><span class='line'>            <span class="n">keyPassword</span> <span class="s">&quot;Your keyPassword&quot;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">buildTypes</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">release</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">signingConfig</span> <span class="n">signingConfigs</span><span class="o">.</span><span class="na">YourApp</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是对签名的配置</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">sourceSets</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">main</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">jniLibs</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">libs</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块主要是对sourceSet的配置这个配置可以将libs下的</span><span class="o">.</span><span class="na">so库编译进当前project</span><span class="err">。</span><span class="n">sourceSets这一块Android</span>
+</span><span class='line'><span class="n">Studio会默认配置</span><span class="err">，</span><span class="n">当然也可以自己写比如</span><span class="err">：</span>
+</span><span class='line'><span class="o">(</span>
+</span><span class='line'><span class="n">java</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">src</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">resources</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">src</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">idl</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">src</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">renderscript</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">src</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">res</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">res</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">assets</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">assets</span><span class="err">&#39;</span><span class="o">])</span>
+</span><span class='line'><span class="n">这个视个人项目文件结构来具体配置</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">productFlavors</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">baidu_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;baidu_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">meizu_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;meizu_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">mumayi_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;mumayi_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">xiaomi_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;xiaomi_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">wandoujia_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;wandoujia_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">play_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;play_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是对多渠道包的配置</span><span class="err">，</span><span class="n">具体每一个渠道包的包名等等之类的信息都可以在这个地方配置</span><span class="err">，</span><span class="n">示例中是每一个</span>
+</span><span class='line'><span class="n">productFlavor中加入了友盟的多渠道信息统计</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="nf">fileTree</span><span class="o">(</span><span class="nl">dir:</span> <span class="err">&#39;</span><span class="n">libs</span><span class="err">&#39;</span><span class="o">,</span> <span class="nl">include:</span> <span class="o">[</span><span class="err">&#39;</span><span class="o">*.</span><span class="na">jar</span><span class="err">&#39;</span><span class="o">])</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="nf">project</span><span class="o">(</span><span class="err">&#39;</span><span class="o">:</span><span class="n">common</span><span class="err">&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">io</span><span class="o">.</span><span class="na">realm</span><span class="o">:</span><span class="n">realm</span><span class="o">-</span><span class="nl">android:</span><span class="mf">0.71</span><span class="o">.</span><span class="mi">0</span><span class="err">&#39;</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">code</span><span class="o">.</span><span class="na">gson</span><span class="o">:</span><span class="nl">gson:</span><span class="mf">2.3</span><span class="err">&#39;</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">mcxiaoke</span><span class="o">.</span><span class="na">volley</span><span class="o">:</span><span class="nl">library:</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">6</span><span class="err">&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是对第三方依赖的配置</span><span class="err">。</span><span class="n">compile</span> <span class="nf">fileTree</span><span class="o">(</span><span class="nl">dir:</span> <span class="err">&#39;</span><span class="n">libs</span><span class="err">&#39;</span><span class="o">,</span> <span class="nl">include:</span> <span class="o">[</span><span class="err">&#39;</span><span class="o">*.</span><span class="na">jar</span><span class="err">&#39;</span><span class="o">])</span> <span class="n">这个是将当前module项目</span>
+</span><span class='line'><span class="n">目录下的所有jar包以lib的形式编译到当前project中来</span><span class="err">。</span> <span class="n">compile</span> <span class="nf">project</span><span class="o">(</span><span class="err">&#39;</span><span class="o">:</span><span class="n">common</span><span class="err">&#39;</span><span class="o">)</span> <span class="n">这个的话是将第三方的</span>
+</span><span class='line'><span class="n">library</span> <span class="n">project编译进当前project</span><span class="err">，</span><span class="n">这个地方要注意的是得先在settings</span><span class="o">.</span><span class="na">build中声明这个library</span><span class="o">,</span><span class="n">类似这样的</span>
+</span><span class='line'><span class="n">include</span> <span class="err">&#39;</span><span class="o">:</span><span class="n">app</span><span class="err">&#39;</span><span class="o">,</span> <span class="err">&#39;</span><span class="o">:</span><span class="n">Common</span><span class="err">&#39;</span> <span class="err">。</span> <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">code</span><span class="o">.</span><span class="na">gson</span><span class="o">:</span><span class="nl">gson:</span><span class="mf">2.3</span><span class="err">&#39;</span> <span class="n">这个是通过从远程maven仓库的</span>
+</span><span class='line'><span class="n">形式来编译第三方library到当前project</span><span class="err">，</span><span class="n">我个人现在目前更倾向于这种形式导入第三方library</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Dec 11th, 2014</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>android</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		
+	</div>
+	
+</div>
+
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    vicvan
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+</body>
+</html>

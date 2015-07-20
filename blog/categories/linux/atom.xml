@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: linux | vicvan]]></title>
+  <link href="http://yoursite.com/blog/categories/linux/atom.xml" rel="self"/>
+  <link href="http://yoursite.com/"/>
+  <updated>2015-07-21T00:34:52+08:00</updated>
+  <id>http://yoursite.com/</id>
+  <author>
+    <name><![CDATA[vicvan]]></name>
+    <email><![CDATA[fanhongweiqq@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[After install Ubuntu 14.04 LTS]]></title>
+    <link href="http://yoursite.com/blog/2014/05/12/after-install-ubuntu14-dot-04/"/>
+    <updated>2014-05-12T14:34:00+08:00</updated>
+    <id>http://yoursite.com/blog/2014/05/12/after-install-ubuntu14-dot-04</id>
+    <content type="html"><![CDATA[<h1>前奏</h1>
+
+<p>之前从ubuntu 13.10升级到ubuntu 14.04 LTS,由于输入法的问题,在删除iBus的时候不小心删除了Unity的一些东西,结果桌面环境挂掉了,无奈重装系统,装完系统倒是焕然一新了,可是各种缺环境.然后开始了一系列配置环境的艰辛历程,通过这篇博文记录这艰辛历程，以备下次强迫症患了再一次作大死。</p>
+
+<h1>开工</h1>
+
+<h3><em>基本系统配置</em></h3>
+
+<p><strong>换源:</strong> 果断将源换成我大<a href="http://hustunique.com">联创</a>自己的源 <a href="http://mirrors.hustunique.com">mirrors.hustunique.com</a>.之后<code>sudo apt-get update</code>更新一下.</p>
+
+<p><strong>安装chrome:</strong> 直接<a href="https://www.google.com/intl/zh-CN/chrome/browser/">chrome官网</a>下载chrome的deb包,然后通过软件中心安装即可.很庆幸的14.04中没有之前版本中出现的缺少lib的问题.</p>
+
+<p><strong>终端配置:</strong> 安装Termiantor终端,此终端比自带的终端强悍很多.</p>
+
+<p><strong>终端环境：</strong> 弃用bash,换上高大上的zsh.通过github上的 <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>来管理zsh配置,执行以下shell即可
+```
+sudo apt-get install zsh
+curl -L <a href="http://install.ohmyz.sh">http://install.ohmyz.sh</a> | sh  //自动安装
+chsh -s /bin/zsh</p>
+
+<p>```</p>
+
+<!--more-->
+
+
+<p><strong>键盘映射修改:</strong> 由于个人习惯,总是喜欢将CapsLk替换为Ctrl,通过Xmodmap来修改键盘映射,在/home下添加.Xmodmap文件</p>
+
+<p>.Xmodmap
+<code>
+remove Lock = Caps_Lock
+keysym Caps_Lock = Control_L
+add control = Control_L
+</code></p>
+
+<p><strong>主题配置:</strong> 首先安装Ubuntu Tweak这个主题管理软件.</p>
+
+<p>然后安装我自己喜欢的Numix主题
+<code>
+sudo add-apt-repository ppa:numix/ppa
+sudo apt-get update
+sudo apt-get install numix-gtk-theme
+</code>
+字体选择钟爱的Manaco.
+最后通过Ubuntu Tweak工具去管理设置这些配置。</p>
+
+<p><strong>输入法：</strong> 好不容易搜狗支持Linux就用它吧,前往<a href="http://pinyin.sogou.com/linux/">官网</a>下载deb包,之后安装即可,前提是得安装fcitx.关于输入法这一块会出不少问题,耐心点,慢慢来.</p>
+
+<h3><em>Android 开发配置</em></h3>
+
+<p><strong>jdk安装：</strong> 终端通过<code>sudo apt-get install XXX</code>安装即可.</p>
+
+<p><strong>Android Studio:</strong> 前往 <a href="http://developer.android.com/sdk/installing/studio.html">Android开发者网站</a>下载Android Studio.另外,Android Studio有creat Desktop Entry这个功能,不再需要我们自己去写.desktop文件.</p>
+
+<p><strong>GIMP:</strong> 这个主要就是平时设计师给图之后用来取色或者切图之类的.
+<code>
+sudo add-apt-repository ppa:otto-kesselgulasch/gimp
+sudo apt-get update
+sudo apt-get install gimp
+</code></p>
+
+<p><strong>DropBox:</strong> 方便与设计师进行图片的同步,前往 <a href="https://www.dropbox.com/install?os=lnx">DropBox官网</a>下载deb包即可。</p>
+
+<p><strong>Genymotion:</strong> 目前作为一个学生党开发者，没有大量的手持设备用来适配，通过Genymotion这些虚拟设备可以达到同样的效果。为了方便,在/usr/share/applications目录下创建genymotion.desktop文件用于快捷启动</p>
+
+<p>genmotion.desktop
+<code>
+[Desktop Entry]
+Type=Application
+Name=Genymotion
+Icon=/home/dsnc/Downloads/genymotion/icons/icon.png
+Exec="/home/dsnc/Downloads/genymotion/genymotion"
+Terminal=false
+Categories=Development;IDE;
+</code></p>
+
+<h3><em>博客管理</em></h3>
+
+<p><strong>Ruby环境配置:</strong> 个人博客是用Octopress搭建的,所以得配置ruby环境,因为14.04比较新,配置起来比较纠结,缺少各种依赖库,一下是我的成功配置过程</p>
+
+<pre><code>sudo apt-get update
+sudo apt-get install curl
+\curl -sSL https://get.rvm.io | bash -s stable       //install RVM by using curl
+source ~/.rvm/scripts/rvm          //load RVM
+type rvm | head -n 1          //if install success,there is "rvm is a function"
+
+//install lib,without these the "rvm requirements will failed"
+sudo apt-get install gawk g++ libreadline6-dev zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake libtool bison libffi-dev
+rvm requirements  
+rvm install ruby
+</code></pre>
+
+<blockquote><ul>
+<li>RVM:Ruby Version Manager</li>
+</ul>
+</blockquote>
+
+<p><strong>ReText:</strong> 用来写markdown,直接软件中心下载即可.</p>
+
+<h3><em>其他常用应用</em></h3>
+
+<p><strong>Docky:</strong> 应用中心搜索</p>
+
+<p><strong>WPS:</strong> 前往 <a href="http://linux.wps.cn/">WPS官网</a>下载deb包即可.</p>
+
+<p><strong>Synapse:</strong> 快速启动器
+<code>
+sudo add-apt-repository ppa:synapse-core/testing
+sudo apt-get update
+sudo apt-get install synapse
+</code></p>
+
+<p><strong>截图工具：</strong> 这个我习惯使用的是Shutter
+<code>
+sudo add-apt-repository ppa:shutter/ppa
+sudo apt-get update
+sudo apt-get install shutter
+</code></p>
+
+<h2><em>越来越发现Ubuntu softerware center还是有很多好玩的应用,并且博文中提到的很多软件也都可以同多软件中心直接安装,不用通过添加PPA源的方式安装</em></h2>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Linux内核编译]]></title>
+    <link href="http://yoursite.com/blog/2014/03/09/linux-kernel/"/>
+    <updated>2014-03-09T21:05:00+08:00</updated>
+    <id>http://yoursite.com/blog/2014/03/09/linux-kernel</id>
+    <content type="html"><![CDATA[<p>系统发行版ubuntu13.04，内核版本3.12.13
+首先，官网下载所需内核。</p>
+
+<p>为了之后的方便，切换到root权限    命令：<code>sudo -i</code></p>
+
+<p>复制内核包到制定目录    命令：<code>cp ./linux-3.12.13.tar.xz   /usr/src</code></p>
+
+<p>解压内核包   命令：<code>tar -xvf linux-3.12.13.tar.xz</code></p>
+
+<p>切换到/usr/src目录下  命令：<code>cd /usr/src</code></p>
+
+<p><img src="/images/image-5.png" alt="" /></p>
+
+<!--more-->
+
+
+<p><img src="/images/image-9.png" alt="" /></p>
+
+<p>把原来编译产生的垃圾删除   命令：<code>make mrproper</code></p>
+
+<p>配置内核,选用基于图形窗口模式的配置界面   命令：<code>make xconfig</code></p>
+
+<p>正常的话应该可以开始配置内核了，可惜ubuntu没有自带qt环境或者我之前吧qt环境卸载了</p>
+
+<p><img src="/images/image-7.png" alt="" /></p>
+
+<p>缺qt3环境，然后去装qt3环境，发现现在大多数源里边已经没有qt3了，索性安装qt4的环境，重新开始配置内核，发现2.6的内核必须要qt3的环境，于是换到了3.12.13的内核。</p>
+
+<p>重新执行 <code>make xconfig</code>,出现配置界面</p>
+
+<p><img src="/images/image-11.png" alt="" /></p>
+
+<p>开始配置内核，看不懂，找到了@金步国的一篇博文  <a href="http://www.jinbuguo.com/kernel/longterm-3_10-options.html">博文链接</a></p>
+
+<p><img src="/images/image-12.png" alt="" /></p>
+
+<p>为了确保所有有关文件都处于最新版本状态  命令：<code>make clean</code></p>
+
+<p>开始编译压缩形式的内核  命令：<code>make zImage</code></p>
+
+<p><img src="/images/image-14.png" alt="" /></p>
+
+<p>大概编译了20左右，内核编译完毕。</p>
+
+<p><img src="/images/image-16.png" alt="" /></p>
+
+<p>开始编译模块,这个过程时间比较长。  命令:<code>make modules</code></p>
+
+<p>编译完模块之后开始将编译后的模块转移到系统标准位置  命令：<code>make module_install</code></p>
+
+<p>最后执行 <code>make install</code>,这应该算是最后一步了，结果出问题了。</p>
+
+<p><img src="/images/image-18.png" alt="" /></p>
+
+<p>原因：当时装系统的时候boot分区是单挂的，分了80M进去，结果<code>make install</code>的时候报错：gzip: stdout: No space left on device.  看样子是boot分区太小gzip解压包的时候没有空间了。</p>
+
+<p>解决办法：删掉boot分区下边当前没用的所有内核，然后update-grub 结果boot还是太小，最后想着把boot umount掉，然后把活动分区标记为根分区，想了想太危险，万一搞坏了，现在ubuntu下的所有配好的环境都完蛋了，最后选择了虚拟机。</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,578 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Android4.4及以上版本实现状态栏与顶栏同色 - vicvan</title>
+	<meta name="author" content="vicvan">
+
+	
+	<meta name="description" content="在Android中实现状态栏与顶栏同色，可以增加应用的美观性，提升用户体验。那么这一点是如何实现的呢？ 目前，比较常用的是github上一个叫做SystemBarTint的库。但是在实际使用的过程中，当与碎总的SwipeBackLayout滑动返回一起使用的时候， &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="vicvan" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">vicvan</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="https://www.google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:yoursite.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="https://www.google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:yoursite.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Android4.4及以上版本实现状态栏与顶栏同色</h2>
+	<div class="entry-content"><p>在Android中实现状态栏与顶栏同色，可以增加应用的美观性，提升用户体验。那么这一点是如何实现的呢？</p>
+
+<p>目前，比较常用的是github上一个叫做<a href="https://github.com/jgilfelt/SystemBarTint">SystemBarTint</a>的库。但是在实际使用的过程中，当与碎总的<a href="https://github.com/ikew0ng/SwipeBackLayout">SwipeBackLayout</a>滑动返回一起使用的时候，会发现通知栏并不能和当前页面一起被滑走，在StatusBar与ActionBar连接的地方会有很明显的撕裂感，非常影响用户体验。所以在我们自己的项目中放弃了这种实现方式并寻求其他解决方案，最终通过阅读SwipeBackLayout源码和SystemBarTint源码找到了解决方案，实现了状态栏和顶栏同色与滑动返回的完美结合。</p>
+
+<p>首先我们通过SystemBarTint的源码分析来搞明白状态栏和变色是如何实现的</p>
+
+<!--More-->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Constructor. Call this in the host activity onCreate method after its</span>
+</span><span class='line'><span class="cm">     * content view has been set. You should always create new instances when</span>
+</span><span class='line'><span class="cm">     * the host activity is recreated.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @param activity The host activity.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="nd">@TargetApi</span><span class="o">(</span><span class="mi">19</span><span class="o">)</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">SystemBarTintManager</span><span class="o">(</span><span class="n">Activity</span> <span class="n">activity</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">Window</span> <span class="n">win</span> <span class="o">=</span> <span class="n">activity</span><span class="o">.</span><span class="na">getWindow</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">ViewGroup</span> <span class="n">decorViewGroup</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">win</span><span class="o">.</span><span class="na">getDecorView</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">SDK_INT</span> <span class="o">&gt;=</span> <span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">KITKAT</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// check theme attrs</span>
+</span><span class='line'>            <span class="kt">int</span><span class="o">[]</span> <span class="n">attrs</span> <span class="o">=</span> <span class="o">{</span><span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">attr</span><span class="o">.</span><span class="na">windowTranslucentStatus</span><span class="o">,</span>
+</span><span class='line'>                    <span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">attr</span><span class="o">.</span><span class="na">windowTranslucentNavigation</span><span class="o">};</span>
+</span><span class='line'>            <span class="n">TypedArray</span> <span class="n">a</span> <span class="o">=</span> <span class="n">activity</span><span class="o">.</span><span class="na">obtainStyledAttributes</span><span class="o">(</span><span class="n">attrs</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mStatusBarAvailable</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">getBoolean</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">mNavBarAvailable</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">getBoolean</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">a</span><span class="o">.</span><span class="na">recycle</span><span class="o">();</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">// check window flags</span>
+</span><span class='line'>            <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">winParams</span> <span class="o">=</span> <span class="n">win</span><span class="o">.</span><span class="na">getAttributes</span><span class="o">();</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">bits</span> <span class="o">=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_STATUS</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">((</span><span class="n">winParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">&amp;</span> <span class="n">bits</span><span class="o">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mStatusBarAvailable</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="n">bits</span> <span class="o">=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_NAVIGATION</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">((</span><span class="n">winParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">&amp;</span> <span class="n">bits</span><span class="o">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mNavBarAvailable</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">mConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">SystemBarConfig</span><span class="o">(</span><span class="n">activity</span><span class="o">,</span> <span class="n">mStatusBarAvailable</span><span class="o">,</span> <span class="n">mNavBarAvailable</span><span class="o">);</span>
+</span><span class='line'>        <span class="c1">// device might not have virtual navigation keys</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(!</span><span class="n">mConfig</span><span class="o">.</span><span class="na">hasNavigtionBar</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mNavBarAvailable</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mStatusBarAvailable</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">setupStatusBarView</span><span class="o">(</span><span class="n">activity</span><span class="o">,</span> <span class="n">decorViewGroup</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mNavBarAvailable</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">setupNavBarView</span><span class="o">(</span><span class="n">activity</span><span class="o">,</span> <span class="n">decorViewGroup</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到在27～31行通过条件判断首先设置statusbar为透明（只有Android4.4及以上的系统才可以设置statusbar为透明，这也是状态栏变色只在Android4.4及以上系统有效的原因），将statusbar设置为透明之后，statusbar下边的那一层黑条就不见了，当前页面的内容也就会顶到屏幕最上边了（statusbar和navigationbar其实是两个window）。接下来，我们再来看一段代码</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">setupStatusBarView</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">ViewGroup</span> <span class="n">decorViewGroup</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mStatusBarTintView</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">View</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">LayoutParams</span> <span class="n">params</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">LayoutParams</span><span class="o">(</span><span class="n">LayoutParams</span><span class="o">.</span><span class="na">MATCH_PARENT</span><span class="o">,</span> <span class="n">mConfig</span><span class="o">.</span><span class="na">getStatusBarHeight</span><span class="o">());</span>
+</span><span class='line'>        <span class="n">params</span><span class="o">.</span><span class="na">gravity</span> <span class="o">=</span> <span class="n">Gravity</span><span class="o">.</span><span class="na">TOP</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mNavBarAvailable</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">mConfig</span><span class="o">.</span><span class="na">isNavigationAtBottom</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">params</span><span class="o">.</span><span class="na">rightMargin</span> <span class="o">=</span> <span class="n">mConfig</span><span class="o">.</span><span class="na">getNavigationBarWidth</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">mStatusBarTintView</span><span class="o">.</span><span class="na">setLayoutParams</span><span class="o">(</span><span class="n">params</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mStatusBarTintView</span><span class="o">.</span><span class="na">setBackgroundColor</span><span class="o">(</span><span class="n">DEFAULT_TINT_COLOR</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mStatusBarTintView</span><span class="o">.</span><span class="na">setVisibility</span><span class="o">(</span><span class="n">View</span><span class="o">.</span><span class="na">GONE</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">decorViewGroup</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">mStatusBarTintView</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过这一段代码可以看出，SystemBarTint通过给decorview add了一个和statusbar高度一样的view进去。</p>
+
+<p>至此，我们应该知道SystemBarTint是如何实现状态栏变色的了，接下来我们再看看SwipeBackLayout的源码</p>
+
+<p>首先，我们来看SwipeBackActivity这个类</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SwipeBackActivity</span> <span class="kd">extends</span> <span class="n">ActionBarActivity</span> <span class="kd">implements</span> <span class="n">SwipeBackActivityBase</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">SwipeBackActivityHelper</span> <span class="n">mHelper</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mHelper</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">SwipeBackActivityHelper</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mHelper</span><span class="o">.</span><span class="na">onActivityCreate</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPostCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onPostCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mHelper</span><span class="o">.</span><span class="na">onPostCreate</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">View</span> <span class="nf">findViewById</span><span class="o">(</span><span class="kt">int</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">View</span> <span class="n">v</span> <span class="o">=</span> <span class="kd">super</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">v</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">mHelper</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">mHelper</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">v</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">SwipeBackLayout</span> <span class="nf">getSwipeBackLayout</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mHelper</span><span class="o">.</span><span class="na">getSwipeBackLayout</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setSwipeBackEnable</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">enable</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">getSwipeBackLayout</span><span class="o">().</span><span class="na">setEnableGesture</span><span class="o">(</span><span class="n">enable</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">scrollToFinishActivity</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">getSwipeBackLayout</span><span class="o">().</span><span class="na">scrollToFinishActivity</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到在14行的地方有一个mHelper.onPostCreate(),我们接着往下看</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SwipeBackActivityHelper</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Activity</span> <span class="n">mActivity</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">SwipeBackLayout</span> <span class="n">mSwipeBackLayout</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">SwipeBackActivityHelper</span><span class="o">(</span><span class="n">Activity</span> <span class="n">activity</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mActivity</span> <span class="o">=</span> <span class="n">activity</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&quot;deprecation&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onActivityCreate</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mActivity</span><span class="o">.</span><span class="na">getWindow</span><span class="o">().</span><span class="na">setBackgroundDrawable</span><span class="o">(</span><span class="k">new</span> <span class="nf">ColorDrawable</span><span class="o">(</span><span class="mi">0</span><span class="o">));</span>
+</span><span class='line'>        <span class="n">mActivity</span><span class="o">.</span><span class="na">getWindow</span><span class="o">().</span><span class="na">getDecorView</span><span class="o">().</span><span class="na">setBackgroundDrawable</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mSwipeBackLayout</span> <span class="o">=</span> <span class="o">(</span><span class="n">SwipeBackLayout</span><span class="o">)</span> <span class="n">LayoutInflater</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="n">mActivity</span><span class="o">).</span><span class="na">inflate</span><span class="o">(</span>
+</span><span class='line'>                <span class="n">me</span><span class="o">.</span><span class="na">imid</span><span class="o">.</span><span class="na">swipebacklayout</span><span class="o">.</span><span class="na">lib</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">swipeback_layout</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mSwipeBackLayout</span><span class="o">.</span><span class="na">addSwipeListener</span><span class="o">(</span><span class="k">new</span> <span class="n">SwipeBackLayout</span><span class="o">.</span><span class="na">SwipeListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onScrollStateChange</span><span class="o">(</span><span class="kt">int</span> <span class="n">state</span><span class="o">,</span> <span class="kt">float</span> <span class="n">scrollPercent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onEdgeTouch</span><span class="o">(</span><span class="kt">int</span> <span class="n">edgeFlag</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onScrollOverThreshold</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">});</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPostCreate</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mSwipeBackLayout</span><span class="o">.</span><span class="na">attachToActivity</span><span class="o">(</span><span class="n">mActivity</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">View</span> <span class="nf">findViewById</span><span class="o">(</span><span class="kt">int</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mSwipeBackLayout</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">mSwipeBackLayout</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">SwipeBackLayout</span> <span class="nf">getSwipeBackLayout</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mSwipeBackLayout</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以发现在33行的位置有一个mSwipeBackLayout.attachToActivity(mActivity)，我们接着看下去</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">attachToActivity</span><span class="o">(</span><span class="n">Activity</span> <span class="n">activity</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mActivity</span> <span class="o">=</span> <span class="n">activity</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">TypedArray</span> <span class="n">a</span> <span class="o">=</span> <span class="n">activity</span><span class="o">.</span><span class="na">getTheme</span><span class="o">().</span><span class="na">obtainStyledAttributes</span><span class="o">(</span><span class="k">new</span> <span class="kt">int</span><span class="o">[]</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">attr</span><span class="o">.</span><span class="na">windowBackground</span>
+</span><span class='line'>        <span class="o">});</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">background</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">getResourceId</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">a</span><span class="o">.</span><span class="na">recycle</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">ViewGroup</span> <span class="n">decor</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">activity</span><span class="o">.</span><span class="na">getWindow</span><span class="o">().</span><span class="na">getDecorView</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">ViewGroup</span> <span class="n">decorChild</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">decor</span><span class="o">.</span><span class="na">getChildAt</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">decorChild</span><span class="o">.</span><span class="na">setBackgroundResource</span><span class="o">(</span><span class="n">background</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">decor</span><span class="o">.</span><span class="na">removeView</span><span class="o">(</span><span class="n">decorChild</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">addView</span><span class="o">(</span><span class="n">decorChild</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">setContentView</span><span class="o">(</span><span class="n">decorChild</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">decor</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>终于，我们找到了最初始的位置，通过这一段代码，我们会发现SwipeBackLayout的原理其实就是获取到当前页面的DecorView然后再获取到这棵view树位于0位置的view并将其移除，之后再把SwipeBackLayout(通过源码可以知道这个Layout是继承自FrameLayout的) add到DecorView里边来。</p>
+
+<p>综合分析了SystemBarTint和SwipebackLayout的源码之后，我们也就知道为什么statusbar不能一起划走的原因了，因为SystemBarTint是给DecorView add了一个和statusbar同高的view,而SwipeBackLayout也是DecorView的子view，这两个view在同一层次上，所以不能一起滑走。知道原因之后，解决方案也就浮出了水面，我们可以在把那个view add到SwipwBacklayout里边来，这样子就可以一起滑走了。下面代码是我们项目里边的实现方式</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@TargetApi</span><span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">KITKAT</span><span class="o">)</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">setSystemBarTransparent</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Window</span> <span class="n">window</span> <span class="o">=</span> <span class="n">getWindow</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">layoutParams</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="na">getAttributes</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_STATUS</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">immerseNavigationBar</span><span class="o">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">SmartBarUtils</span><span class="o">.</span><span class="na">isMeizu</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_NAVIGATION</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">window</span><span class="o">.</span><span class="na">setAttributes</span><span class="o">(</span><span class="n">layoutParams</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">shouldHackStatusBarTransparent</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">hackStatusBarTransparent</span><span class="o">();</span>
+</span><span class='line'>            <span class="n">setContentPadding</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">setContentPadding</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">actionBarHeight</span> <span class="o">=</span> <span class="n">mHasActionBarHeight</span> <span class="o">?</span> <span class="n">CommonUtils</span><span class="o">.</span><span class="na">getActionBarHeight</span><span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">:</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">((</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">content</span><span class="o">)).</span><span class="na">getChildAt</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="na">setPadding</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">CommonUtils</span><span class="o">.</span><span class="na">getStatusBarHeight</span><span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">+</span> <span class="n">actionBarHeight</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">hackStatusBarTransparent</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Window</span> <span class="n">window</span> <span class="o">=</span> <span class="n">getWindow</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">ViewGroup</span> <span class="n">contentFrame</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">window</span><span class="o">.</span><span class="na">getDecorView</span><span class="o">().</span><span class="na">findViewById</span><span class="o">(</span>
+</span><span class='line'>                <span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">content</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">View</span> <span class="n">hackView</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">View</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">setStatusViewBackground</span><span class="o">(</span><span class="n">hackView</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">contentFrame</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">hackView</span><span class="o">,</span> <span class="n">ViewGroup</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">MATCH_PARENT</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">CommonUtils</span><span class="o">.</span><span class="na">getStatusBarHeight</span><span class="o">(</span><span class="k">this</span><span class="o">));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到我们是把这个view add到content这一层了,也不再需要用到SystemBarTint这个库了。</p>
+
+<p>最后通过hierarchyviewer工具load出来一个view布局很容易看明白这个问题，截图如下</p>
+
+<p><img src="/images/image-34.png" alt="" /></p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Mar 4th, 2015</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/andriod/'>andriod</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		
+	</div>
+	
+</div>
+
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    vicvan
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+</body>
+</html>

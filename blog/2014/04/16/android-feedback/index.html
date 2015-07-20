@@ -1,0 +1,622 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Android-FeedBack - vicvan</title>
+	<meta name="author" content="vicvan">
+
+	
+	<meta name="description" content="选择 之前开发OverHust的时候，需要用到用户反馈这一功能，于是就在考虑怎么实现用户反馈这一功能。 目前，常规方法如下： 利用第三方服务，例如：友盟
+调用用户已登录的邮箱帐号发送邮件 利用第三方服务 优点：使用第三方服务，只需要调用接口，简单粗暴。 缺点：导入Library工程，自定义度不高。 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="vicvan" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">vicvan</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="https://www.google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:yoursite.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="https://www.google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:yoursite.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Android-FeedBack</h2>
+	<div class="entry-content"><h1>选择</h1>
+
+<p>之前开发OverHust的时候，需要用到用户反馈这一功能，于是就在考虑怎么实现<strong>用户反馈</strong>这一功能。</p>
+
+<p>目前，常规方法如下：</p>
+
+<blockquote><ul>
+<li><p>利用第三方服务，例如：<a href="http://www.umeng.com/">友盟</a></p></li>
+<li><p>调用用户已登录的邮箱帐号发送邮件</p></li>
+</ul>
+</blockquote>
+
+<h4>利用第三方服务</h4>
+
+<p><code>优点</code>：使用第三方服务，只需要调用接口，简单粗暴。</p>
+
+<p><code>缺点</code>：导入Library工程，自定义度不高。如果仅仅会用到第三方的用户反馈这一服务的话，更没必要导入别人的Library工程。</p>
+
+<h4>调用用户已登录的邮箱帐号发送邮件</h4>
+
+<p><code>优点</code>：直接调用系统的发送邮件服务，更加简单粗暴。</p>
+
+<p><code>缺点</code>：如果用户没有在系统中登录邮箱帐号，那就悲剧了。</p>
+
+<!--more-->
+
+
+<p><em>详细了解上述两种方法各自的优劣之后,发现他们都不能很好的满足需求，因此，另谋出路。于是就在stackoverflow上发现可以用<code>JavaMail API</code>来实现。首先，不用导入一些其他Library工程，其次虽然也是用邮件服务，但是发信邮件帐号是在应用内指定的，与用户无关。当然，也是由于我自己想体验一下<code>JavaMail API</code>，之后开发应用还是更多的会用第三方服务，因为第三方服务有很多我用的着的功能。</em></p>
+
+<h1>实现</h1>
+
+<p>具体实现是参照stackoverflow上的 <a href="http://stackoverflow.com/questions/2020088/sending-email-in-android-using-javamail-api-without-using-the-default-built-in-a">Sending Email in Android using JavaMail API without using the default/built-in app</a></p>
+
+<p>首先，在工程中导入这三个jar, <a href="http://javamail-android.googlecode.com/files/mail.jar">mail.jar</a> , <a href="http://javamail-android.googlecode.com/files/activation.jar">activation.jar</a> , <a href="http://javamail-android.googlecode.com/files/additionnal.jar">additionnal.jar</a>.</p>
+
+<p>之后，写几个工具类就ok了（附上我项目中的这几个类）。</p>
+
+<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/JSSEProvider.java">JSSEProvider,java</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">unique</span><span class="o">.</span><span class="na">overhust</span><span class="o">.</span><span class="na">Feedback</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.security.AccessController</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.security.Provider</span><span class="o">;</span>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * Created by fhw on 12/27/13.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">JSSEProvider</span> <span class="kd">extends</span> <span class="n">Provider</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">JSSEProvider</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="s">&quot;HarmonyJSSE&quot;</span><span class="o">,</span> <span class="mf">1.0</span><span class="o">,</span> <span class="s">&quot;Harmony JSSE Provider&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">AccessController</span><span class="o">.</span><span class="na">doPrivileged</span><span class="o">(</span><span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="na">security</span><span class="o">.</span><span class="na">PrivilegedAction</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="n">Void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">put</span><span class="o">(</span><span class="s">&quot;SSLContext.TLS&quot;</span><span class="o">,</span>
+</span><span class='line'>                        <span class="s">&quot;org.apache.harmony.xnet.provider.jsse.SSLContextImpl&quot;</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">put</span><span class="o">(</span><span class="s">&quot;Alg.Alias.SSLContext.TLSv1&quot;</span><span class="o">,</span> <span class="s">&quot;TLS&quot;</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">put</span><span class="o">(</span><span class="s">&quot;KeyManagerFactory.X509&quot;</span><span class="o">,</span>
+</span><span class='line'>                        <span class="s">&quot;org.apache.harmony.xnet.provider.jsse.KeyManagerFactoryImpl&quot;</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">put</span><span class="o">(</span><span class="s">&quot;TrustManagerFactory.X509&quot;</span><span class="o">,</span>
+</span><span class='line'>                        <span class="s">&quot;org.apache.harmony.xnet.provider.jsse.TrustManagerFactoryImpl&quot;</span><span class="o">);</span>
+</span><span class='line'>                <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">});</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/GmailSender.java">GmailSender.java</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">unique</span><span class="o">.</span><span class="na">overhust</span><span class="o">.</span><span class="na">Feedback</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.util.Log</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.activation.DataHandler</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.activation.DataSource</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.Authenticator</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.Message</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.PasswordAuthentication</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.Session</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.Transport</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.internet.InternetAddress</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.internet.MimeMessage</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.ByteArrayInputStream</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.OutputStream</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.security.Security</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.Properties</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * Created by fhw on 12/27/13.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">GmailSender</span> <span class="kd">extends</span> <span class="n">Authenticator</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">mailhost</span> <span class="o">=</span> <span class="s">&quot;smtp.gmail.com&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">user</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">password</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Session</span> <span class="n">session</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">static</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Security</span><span class="o">.</span><span class="na">addProvider</span><span class="o">(</span><span class="k">new</span> <span class="nf">JSSEProvider</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">GmailSender</span><span class="o">(</span><span class="n">String</span> <span class="n">user</span><span class="o">,</span> <span class="n">String</span> <span class="n">password</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">user</span> <span class="o">=</span> <span class="n">user</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">password</span> <span class="o">=</span> <span class="n">password</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">Properties</span> <span class="n">props</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Properties</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">&quot;mail.transport.protocol&quot;</span><span class="o">,</span> <span class="s">&quot;smtp&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">&quot;mail.host&quot;</span><span class="o">,</span> <span class="n">mailhost</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;mail.smtp.auth&quot;</span><span class="o">,</span> <span class="s">&quot;true&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;mail.smtp.port&quot;</span><span class="o">,</span> <span class="s">&quot;465&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;mail.smtp.socketFactory.port&quot;</span><span class="o">,</span> <span class="s">&quot;465&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;mail.smtp.socketFactory.class&quot;</span><span class="o">,</span>
+</span><span class='line'>                <span class="s">&quot;javax.net.ssl.SSLSocketFactory&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;mail.smtp.socketFactory.fallback&quot;</span><span class="o">,</span> <span class="s">&quot;false&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">&quot;mail.smtp.quitwait&quot;</span><span class="o">,</span> <span class="s">&quot;false&quot;</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="na">getDefaultInstance</span><span class="o">(</span><span class="n">props</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">protected</span> <span class="n">PasswordAuthentication</span> <span class="nf">getPasswordAuthentication</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="k">new</span> <span class="nf">PasswordAuthentication</span><span class="o">(</span><span class="n">user</span><span class="o">,</span> <span class="n">password</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">sendMail</span><span class="o">(</span><span class="n">String</span> <span class="n">subject</span><span class="o">,</span> <span class="n">String</span> <span class="n">body</span><span class="o">,</span> <span class="n">String</span> <span class="n">sender</span><span class="o">,</span> <span class="n">String</span> <span class="n">recipients</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">MimeMessage</span> <span class="n">message</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">MimeMessage</span><span class="o">(</span><span class="n">session</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">DataHandler</span> <span class="n">handler</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">DataHandler</span><span class="o">(</span><span class="k">new</span> <span class="nf">ByteArrayDataSource</span><span class="o">(</span><span class="n">body</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(),</span> <span class="s">&quot;text/plain&quot;</span><span class="o">));</span>
+</span><span class='line'>            <span class="n">message</span><span class="o">.</span><span class="na">setSender</span><span class="o">(</span><span class="k">new</span> <span class="nf">InternetAddress</span><span class="o">(</span><span class="n">sender</span><span class="o">));</span>
+</span><span class='line'>            <span class="n">message</span><span class="o">.</span><span class="na">setSubject</span><span class="o">(</span><span class="n">subject</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">message</span><span class="o">.</span><span class="na">setDataHandler</span><span class="o">(</span><span class="n">handler</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">recipients</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="sc">&#39;,&#39;</span><span class="o">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
+</span><span class='line'>                <span class="n">message</span><span class="o">.</span><span class="na">setRecipients</span><span class="o">(</span><span class="n">Message</span><span class="o">.</span><span class="na">RecipientType</span><span class="o">.</span><span class="na">TO</span><span class="o">,</span> <span class="n">InternetAddress</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">recipients</span><span class="o">));</span>
+</span><span class='line'>            <span class="k">else</span>
+</span><span class='line'>                <span class="n">message</span><span class="o">.</span><span class="na">setRecipient</span><span class="o">(</span><span class="n">Message</span><span class="o">.</span><span class="na">RecipientType</span><span class="o">.</span><span class="na">TO</span><span class="o">,</span> <span class="k">new</span> <span class="nf">InternetAddress</span><span class="o">(</span><span class="n">recipients</span><span class="o">));</span>
+</span><span class='line'>            <span class="n">Transport</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">message</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">&quot;gmailsender&quot;</span><span class="o">,</span><span class="s">&quot;ok&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">&quot;ecption&quot;</span><span class="o">,</span><span class="s">&quot;&quot;</span><span class="o">+</span><span class="n">e</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">class</span> <span class="nc">ByteArrayDataSource</span> <span class="kd">implements</span> <span class="n">DataSource</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">String</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">ByteArrayDataSource</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span><span class="o">,</span> <span class="n">String</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">super</span><span class="o">();</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">type</span> <span class="o">=</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">ByteArrayDataSource</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">super</span><span class="o">();</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setType</span><span class="o">(</span><span class="n">String</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">type</span> <span class="o">=</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">String</span> <span class="nf">getContentType</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">type</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+</span><span class='line'>                <span class="k">return</span> <span class="s">&quot;application/octet-stream&quot;</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">else</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">InputStream</span> <span class="nf">getInputStream</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="k">new</span> <span class="nf">ByteArrayInputStream</span><span class="o">(</span><span class="n">data</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">String</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="s">&quot;ByteArrayDataSource&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">OutputStream</span> <span class="nf">getOutputStream</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">throw</span> <span class="k">new</span> <span class="nf">IOException</span><span class="o">(</span><span class="s">&quot;Not Supported&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最后，自己封装一个发送邮件的工具类。</p>
+
+<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/SendFeedback.java">SendFeedback.java</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">unique</span><span class="o">.</span><span class="na">overhust</span><span class="o">.</span><span class="na">Feedback</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.content.Context</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.os.AsyncTask</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.os.Build</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.telephony.TelephonyManager</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.util.Log</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">com.unique.overhust.CommonUtils.ShareContext</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * Created by fhw on 12/27/13.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SendFeedback</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">feedbackBody</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">feedbackContact</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">handsetinfo</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kt">int</span> <span class="n">mType</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">SendFeedback</span><span class="o">(</span><span class="n">String</span> <span class="n">fdBody</span><span class="o">,</span> <span class="n">String</span> <span class="n">fdContact</span><span class="o">,</span> <span class="kt">int</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">feedbackBody</span> <span class="o">=</span> <span class="n">fdBody</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">feedbackContact</span> <span class="o">=</span> <span class="n">fdContact</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">mType</span> <span class="o">=</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">getHandsetinfo</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">new</span> <span class="nf">SendEmailTask</span><span class="o">(</span><span class="n">feedbackBody</span><span class="o">,</span> <span class="n">feedbackContact</span><span class="o">,</span> <span class="n">mType</span><span class="o">).</span><span class="na">execute</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getHandsetinfo</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">TelephonyManager</span> <span class="n">tm</span> <span class="o">=</span> <span class="o">(</span><span class="n">TelephonyManager</span><span class="o">)</span> <span class="n">ShareContext</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">TELEPHONY_SERVICE</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">handsetinfo</span> <span class="o">=</span> <span class="s">&quot;手机型号:&quot;</span> <span class="o">+</span> <span class="n">Build</span><span class="o">.</span><span class="na">MODEL</span> <span class="o">+</span>
+</span><span class='line'>                <span class="s">&quot;,SDK版本:&quot;</span> <span class="o">+</span> <span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">SDK</span> <span class="o">+</span>
+</span><span class='line'>                <span class="s">&quot;,系统版本:&quot;</span> <span class="o">+</span> <span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">RELEASE</span> <span class="o">+</span>
+</span><span class='line'>                <span class="s">&quot;,手机厂商:&quot;</span> <span class="o">+</span> <span class="n">Build</span><span class="o">.</span><span class="na">MANUFACTURER</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">handsetinfo</span> <span class="o">=</span> <span class="n">handsetinfo</span> <span class="o">+</span> <span class="s">&quot;,设备ID:&quot;</span> <span class="o">+</span> <span class="n">tm</span><span class="o">.</span><span class="na">getDeviceId</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">&quot;exception&quot;</span><span class="o">,</span><span class="s">&quot;&quot;</span><span class="o">+</span><span class="n">e</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">handsetinfo</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">class</span> <span class="nc">SendEmailTask</span> <span class="kd">extends</span> <span class="n">AsyncTask</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">,</span> <span class="n">Void</span><span class="o">,</span> <span class="n">Void</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">subject</span> <span class="o">=</span> <span class="s">&quot;用户反馈&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">installSubject</span> <span class="o">=</span> <span class="s">&quot;安装信息&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">recipients</span> <span class="o">=</span> <span class="s">&quot;overhustdsnc@gmail.com&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">String</span> <span class="n">mFeedbackBody</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">String</span> <span class="n">mFeedbackContact</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kt">int</span> <span class="n">Type</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">SendEmailTask</span><span class="o">(</span><span class="n">String</span> <span class="n">feedbackBody</span><span class="o">,</span> <span class="n">String</span> <span class="n">feedbackContact</span><span class="o">,</span> <span class="kt">int</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">mFeedbackBody</span> <span class="o">=</span> <span class="n">feedbackBody</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">mFeedbackContact</span> <span class="o">=</span> <span class="n">feedbackContact</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">Type</span> <span class="o">=</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">protected</span> <span class="n">Void</span> <span class="nf">doInBackground</span><span class="o">(</span><span class="n">Void</span><span class="o">...</span> <span class="n">params</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">Type</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="n">GmailSender</span> <span class="n">sender</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GmailSender</span><span class="o">(</span><span class="s">&quot;YourGmailAccount&quot;</span><span class="o">,</span> <span class="s">&quot;password&quot;</span><span class="o">);</span>
+</span><span class='line'>                    <span class="n">sender</span><span class="o">.</span><span class="na">sendMail</span><span class="o">(</span><span class="n">subject</span><span class="o">,</span> <span class="s">&quot;反馈内容:\n&quot;</span> <span class="o">+</span> <span class="n">mFeedbackBody</span> <span class="o">+</span> <span class="s">&quot;\n\n&quot;</span> <span class="o">+</span> <span class="s">&quot;联系方式:\n&quot;</span> <span class="o">+</span> <span class="n">mFeedbackContact</span> <span class="o">+</span> <span class="s">&quot;\n\n手机信息:\n&quot;</span> <span class="o">+</span> <span class="n">handsetinfo</span><span class="o">,</span> <span class="n">recipients</span><span class="o">,</span> <span class="n">recipients</span><span class="o">);</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">Type</span> <span class="o">==</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="n">GmailSender</span> <span class="n">sender</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GmailSender</span><span class="o">(</span><span class="s">&quot;YourGmailAccount&quot;</span><span class="o">,</span> <span class="s">&quot;password&quot;</span><span class="o">);</span>
+</span><span class='line'>                    <span class="n">sender</span><span class="o">.</span><span class="na">sendMail</span><span class="o">(</span><span class="n">installSubject</span><span class="o">,</span> <span class="n">mFeedbackBody</span><span class="o">+</span><span class="n">mFeedbackContact</span><span class="o">+</span><span class="s">&quot;手机信息:\n&quot;</span> <span class="o">+</span> <span class="n">handsetinfo</span><span class="o">,</span> <span class="n">recipients</span><span class="o">,</span> <span class="n">recipients</span><span class="o">);</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">&quot;SendMail&quot;</span><span class="o">,</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(),</span> <span class="n">e</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPostExecute</span><span class="o">(</span><span class="n">Void</span> <span class="n">result</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Apr 16th, 2014</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>android</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		
+	</div>
+	
+</div>
+
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    vicvan
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+</body>
+</html>

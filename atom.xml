@@ -1,0 +1,1720 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[vicvan]]></title>
+  <link href="http://yoursite.com/atom.xml" rel="self"/>
+  <link href="http://yoursite.com/"/>
+  <updated>2015-07-21T00:34:52+08:00</updated>
+  <id>http://yoursite.com/</id>
+  <author>
+    <name><![CDATA[vicvan]]></name>
+    <email><![CDATA[fanhongweiqq@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Android4.4及以上版本实现状态栏与顶栏同色]]></title>
+    <link href="http://yoursite.com/blog/2015/03/04/android-statusbartint-and-swipebacklayout/"/>
+    <updated>2015-03-04T19:28:35+08:00</updated>
+    <id>http://yoursite.com/blog/2015/03/04/android-statusbartint-and-swipebacklayout</id>
+    <content type="html"><![CDATA[<p>在Android中实现状态栏与顶栏同色，可以增加应用的美观性，提升用户体验。那么这一点是如何实现的呢？</p>
+
+<p>目前，比较常用的是github上一个叫做<a href="https://github.com/jgilfelt/SystemBarTint">SystemBarTint</a>的库。但是在实际使用的过程中，当与碎总的<a href="https://github.com/ikew0ng/SwipeBackLayout">SwipeBackLayout</a>滑动返回一起使用的时候，会发现通知栏并不能和当前页面一起被滑走，在StatusBar与ActionBar连接的地方会有很明显的撕裂感，非常影响用户体验。所以在我们自己的项目中放弃了这种实现方式并寻求其他解决方案，最终通过阅读SwipeBackLayout源码和SystemBarTint源码找到了解决方案，实现了状态栏和顶栏同色与滑动返回的完美结合。</p>
+
+<p>首先我们通过SystemBarTint的源码分析来搞明白状态栏和变色是如何实现的</p>
+
+<!--More-->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Constructor. Call this in the host activity onCreate method after its</span>
+</span><span class='line'><span class="cm">     * content view has been set. You should always create new instances when</span>
+</span><span class='line'><span class="cm">     * the host activity is recreated.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @param activity The host activity.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="nd">@TargetApi</span><span class="o">(</span><span class="mi">19</span><span class="o">)</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">SystemBarTintManager</span><span class="o">(</span><span class="n">Activity</span> <span class="n">activity</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">Window</span> <span class="n">win</span> <span class="o">=</span> <span class="n">activity</span><span class="o">.</span><span class="na">getWindow</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">ViewGroup</span> <span class="n">decorViewGroup</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">win</span><span class="o">.</span><span class="na">getDecorView</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">SDK_INT</span> <span class="o">&gt;=</span> <span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">KITKAT</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="c1">// check theme attrs</span>
+</span><span class='line'>            <span class="kt">int</span><span class="o">[]</span> <span class="n">attrs</span> <span class="o">=</span> <span class="o">{</span><span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">attr</span><span class="o">.</span><span class="na">windowTranslucentStatus</span><span class="o">,</span>
+</span><span class='line'>                    <span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">attr</span><span class="o">.</span><span class="na">windowTranslucentNavigation</span><span class="o">};</span>
+</span><span class='line'>            <span class="n">TypedArray</span> <span class="n">a</span> <span class="o">=</span> <span class="n">activity</span><span class="o">.</span><span class="na">obtainStyledAttributes</span><span class="o">(</span><span class="n">attrs</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mStatusBarAvailable</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">getBoolean</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">mNavBarAvailable</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">getBoolean</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">a</span><span class="o">.</span><span class="na">recycle</span><span class="o">();</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="c1">// check window flags</span>
+</span><span class='line'>            <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">winParams</span> <span class="o">=</span> <span class="n">win</span><span class="o">.</span><span class="na">getAttributes</span><span class="o">();</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">bits</span> <span class="o">=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_STATUS</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">((</span><span class="n">winParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">&amp;</span> <span class="n">bits</span><span class="o">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mStatusBarAvailable</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="n">bits</span> <span class="o">=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_NAVIGATION</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">((</span><span class="n">winParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">&amp;</span> <span class="n">bits</span><span class="o">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">mNavBarAvailable</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">mConfig</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">SystemBarConfig</span><span class="o">(</span><span class="n">activity</span><span class="o">,</span> <span class="n">mStatusBarAvailable</span><span class="o">,</span> <span class="n">mNavBarAvailable</span><span class="o">);</span>
+</span><span class='line'>        <span class="c1">// device might not have virtual navigation keys</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(!</span><span class="n">mConfig</span><span class="o">.</span><span class="na">hasNavigtionBar</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mNavBarAvailable</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mStatusBarAvailable</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">setupStatusBarView</span><span class="o">(</span><span class="n">activity</span><span class="o">,</span> <span class="n">decorViewGroup</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mNavBarAvailable</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">setupNavBarView</span><span class="o">(</span><span class="n">activity</span><span class="o">,</span> <span class="n">decorViewGroup</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到在27～31行通过条件判断首先设置statusbar为透明（只有Android4.4及以上的系统才可以设置statusbar为透明，这也是状态栏变色只在Android4.4及以上系统有效的原因），将statusbar设置为透明之后，statusbar下边的那一层黑条就不见了，当前页面的内容也就会顶到屏幕最上边了（statusbar和navigationbar其实是两个window）。接下来，我们再来看一段代码</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">private</span> <span class="kt">void</span> <span class="nf">setupStatusBarView</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">ViewGroup</span> <span class="n">decorViewGroup</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mStatusBarTintView</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">View</span><span class="o">(</span><span class="n">context</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">LayoutParams</span> <span class="n">params</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">LayoutParams</span><span class="o">(</span><span class="n">LayoutParams</span><span class="o">.</span><span class="na">MATCH_PARENT</span><span class="o">,</span> <span class="n">mConfig</span><span class="o">.</span><span class="na">getStatusBarHeight</span><span class="o">());</span>
+</span><span class='line'>        <span class="n">params</span><span class="o">.</span><span class="na">gravity</span> <span class="o">=</span> <span class="n">Gravity</span><span class="o">.</span><span class="na">TOP</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mNavBarAvailable</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">mConfig</span><span class="o">.</span><span class="na">isNavigationAtBottom</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">params</span><span class="o">.</span><span class="na">rightMargin</span> <span class="o">=</span> <span class="n">mConfig</span><span class="o">.</span><span class="na">getNavigationBarWidth</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">mStatusBarTintView</span><span class="o">.</span><span class="na">setLayoutParams</span><span class="o">(</span><span class="n">params</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mStatusBarTintView</span><span class="o">.</span><span class="na">setBackgroundColor</span><span class="o">(</span><span class="n">DEFAULT_TINT_COLOR</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mStatusBarTintView</span><span class="o">.</span><span class="na">setVisibility</span><span class="o">(</span><span class="n">View</span><span class="o">.</span><span class="na">GONE</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">decorViewGroup</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">mStatusBarTintView</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过这一段代码可以看出，SystemBarTint通过给decorview add了一个和statusbar高度一样的view进去。</p>
+
+<p>至此，我们应该知道SystemBarTint是如何实现状态栏变色的了，接下来我们再看看SwipeBackLayout的源码</p>
+
+<p>首先，我们来看SwipeBackActivity这个类</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SwipeBackActivity</span> <span class="kd">extends</span> <span class="n">ActionBarActivity</span> <span class="kd">implements</span> <span class="n">SwipeBackActivityBase</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">SwipeBackActivityHelper</span> <span class="n">mHelper</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mHelper</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">SwipeBackActivityHelper</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mHelper</span><span class="o">.</span><span class="na">onActivityCreate</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPostCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">.</span><span class="na">onPostCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mHelper</span><span class="o">.</span><span class="na">onPostCreate</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">View</span> <span class="nf">findViewById</span><span class="o">(</span><span class="kt">int</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">View</span> <span class="n">v</span> <span class="o">=</span> <span class="kd">super</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">v</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">mHelper</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">mHelper</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">v</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">SwipeBackLayout</span> <span class="nf">getSwipeBackLayout</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mHelper</span><span class="o">.</span><span class="na">getSwipeBackLayout</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setSwipeBackEnable</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">enable</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">getSwipeBackLayout</span><span class="o">().</span><span class="na">setEnableGesture</span><span class="o">(</span><span class="n">enable</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">scrollToFinishActivity</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">getSwipeBackLayout</span><span class="o">().</span><span class="na">scrollToFinishActivity</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到在14行的地方有一个mHelper.onPostCreate(),我们接着往下看</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SwipeBackActivityHelper</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Activity</span> <span class="n">mActivity</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">SwipeBackLayout</span> <span class="n">mSwipeBackLayout</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">SwipeBackActivityHelper</span><span class="o">(</span><span class="n">Activity</span> <span class="n">activity</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mActivity</span> <span class="o">=</span> <span class="n">activity</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&quot;deprecation&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onActivityCreate</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mActivity</span><span class="o">.</span><span class="na">getWindow</span><span class="o">().</span><span class="na">setBackgroundDrawable</span><span class="o">(</span><span class="k">new</span> <span class="nf">ColorDrawable</span><span class="o">(</span><span class="mi">0</span><span class="o">));</span>
+</span><span class='line'>        <span class="n">mActivity</span><span class="o">.</span><span class="na">getWindow</span><span class="o">().</span><span class="na">getDecorView</span><span class="o">().</span><span class="na">setBackgroundDrawable</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mSwipeBackLayout</span> <span class="o">=</span> <span class="o">(</span><span class="n">SwipeBackLayout</span><span class="o">)</span> <span class="n">LayoutInflater</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="n">mActivity</span><span class="o">).</span><span class="na">inflate</span><span class="o">(</span>
+</span><span class='line'>                <span class="n">me</span><span class="o">.</span><span class="na">imid</span><span class="o">.</span><span class="na">swipebacklayout</span><span class="o">.</span><span class="na">lib</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">swipeback_layout</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">mSwipeBackLayout</span><span class="o">.</span><span class="na">addSwipeListener</span><span class="o">(</span><span class="k">new</span> <span class="n">SwipeBackLayout</span><span class="o">.</span><span class="na">SwipeListener</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onScrollStateChange</span><span class="o">(</span><span class="kt">int</span> <span class="n">state</span><span class="o">,</span> <span class="kt">float</span> <span class="n">scrollPercent</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onEdgeTouch</span><span class="o">(</span><span class="kt">int</span> <span class="n">edgeFlag</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="nd">@Override</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onScrollOverThreshold</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">});</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPostCreate</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mSwipeBackLayout</span><span class="o">.</span><span class="na">attachToActivity</span><span class="o">(</span><span class="n">mActivity</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">View</span> <span class="nf">findViewById</span><span class="o">(</span><span class="kt">int</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mSwipeBackLayout</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="n">mSwipeBackLayout</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">SwipeBackLayout</span> <span class="nf">getSwipeBackLayout</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">mSwipeBackLayout</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以发现在33行的位置有一个mSwipeBackLayout.attachToActivity(mActivity)，我们接着看下去</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kd">public</span> <span class="kt">void</span> <span class="nf">attachToActivity</span><span class="o">(</span><span class="n">Activity</span> <span class="n">activity</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">mActivity</span> <span class="o">=</span> <span class="n">activity</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">TypedArray</span> <span class="n">a</span> <span class="o">=</span> <span class="n">activity</span><span class="o">.</span><span class="na">getTheme</span><span class="o">().</span><span class="na">obtainStyledAttributes</span><span class="o">(</span><span class="k">new</span> <span class="kt">int</span><span class="o">[]</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">attr</span><span class="o">.</span><span class="na">windowBackground</span>
+</span><span class='line'>        <span class="o">});</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">background</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="na">getResourceId</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">a</span><span class="o">.</span><span class="na">recycle</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">ViewGroup</span> <span class="n">decor</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">activity</span><span class="o">.</span><span class="na">getWindow</span><span class="o">().</span><span class="na">getDecorView</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">ViewGroup</span> <span class="n">decorChild</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">decor</span><span class="o">.</span><span class="na">getChildAt</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">decorChild</span><span class="o">.</span><span class="na">setBackgroundResource</span><span class="o">(</span><span class="n">background</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">decor</span><span class="o">.</span><span class="na">removeView</span><span class="o">(</span><span class="n">decorChild</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">addView</span><span class="o">(</span><span class="n">decorChild</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">setContentView</span><span class="o">(</span><span class="n">decorChild</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">decor</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>终于，我们找到了最初始的位置，通过这一段代码，我们会发现SwipeBackLayout的原理其实就是获取到当前页面的DecorView然后再获取到这棵view树位于0位置的view并将其移除，之后再把SwipeBackLayout(通过源码可以知道这个Layout是继承自FrameLayout的) add到DecorView里边来。</p>
+
+<p>综合分析了SystemBarTint和SwipebackLayout的源码之后，我们也就知道为什么statusbar不能一起划走的原因了，因为SystemBarTint是给DecorView add了一个和statusbar同高的view,而SwipeBackLayout也是DecorView的子view，这两个view在同一层次上，所以不能一起滑走。知道原因之后，解决方案也就浮出了水面，我们可以在把那个view add到SwipwBacklayout里边来，这样子就可以一起滑走了。下面代码是我们项目里边的实现方式</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@TargetApi</span><span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">KITKAT</span><span class="o">)</span>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">setSystemBarTransparent</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Window</span> <span class="n">window</span> <span class="o">=</span> <span class="n">getWindow</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">layoutParams</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="na">getAttributes</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_STATUS</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">immerseNavigationBar</span><span class="o">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">SmartBarUtils</span><span class="o">.</span><span class="na">isMeizu</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_NAVIGATION</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">window</span><span class="o">.</span><span class="na">setAttributes</span><span class="o">(</span><span class="n">layoutParams</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">shouldHackStatusBarTransparent</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">hackStatusBarTransparent</span><span class="o">();</span>
+</span><span class='line'>            <span class="n">setContentPadding</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">setContentPadding</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">actionBarHeight</span> <span class="o">=</span> <span class="n">mHasActionBarHeight</span> <span class="o">?</span> <span class="n">CommonUtils</span><span class="o">.</span><span class="na">getActionBarHeight</span><span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">:</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">((</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">content</span><span class="o">)).</span><span class="na">getChildAt</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="na">setPadding</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">CommonUtils</span><span class="o">.</span><span class="na">getStatusBarHeight</span><span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">+</span> <span class="n">actionBarHeight</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">hackStatusBarTransparent</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Window</span> <span class="n">window</span> <span class="o">=</span> <span class="n">getWindow</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">ViewGroup</span> <span class="n">contentFrame</span> <span class="o">=</span> <span class="o">(</span><span class="n">ViewGroup</span><span class="o">)</span> <span class="n">window</span><span class="o">.</span><span class="na">getDecorView</span><span class="o">().</span><span class="na">findViewById</span><span class="o">(</span>
+</span><span class='line'>                <span class="n">android</span><span class="o">.</span><span class="na">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">content</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">View</span> <span class="n">hackView</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">View</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">setStatusViewBackground</span><span class="o">(</span><span class="n">hackView</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">contentFrame</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">hackView</span><span class="o">,</span> <span class="n">ViewGroup</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">MATCH_PARENT</span><span class="o">,</span>
+</span><span class='line'>                <span class="n">CommonUtils</span><span class="o">.</span><span class="na">getStatusBarHeight</span><span class="o">(</span><span class="k">this</span><span class="o">));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到我们是把这个view add到content这一层了,也不再需要用到SystemBarTint这个库了。</p>
+
+<p>最后通过hierarchyviewer工具load出来一个view布局很容易看明白这个问题，截图如下</p>
+
+<p><img src="http://yoursite.com/images/image-34.png" alt="" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android Develop Tips(一)]]></title>
+    <link href="http://yoursite.com/blog/2014/12/11/android-develop-tip/"/>
+    <updated>2014-12-11T00:07:34+08:00</updated>
+    <id>http://yoursite.com/blog/2014/12/11/android-develop-tip</id>
+    <content type="html"><![CDATA[<h2>Android常用项目结构</h2>
+
+<p>在Android的开发过程中一直在不断的调整自己对于项目结构的架构方式，经过了多次的调整之后，现在基本每个项目都会以如下方式来架构：</p>
+
+<ul>
+<li><strong><em>api</em></strong>
+放置一些API口类</li>
+<li><strong><em>app</em></strong>
+放置一些与整个东西pp相关的类，如继承自Application的当前应用的Appliation类、继承自系统Resources写的当前应用的Resurces类、应用的版本管理VersionManager类等</li>
+<li><strong><em>bean</em></strong>
+主要用来放置java bean的类</li>
+<li><strong><em>io</em></strong>
+放置一些io操作的类，如网络请求、文件读写、数据库操作等等</li>
+<li><strong><em>provider</em></strong>
+放置provider相关的类</li>
+<li><strong><em>receiver</em></strong><br/>
+放置整应用里边需要的reiver类</li>
+<li><strong><em>service</em></strong>
+放置整个应用里边的sevice类</li>
+<li><strong><em>ui</em></strong>
+
+<ul>
+<li><strong><em>activity</em></strong>
+整个应用的actvity类</li>
+<li><strong><em>adapter</em></strong>
+整个应用的adapter类</li>
+<li><strong><em>controller</em></strong>
+整个用中用到的ew层进行操纵的roller类</li>
+<li><strong><em>fragment</em></strong>
+整个应中的fragemnt类</li>
+<li><strong><em>util</em></strong>
+对应用中ui进行操作的一些helper类</li>
+<li><strong><em>view</em></strong>
+整个应中可以分离出来的view</li>
+<li><strong><em>widget</em></strong>
+整个应用的自定义控件</li>
+</ul>
+</li>
+<li><strong><em>util</em></strong>
+各种各样的工具类</li>
+</ul>
+
+
+<p>我现在基本上每个项目都是这种架构方式了，另外，我习惯将自己平时的积累的一些工具类之类的类整理到一个Common的library module中，自己的每个项目都会把这个common module倒入进来，这样子方便了很多。</p>
+
+<!--more-->
+
+
+<h2>Gradle</h2>
+
+<p>Gradle只是提供了一个构建项目的框架,然后通过各种各样的Plugin来构建我们自己的项目。Gradle本身的领域对象主要有Project和Task，Project为task的执行提供了上下文。Gradle默认会将当前目录下的build.gradle作为项目的构建文件。接下来以一个实际项目为例类详细介绍gradle构建Android项目。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">apply</span> <span class="nl">plugin:</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">android</span><span class="o">.</span><span class="na">application</span><span class="err">&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">android</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">compileSdkVersion</span> <span class="mi">21</span>
+</span><span class='line'>    <span class="n">buildToolsVersion</span> <span class="err">&#39;</span><span class="mf">21.1</span><span class="o">.</span><span class="mi">1</span><span class="err">&#39;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">defaultConfig</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">applicationId</span> <span class="s">&quot;us.drilight.android&quot;</span>
+</span><span class='line'>        <span class="n">minSdkVersion</span> <span class="mi">14</span>
+</span><span class='line'>        <span class="n">targetSdkVersion</span> <span class="mi">21</span>
+</span><span class='line'>        <span class="n">versionCode</span> <span class="mi">1</span>
+</span><span class='line'>        <span class="n">versionName</span> <span class="s">&quot;1.0&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">lintOptions</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">checkReleaseBuilds</span> <span class="kc">false</span>
+</span><span class='line'>        <span class="c1">// Or, if you prefer, you can continue to check for errors in release builds,</span>
+</span><span class='line'>        <span class="c1">// but continue the build even when errors are found:</span>
+</span><span class='line'>        <span class="n">abortOnError</span> <span class="kc">false</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">signingConfigs</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">YourApp</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">storeFile</span> <span class="nf">file</span><span class="o">(</span><span class="s">&quot;Your keystore path&quot;</span><span class="o">)</span>
+</span><span class='line'>            <span class="n">storePassword</span> <span class="s">&quot;Your keystore password&quot;</span>
+</span><span class='line'>            <span class="n">keyAlias</span> <span class="s">&quot;Your keyAlias&quot;</span>
+</span><span class='line'>            <span class="n">keyPassword</span> <span class="s">&quot;Your keyPassword&quot;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">buildTypes</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">release</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">signingConfig</span> <span class="n">signingConfigs</span><span class="o">.</span><span class="na">YourApp</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">sourceSets</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">main</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">jniLibs</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">libs</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">productFlavors</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">baidu_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;baidu_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">meizu_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;meizu_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">mumayi_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;mumayi_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">xiaomi_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;xiaomi_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">wandoujia_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;wandoujia_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">play_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;play_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="nf">fileTree</span><span class="o">(</span><span class="nl">dir:</span> <span class="err">&#39;</span><span class="n">libs</span><span class="err">&#39;</span><span class="o">,</span> <span class="nl">include:</span> <span class="o">[</span><span class="err">&#39;</span><span class="o">*.</span><span class="na">jar</span><span class="err">&#39;</span><span class="o">])</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="nf">project</span><span class="o">(</span><span class="err">&#39;</span><span class="o">:</span><span class="n">common</span><span class="err">&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">io</span><span class="o">.</span><span class="na">realm</span><span class="o">:</span><span class="n">realm</span><span class="o">-</span><span class="nl">android:</span><span class="mf">0.71</span><span class="o">.</span><span class="mi">0</span><span class="err">&#39;</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">code</span><span class="o">.</span><span class="na">gson</span><span class="o">:</span><span class="nl">gson:</span><span class="mf">2.3</span><span class="err">&#39;</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">mcxiaoke</span><span class="o">.</span><span class="na">volley</span><span class="o">:</span><span class="nl">library:</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">6</span><span class="err">&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>apply plugin: 'com.android.application'</code> 显然这是一个构建Android项目Gradle Plugin，另外，如果希望当前module是以一个library project被编译的话应该使用 <code>apply plugin: 'com.android.library'</code> 这个plugin。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">android</span><span class="o">{</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是plugin中的android</span> <span class="n">project构建</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">compileSdkVersion</span> <span class="mi">21</span>
+</span><span class='line'><span class="n">buildToolsVersion</span> <span class="err">&#39;</span><span class="mf">21.1</span><span class="o">.</span><span class="mi">1</span><span class="err">&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是用来指定CompileSdkVersion和BuildToolsVersion的</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">defaultConfig</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">applicationId</span> <span class="s">&quot;us.drilight.android&quot;</span>
+</span><span class='line'>        <span class="n">minSdkVersion</span> <span class="mi">14</span>
+</span><span class='line'>        <span class="n">targetSdkVersion</span> <span class="mi">21</span>
+</span><span class='line'>        <span class="n">versionCode</span> <span class="mi">1</span>
+</span><span class='line'>        <span class="n">versionName</span> <span class="s">&quot;1.0&quot;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是用来对project进行一个初步的配置</span><span class="err">，</span><span class="n">包括applicationId</span><span class="o">,</span><span class="n">minSdkVersion</span><span class="o">,</span><span class="n">versionCode</span><span class="o">,</span><span class="n">versionName</span><span class="err">。</span>
+</span><span class='line'><span class="n">这个地方有个需要注意的就是在gradle构建的project中versionCode和versionName以这个地方的为准</span><span class="err">，</span>
+</span><span class='line'><span class="n">AndroidMainfest</span><span class="o">.</span><span class="na">xml中关于这一块的配置不再有效</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">lintOptions</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">checkReleaseBuilds</span> <span class="kc">false</span>
+</span><span class='line'>        <span class="c1">// Or, if you prefer, you can continue to check for errors in release builds,</span>
+</span><span class='line'>        <span class="c1">// but continue the build even when errors are found:</span>
+</span><span class='line'>        <span class="n">abortOnError</span> <span class="kc">false</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块主要是对编译过程的配置</span><span class="err">，</span><span class="n">如果这个地方不做处理的话</span><span class="err">，</span><span class="n">在编译的时候就连warning之类的都会导致编译通不过</span><span class="err">，</span><span class="n">所以配</span>
+</span><span class='line'><span class="n">置这一块基本是必须的</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">signingConfigs</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">YourApp</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">storeFile</span> <span class="nf">file</span><span class="o">(</span><span class="s">&quot;Your keystore path&quot;</span><span class="o">)</span>
+</span><span class='line'>            <span class="n">storePassword</span> <span class="s">&quot;Your keystore password&quot;</span>
+</span><span class='line'>            <span class="n">keyAlias</span> <span class="s">&quot;Your keyAlias&quot;</span>
+</span><span class='line'>            <span class="n">keyPassword</span> <span class="s">&quot;Your keyPassword&quot;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">buildTypes</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">release</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">signingConfig</span> <span class="n">signingConfigs</span><span class="o">.</span><span class="na">YourApp</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是对签名的配置</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">sourceSets</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">main</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">jniLibs</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">libs</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块主要是对sourceSet的配置这个配置可以将libs下的</span><span class="o">.</span><span class="na">so库编译进当前project</span><span class="err">。</span><span class="n">sourceSets这一块Android</span>
+</span><span class='line'><span class="n">Studio会默认配置</span><span class="err">，</span><span class="n">当然也可以自己写比如</span><span class="err">：</span>
+</span><span class='line'><span class="o">(</span>
+</span><span class='line'><span class="n">java</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">src</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">resources</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">src</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">idl</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">src</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">renderscript</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">src</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">res</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">res</span><span class="err">&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">assets</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">assets</span><span class="err">&#39;</span><span class="o">])</span>
+</span><span class='line'><span class="n">这个视个人项目文件结构来具体配置</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">productFlavors</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">baidu_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;baidu_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">meizu_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;meizu_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">mumayi_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;mumayi_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">xiaomi_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;xiaomi_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">wandoujia_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;wandoujia_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="n">play_market</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">manifestPlaceholders</span> <span class="o">=</span> <span class="o">[</span><span class="nl">UMENG_CHANNEL_VALUE:</span> <span class="s">&quot;play_market&quot;</span><span class="o">]</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是对多渠道包的配置</span><span class="err">，</span><span class="n">具体每一个渠道包的包名等等之类的信息都可以在这个地方配置</span><span class="err">，</span><span class="n">示例中是每一个</span>
+</span><span class='line'><span class="n">productFlavor中加入了友盟的多渠道信息统计</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="n">dependencies</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="nf">fileTree</span><span class="o">(</span><span class="nl">dir:</span> <span class="err">&#39;</span><span class="n">libs</span><span class="err">&#39;</span><span class="o">,</span> <span class="nl">include:</span> <span class="o">[</span><span class="err">&#39;</span><span class="o">*.</span><span class="na">jar</span><span class="err">&#39;</span><span class="o">])</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="nf">project</span><span class="o">(</span><span class="err">&#39;</span><span class="o">:</span><span class="n">common</span><span class="err">&#39;</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">io</span><span class="o">.</span><span class="na">realm</span><span class="o">:</span><span class="n">realm</span><span class="o">-</span><span class="nl">android:</span><span class="mf">0.71</span><span class="o">.</span><span class="mi">0</span><span class="err">&#39;</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">code</span><span class="o">.</span><span class="na">gson</span><span class="o">:</span><span class="nl">gson:</span><span class="mf">2.3</span><span class="err">&#39;</span>
+</span><span class='line'>    <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">mcxiaoke</span><span class="o">.</span><span class="na">volley</span><span class="o">:</span><span class="nl">library:</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">6</span><span class="err">&#39;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">这一块是对第三方依赖的配置</span><span class="err">。</span><span class="n">compile</span> <span class="nf">fileTree</span><span class="o">(</span><span class="nl">dir:</span> <span class="err">&#39;</span><span class="n">libs</span><span class="err">&#39;</span><span class="o">,</span> <span class="nl">include:</span> <span class="o">[</span><span class="err">&#39;</span><span class="o">*.</span><span class="na">jar</span><span class="err">&#39;</span><span class="o">])</span> <span class="n">这个是将当前module项目</span>
+</span><span class='line'><span class="n">目录下的所有jar包以lib的形式编译到当前project中来</span><span class="err">。</span> <span class="n">compile</span> <span class="nf">project</span><span class="o">(</span><span class="err">&#39;</span><span class="o">:</span><span class="n">common</span><span class="err">&#39;</span><span class="o">)</span> <span class="n">这个的话是将第三方的</span>
+</span><span class='line'><span class="n">library</span> <span class="n">project编译进当前project</span><span class="err">，</span><span class="n">这个地方要注意的是得先在settings</span><span class="o">.</span><span class="na">build中声明这个library</span><span class="o">,</span><span class="n">类似这样的</span>
+</span><span class='line'><span class="n">include</span> <span class="err">&#39;</span><span class="o">:</span><span class="n">app</span><span class="err">&#39;</span><span class="o">,</span> <span class="err">&#39;</span><span class="o">:</span><span class="n">Common</span><span class="err">&#39;</span> <span class="err">。</span> <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">code</span><span class="o">.</span><span class="na">gson</span><span class="o">:</span><span class="nl">gson:</span><span class="mf">2.3</span><span class="err">&#39;</span> <span class="n">这个是通过从远程maven仓库的</span>
+</span><span class='line'><span class="n">形式来编译第三方library到当前project</span><span class="err">，</span><span class="n">我个人现在目前更倾向于这种形式导入第三方library</span><span class="err">。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[To Mac]]></title>
+    <link href="http://yoursite.com/blog/2014/11/15/to-mac/"/>
+    <updated>2014-11-15T11:04:00+08:00</updated>
+    <id>http://yoursite.com/blog/2014/11/15/to-mac</id>
+    <content type="html"><![CDATA[<p>经历了好久的外包填坑，终于把电脑从黑苹果换到了白苹果，各种环境也都搭好了，当然也包括博客环境了，所以博客之后恢复正常更新。</p>
+
+<p><img src="http://yoursite.com/images/image-19.png" alt="" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[After install Ubuntu 14.04 LTS]]></title>
+    <link href="http://yoursite.com/blog/2014/05/12/after-install-ubuntu14-dot-04/"/>
+    <updated>2014-05-12T14:34:00+08:00</updated>
+    <id>http://yoursite.com/blog/2014/05/12/after-install-ubuntu14-dot-04</id>
+    <content type="html"><![CDATA[<h1>前奏</h1>
+
+<p>之前从ubuntu 13.10升级到ubuntu 14.04 LTS,由于输入法的问题,在删除iBus的时候不小心删除了Unity的一些东西,结果桌面环境挂掉了,无奈重装系统,装完系统倒是焕然一新了,可是各种缺环境.然后开始了一系列配置环境的艰辛历程,通过这篇博文记录这艰辛历程，以备下次强迫症患了再一次作大死。</p>
+
+<h1>开工</h1>
+
+<h3><em>基本系统配置</em></h3>
+
+<p><strong>换源:</strong> 果断将源换成我大<a href="http://hustunique.com">联创</a>自己的源 <a href="http://mirrors.hustunique.com">mirrors.hustunique.com</a>.之后<code>sudo apt-get update</code>更新一下.</p>
+
+<p><strong>安装chrome:</strong> 直接<a href="https://www.google.com/intl/zh-CN/chrome/browser/">chrome官网</a>下载chrome的deb包,然后通过软件中心安装即可.很庆幸的14.04中没有之前版本中出现的缺少lib的问题.</p>
+
+<p><strong>终端配置:</strong> 安装Termiantor终端,此终端比自带的终端强悍很多.</p>
+
+<p><strong>终端环境：</strong> 弃用bash,换上高大上的zsh.通过github上的 <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>来管理zsh配置,执行以下shell即可</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install zsh
+</span><span class='line'>curl -L http://install.ohmyz.sh | sh  //自动安装
+</span><span class='line'>chsh -s /bin/zsh
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<!--more-->
+
+
+<p><strong>键盘映射修改:</strong> 由于个人习惯,总是喜欢将CapsLk替换为Ctrl,通过Xmodmap来修改键盘映射,在/home下添加.Xmodmap文件</p>
+
+<p>.Xmodmap</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>remove Lock = Caps_Lock
+</span><span class='line'>keysym Caps_Lock = Control_L
+</span><span class='line'>add control = Control_L</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>主题配置:</strong> 首先安装Ubuntu Tweak这个主题管理软件.</p>
+
+<p>然后安装我自己喜欢的Numix主题</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:numix/ppa
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install numix-gtk-theme</span></code></pre></td></tr></table></div></figure>
+
+
+<p>字体选择钟爱的Manaco.
+最后通过Ubuntu Tweak工具去管理设置这些配置。</p>
+
+<p><strong>输入法：</strong> 好不容易搜狗支持Linux就用它吧,前往<a href="http://pinyin.sogou.com/linux/">官网</a>下载deb包,之后安装即可,前提是得安装fcitx.关于输入法这一块会出不少问题,耐心点,慢慢来.</p>
+
+<h3><em>Android 开发配置</em></h3>
+
+<p><strong>jdk安装：</strong> 终端通过<code>sudo apt-get install XXX</code>安装即可.</p>
+
+<p><strong>Android Studio:</strong> 前往 <a href="http://developer.android.com/sdk/installing/studio.html">Android开发者网站</a>下载Android Studio.另外,Android Studio有creat Desktop Entry这个功能,不再需要我们自己去写.desktop文件.</p>
+
+<p><strong>GIMP:</strong> 这个主要就是平时设计师给图之后用来取色或者切图之类的.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:otto-kesselgulasch/gimp
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install gimp</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>DropBox:</strong> 方便与设计师进行图片的同步,前往 <a href="https://www.dropbox.com/install?os=lnx">DropBox官网</a>下载deb包即可。</p>
+
+<p><strong>Genymotion:</strong> 目前作为一个学生党开发者，没有大量的手持设备用来适配，通过Genymotion这些虚拟设备可以达到同样的效果。为了方便,在/usr/share/applications目录下创建genymotion.desktop文件用于快捷启动</p>
+
+<p>genmotion.desktop</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[Desktop Entry]
+</span><span class='line'>Type=Application
+</span><span class='line'>Name=Genymotion
+</span><span class='line'>Icon=/home/dsnc/Downloads/genymotion/icons/icon.png
+</span><span class='line'>Exec="/home/dsnc/Downloads/genymotion/genymotion"
+</span><span class='line'>Terminal=false
+</span><span class='line'>Categories=Development;IDE;</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><em>博客管理</em></h3>
+
+<p><strong>Ruby环境配置:</strong> 个人博客是用Octopress搭建的,所以得配置ruby环境,因为14.04比较新,配置起来比较纠结,缺少各种依赖库,一下是我的成功配置过程</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install curl
+</span><span class='line'>\curl -sSL https://get.rvm.io | bash -s stable       //install RVM by using curl
+</span><span class='line'>source ~/.rvm/scripts/rvm          //load RVM
+</span><span class='line'>type rvm | head -n 1          //if install success,there is "rvm is a function"
+</span><span class='line'>
+</span><span class='line'>//install lib,without these the "rvm requirements will failed"
+</span><span class='line'>sudo apt-get install gawk g++ libreadline6-dev zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake libtool bison libffi-dev
+</span><span class='line'>rvm requirements  
+</span><span class='line'>rvm install ruby</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><ul>
+<li>RVM:Ruby Version Manager</li>
+</ul>
+</blockquote>
+
+<p><strong>ReText:</strong> 用来写markdown,直接软件中心下载即可.</p>
+
+<h3><em>其他常用应用</em></h3>
+
+<p><strong>Docky:</strong> 应用中心搜索</p>
+
+<p><strong>WPS:</strong> 前往 <a href="http://linux.wps.cn/">WPS官网</a>下载deb包即可.</p>
+
+<p><strong>Synapse:</strong> 快速启动器</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:synapse-core/testing
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install synapse</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>截图工具：</strong> 这个我习惯使用的是Shutter</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:shutter/ppa
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install shutter</span></code></pre></td></tr></table></div></figure>
+
+
+<h2><em>越来越发现Ubuntu softerware center还是有很多好玩的应用,并且博文中提到的很多软件也都可以同多软件中心直接安装,不用通过添加PPA源的方式安装</em></h2>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Android-FeedBack]]></title>
+    <link href="http://yoursite.com/blog/2014/04/16/android-feedback/"/>
+    <updated>2014-04-16T21:24:00+08:00</updated>
+    <id>http://yoursite.com/blog/2014/04/16/android-feedback</id>
+    <content type="html"><![CDATA[<h1>选择</h1>
+
+<p>之前开发OverHust的时候，需要用到用户反馈这一功能，于是就在考虑怎么实现<strong>用户反馈</strong>这一功能。</p>
+
+<p>目前，常规方法如下：</p>
+
+<blockquote><ul>
+<li><p>利用第三方服务，例如：<a href="http://www.umeng.com/">友盟</a></p></li>
+<li><p>调用用户已登录的邮箱帐号发送邮件</p></li>
+</ul>
+</blockquote>
+
+<h4>利用第三方服务</h4>
+
+<p><code>优点</code>：使用第三方服务，只需要调用接口，简单粗暴。</p>
+
+<p><code>缺点</code>：导入Library工程，自定义度不高。如果仅仅会用到第三方的用户反馈这一服务的话，更没必要导入别人的Library工程。</p>
+
+<h4>调用用户已登录的邮箱帐号发送邮件</h4>
+
+<p><code>优点</code>：直接调用系统的发送邮件服务，更加简单粗暴。</p>
+
+<p><code>缺点</code>：如果用户没有在系统中登录邮箱帐号，那就悲剧了。</p>
+
+<!--more-->
+
+
+<p><em>详细了解上述两种方法各自的优劣之后,发现他们都不能很好的满足需求，因此，另谋出路。于是就在stackoverflow上发现可以用<code>JavaMail API</code>来实现。首先，不用导入一些其他Library工程，其次虽然也是用邮件服务，但是发信邮件帐号是在应用内指定的，与用户无关。当然，也是由于我自己想体验一下<code>JavaMail API</code>，之后开发应用还是更多的会用第三方服务，因为第三方服务有很多我用的着的功能。</em></p>
+
+<h1>实现</h1>
+
+<p>具体实现是参照stackoverflow上的 <a href="http://stackoverflow.com/questions/2020088/sending-email-in-android-using-javamail-api-without-using-the-default-built-in-a">Sending Email in Android using JavaMail API without using the default/built-in app</a></p>
+
+<p>首先，在工程中导入这三个jar, <a href="http://javamail-android.googlecode.com/files/mail.jar">mail.jar</a> , <a href="http://javamail-android.googlecode.com/files/activation.jar">activation.jar</a> , <a href="http://javamail-android.googlecode.com/files/additionnal.jar">additionnal.jar</a>.</p>
+
+<p>之后，写几个工具类就ok了（附上我项目中的这几个类）。</p>
+
+<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/JSSEProvider.java">JSSEProvider,java</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">unique</span><span class="o">.</span><span class="na">overhust</span><span class="o">.</span><span class="na">Feedback</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.security.AccessController</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.security.Provider</span><span class="o">;</span>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * Created by fhw on 12/27/13.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">JSSEProvider</span> <span class="kd">extends</span> <span class="n">Provider</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">JSSEProvider</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">super</span><span class="o">(</span><span class="s">&quot;HarmonyJSSE&quot;</span><span class="o">,</span> <span class="mf">1.0</span><span class="o">,</span> <span class="s">&quot;Harmony JSSE Provider&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">AccessController</span><span class="o">.</span><span class="na">doPrivileged</span><span class="o">(</span><span class="k">new</span> <span class="n">java</span><span class="o">.</span><span class="na">security</span><span class="o">.</span><span class="na">PrivilegedAction</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">&gt;()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">public</span> <span class="n">Void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">put</span><span class="o">(</span><span class="s">&quot;SSLContext.TLS&quot;</span><span class="o">,</span>
+</span><span class='line'>                        <span class="s">&quot;org.apache.harmony.xnet.provider.jsse.SSLContextImpl&quot;</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">put</span><span class="o">(</span><span class="s">&quot;Alg.Alias.SSLContext.TLSv1&quot;</span><span class="o">,</span> <span class="s">&quot;TLS&quot;</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">put</span><span class="o">(</span><span class="s">&quot;KeyManagerFactory.X509&quot;</span><span class="o">,</span>
+</span><span class='line'>                        <span class="s">&quot;org.apache.harmony.xnet.provider.jsse.KeyManagerFactoryImpl&quot;</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">put</span><span class="o">(</span><span class="s">&quot;TrustManagerFactory.X509&quot;</span><span class="o">,</span>
+</span><span class='line'>                        <span class="s">&quot;org.apache.harmony.xnet.provider.jsse.TrustManagerFactoryImpl&quot;</span><span class="o">);</span>
+</span><span class='line'>                <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">});</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/GmailSender.java">GmailSender.java</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">unique</span><span class="o">.</span><span class="na">overhust</span><span class="o">.</span><span class="na">Feedback</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.util.Log</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.activation.DataHandler</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.activation.DataSource</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.Authenticator</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.Message</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.PasswordAuthentication</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.Session</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.Transport</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.internet.InternetAddress</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">javax.mail.internet.MimeMessage</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.ByteArrayInputStream</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.InputStream</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.io.OutputStream</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.security.Security</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">java.util.Properties</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * Created by fhw on 12/27/13.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">GmailSender</span> <span class="kd">extends</span> <span class="n">Authenticator</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">mailhost</span> <span class="o">=</span> <span class="s">&quot;smtp.gmail.com&quot;</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">user</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">password</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">Session</span> <span class="n">session</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">static</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Security</span><span class="o">.</span><span class="na">addProvider</span><span class="o">(</span><span class="k">new</span> <span class="nf">JSSEProvider</span><span class="o">());</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">GmailSender</span><span class="o">(</span><span class="n">String</span> <span class="n">user</span><span class="o">,</span> <span class="n">String</span> <span class="n">password</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">user</span> <span class="o">=</span> <span class="n">user</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">password</span> <span class="o">=</span> <span class="n">password</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">Properties</span> <span class="n">props</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Properties</span><span class="o">();</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">&quot;mail.transport.protocol&quot;</span><span class="o">,</span> <span class="s">&quot;smtp&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">&quot;mail.host&quot;</span><span class="o">,</span> <span class="n">mailhost</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;mail.smtp.auth&quot;</span><span class="o">,</span> <span class="s">&quot;true&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;mail.smtp.port&quot;</span><span class="o">,</span> <span class="s">&quot;465&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;mail.smtp.socketFactory.port&quot;</span><span class="o">,</span> <span class="s">&quot;465&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;mail.smtp.socketFactory.class&quot;</span><span class="o">,</span>
+</span><span class='line'>                <span class="s">&quot;javax.net.ssl.SSLSocketFactory&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;mail.smtp.socketFactory.fallback&quot;</span><span class="o">,</span> <span class="s">&quot;false&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">props</span><span class="o">.</span><span class="na">setProperty</span><span class="o">(</span><span class="s">&quot;mail.smtp.quitwait&quot;</span><span class="o">,</span> <span class="s">&quot;false&quot;</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="na">getDefaultInstance</span><span class="o">(</span><span class="n">props</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">protected</span> <span class="n">PasswordAuthentication</span> <span class="nf">getPasswordAuthentication</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="k">new</span> <span class="nf">PasswordAuthentication</span><span class="o">(</span><span class="n">user</span><span class="o">,</span> <span class="n">password</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">sendMail</span><span class="o">(</span><span class="n">String</span> <span class="n">subject</span><span class="o">,</span> <span class="n">String</span> <span class="n">body</span><span class="o">,</span> <span class="n">String</span> <span class="n">sender</span><span class="o">,</span> <span class="n">String</span> <span class="n">recipients</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">MimeMessage</span> <span class="n">message</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">MimeMessage</span><span class="o">(</span><span class="n">session</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">DataHandler</span> <span class="n">handler</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">DataHandler</span><span class="o">(</span><span class="k">new</span> <span class="nf">ByteArrayDataSource</span><span class="o">(</span><span class="n">body</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(),</span> <span class="s">&quot;text/plain&quot;</span><span class="o">));</span>
+</span><span class='line'>            <span class="n">message</span><span class="o">.</span><span class="na">setSender</span><span class="o">(</span><span class="k">new</span> <span class="nf">InternetAddress</span><span class="o">(</span><span class="n">sender</span><span class="o">));</span>
+</span><span class='line'>            <span class="n">message</span><span class="o">.</span><span class="na">setSubject</span><span class="o">(</span><span class="n">subject</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">message</span><span class="o">.</span><span class="na">setDataHandler</span><span class="o">(</span><span class="n">handler</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">recipients</span><span class="o">.</span><span class="na">indexOf</span><span class="o">(</span><span class="sc">&#39;,&#39;</span><span class="o">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
+</span><span class='line'>                <span class="n">message</span><span class="o">.</span><span class="na">setRecipients</span><span class="o">(</span><span class="n">Message</span><span class="o">.</span><span class="na">RecipientType</span><span class="o">.</span><span class="na">TO</span><span class="o">,</span> <span class="n">InternetAddress</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">recipients</span><span class="o">));</span>
+</span><span class='line'>            <span class="k">else</span>
+</span><span class='line'>                <span class="n">message</span><span class="o">.</span><span class="na">setRecipient</span><span class="o">(</span><span class="n">Message</span><span class="o">.</span><span class="na">RecipientType</span><span class="o">.</span><span class="na">TO</span><span class="o">,</span> <span class="k">new</span> <span class="nf">InternetAddress</span><span class="o">(</span><span class="n">recipients</span><span class="o">));</span>
+</span><span class='line'>            <span class="n">Transport</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">message</span><span class="o">);</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">&quot;gmailsender&quot;</span><span class="o">,</span><span class="s">&quot;ok&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">&quot;ecption&quot;</span><span class="o">,</span><span class="s">&quot;&quot;</span><span class="o">+</span><span class="n">e</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="kd">class</span> <span class="nc">ByteArrayDataSource</span> <span class="kd">implements</span> <span class="n">DataSource</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">String</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">ByteArrayDataSource</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span><span class="o">,</span> <span class="n">String</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">super</span><span class="o">();</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">type</span> <span class="o">=</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">ByteArrayDataSource</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">super</span><span class="o">();</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setType</span><span class="o">(</span><span class="n">String</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">type</span> <span class="o">=</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">String</span> <span class="nf">getContentType</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">type</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+</span><span class='line'>                <span class="k">return</span> <span class="s">&quot;application/octet-stream&quot;</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">else</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">InputStream</span> <span class="nf">getInputStream</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="k">new</span> <span class="nf">ByteArrayInputStream</span><span class="o">(</span><span class="n">data</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">String</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="s">&quot;ByteArrayDataSource&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="n">OutputStream</span> <span class="nf">getOutputStream</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">throw</span> <span class="k">new</span> <span class="nf">IOException</span><span class="o">(</span><span class="s">&quot;Not Supported&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最后，自己封装一个发送邮件的工具类。</p>
+
+<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/SendFeedback.java">SendFeedback.java</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">unique</span><span class="o">.</span><span class="na">overhust</span><span class="o">.</span><span class="na">Feedback</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.content.Context</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.os.AsyncTask</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.os.Build</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.telephony.TelephonyManager</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">android.util.Log</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="nn">com.unique.overhust.CommonUtils.ShareContext</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm"> * Created by fhw on 12/27/13.</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">SendFeedback</span> <span class="o">{</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">feedbackBody</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">feedbackContact</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="n">String</span> <span class="n">handsetinfo</span><span class="o">;</span>
+</span><span class='line'>    <span class="kd">private</span> <span class="kt">int</span> <span class="n">mType</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="nf">SendFeedback</span><span class="o">(</span><span class="n">String</span> <span class="n">fdBody</span><span class="o">,</span> <span class="n">String</span> <span class="n">fdContact</span><span class="o">,</span> <span class="kt">int</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">feedbackBody</span> <span class="o">=</span> <span class="n">fdBody</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">feedbackContact</span> <span class="o">=</span> <span class="n">fdContact</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">this</span><span class="o">.</span><span class="na">mType</span> <span class="o">=</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">getHandsetinfo</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">new</span> <span class="nf">SendEmailTask</span><span class="o">(</span><span class="n">feedbackBody</span><span class="o">,</span> <span class="n">feedbackContact</span><span class="o">,</span> <span class="n">mType</span><span class="o">).</span><span class="na">execute</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getHandsetinfo</span><span class="o">()</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">TelephonyManager</span> <span class="n">tm</span> <span class="o">=</span> <span class="o">(</span><span class="n">TelephonyManager</span><span class="o">)</span> <span class="n">ShareContext</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">getSystemService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">TELEPHONY_SERVICE</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">handsetinfo</span> <span class="o">=</span> <span class="s">&quot;手机型号:&quot;</span> <span class="o">+</span> <span class="n">Build</span><span class="o">.</span><span class="na">MODEL</span> <span class="o">+</span>
+</span><span class='line'>                <span class="s">&quot;,SDK版本:&quot;</span> <span class="o">+</span> <span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">SDK</span> <span class="o">+</span>
+</span><span class='line'>                <span class="s">&quot;,系统版本:&quot;</span> <span class="o">+</span> <span class="n">Build</span><span class="o">.</span><span class="na">VERSION</span><span class="o">.</span><span class="na">RELEASE</span> <span class="o">+</span>
+</span><span class='line'>                <span class="s">&quot;,手机厂商:&quot;</span> <span class="o">+</span> <span class="n">Build</span><span class="o">.</span><span class="na">MANUFACTURER</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">handsetinfo</span> <span class="o">=</span> <span class="n">handsetinfo</span> <span class="o">+</span> <span class="s">&quot;,设备ID:&quot;</span> <span class="o">+</span> <span class="n">tm</span><span class="o">.</span><span class="na">getDeviceId</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">&quot;exception&quot;</span><span class="o">,</span><span class="s">&quot;&quot;</span><span class="o">+</span><span class="n">e</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="n">handsetinfo</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">class</span> <span class="nc">SendEmailTask</span> <span class="kd">extends</span> <span class="n">AsyncTask</span><span class="o">&lt;</span><span class="n">Void</span><span class="o">,</span> <span class="n">Void</span><span class="o">,</span> <span class="n">Void</span><span class="o">&gt;</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">subject</span> <span class="o">=</span> <span class="s">&quot;用户反馈&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">installSubject</span> <span class="o">=</span> <span class="s">&quot;安装信息&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">recipients</span> <span class="o">=</span> <span class="s">&quot;overhustdsnc@gmail.com&quot;</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">String</span> <span class="n">mFeedbackBody</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="n">String</span> <span class="n">mFeedbackContact</span><span class="o">;</span>
+</span><span class='line'>        <span class="kd">private</span> <span class="kt">int</span> <span class="n">Type</span><span class="o">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">public</span> <span class="nf">SendEmailTask</span><span class="o">(</span><span class="n">String</span> <span class="n">feedbackBody</span><span class="o">,</span> <span class="n">String</span> <span class="n">feedbackContact</span><span class="o">,</span> <span class="kt">int</span> <span class="n">type</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">mFeedbackBody</span> <span class="o">=</span> <span class="n">feedbackBody</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">mFeedbackContact</span> <span class="o">=</span> <span class="n">feedbackContact</span><span class="o">;</span>
+</span><span class='line'>            <span class="k">this</span><span class="o">.</span><span class="na">Type</span> <span class="o">=</span> <span class="n">type</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">protected</span> <span class="n">Void</span> <span class="nf">doInBackground</span><span class="o">(</span><span class="n">Void</span><span class="o">...</span> <span class="n">params</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">Type</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="n">GmailSender</span> <span class="n">sender</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GmailSender</span><span class="o">(</span><span class="s">&quot;YourGmailAccount&quot;</span><span class="o">,</span> <span class="s">&quot;password&quot;</span><span class="o">);</span>
+</span><span class='line'>                    <span class="n">sender</span><span class="o">.</span><span class="na">sendMail</span><span class="o">(</span><span class="n">subject</span><span class="o">,</span> <span class="s">&quot;反馈内容:\n&quot;</span> <span class="o">+</span> <span class="n">mFeedbackBody</span> <span class="o">+</span> <span class="s">&quot;\n\n&quot;</span> <span class="o">+</span> <span class="s">&quot;联系方式:\n&quot;</span> <span class="o">+</span> <span class="n">mFeedbackContact</span> <span class="o">+</span> <span class="s">&quot;\n\n手机信息:\n&quot;</span> <span class="o">+</span> <span class="n">handsetinfo</span><span class="o">,</span> <span class="n">recipients</span><span class="o">,</span> <span class="n">recipients</span><span class="o">);</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>                <span class="k">if</span> <span class="o">(</span><span class="n">Type</span> <span class="o">==</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="n">GmailSender</span> <span class="n">sender</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">GmailSender</span><span class="o">(</span><span class="s">&quot;YourGmailAccount&quot;</span><span class="o">,</span> <span class="s">&quot;password&quot;</span><span class="o">);</span>
+</span><span class='line'>                    <span class="n">sender</span><span class="o">.</span><span class="na">sendMail</span><span class="o">(</span><span class="n">installSubject</span><span class="o">,</span> <span class="n">mFeedbackBody</span><span class="o">+</span><span class="n">mFeedbackContact</span><span class="o">+</span><span class="s">&quot;手机信息:\n&quot;</span> <span class="o">+</span> <span class="n">handsetinfo</span><span class="o">,</span> <span class="n">recipients</span><span class="o">,</span> <span class="n">recipients</span><span class="o">);</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">&quot;SendMail&quot;</span><span class="o">,</span> <span class="n">e</span><span class="o">.</span><span class="na">getMessage</span><span class="o">(),</span> <span class="n">e</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nd">@Override</span>
+</span><span class='line'>        <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onPostExecute</span><span class="o">(</span><span class="n">Void</span> <span class="n">result</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Linux内核编译]]></title>
+    <link href="http://yoursite.com/blog/2014/03/09/linux-kernel/"/>
+    <updated>2014-03-09T21:05:00+08:00</updated>
+    <id>http://yoursite.com/blog/2014/03/09/linux-kernel</id>
+    <content type="html"><![CDATA[<p>系统发行版ubuntu13.04，内核版本3.12.13
+首先，官网下载所需内核。</p>
+
+<p>为了之后的方便，切换到root权限    命令：<code>sudo -i</code></p>
+
+<p>复制内核包到制定目录    命令：<code>cp ./linux-3.12.13.tar.xz   /usr/src</code></p>
+
+<p>解压内核包   命令：<code>tar -xvf linux-3.12.13.tar.xz</code></p>
+
+<p>切换到/usr/src目录下  命令：<code>cd /usr/src</code></p>
+
+<p><img src="http://yoursite.com/images/image-5.png" alt="" /></p>
+
+<!--more-->
+
+
+<p><img src="http://yoursite.com/images/image-9.png" alt="" /></p>
+
+<p>把原来编译产生的垃圾删除   命令：<code>make mrproper</code></p>
+
+<p>配置内核,选用基于图形窗口模式的配置界面   命令：<code>make xconfig</code></p>
+
+<p>正常的话应该可以开始配置内核了，可惜ubuntu没有自带qt环境或者我之前吧qt环境卸载了</p>
+
+<p><img src="http://yoursite.com/images/image-7.png" alt="" /></p>
+
+<p>缺qt3环境，然后去装qt3环境，发现现在大多数源里边已经没有qt3了，索性安装qt4的环境，重新开始配置内核，发现2.6的内核必须要qt3的环境，于是换到了3.12.13的内核。</p>
+
+<p>重新执行 <code>make xconfig</code>,出现配置界面</p>
+
+<p><img src="http://yoursite.com/images/image-11.png" alt="" /></p>
+
+<p>开始配置内核，看不懂，找到了@金步国的一篇博文  <a href="http://www.jinbuguo.com/kernel/longterm-3_10-options.html">博文链接</a></p>
+
+<p><img src="http://yoursite.com/images/image-12.png" alt="" /></p>
+
+<p>为了确保所有有关文件都处于最新版本状态  命令：<code>make clean</code></p>
+
+<p>开始编译压缩形式的内核  命令：<code>make zImage</code></p>
+
+<p><img src="http://yoursite.com/images/image-14.png" alt="" /></p>
+
+<p>大概编译了20左右，内核编译完毕。</p>
+
+<p><img src="http://yoursite.com/images/image-16.png" alt="" /></p>
+
+<p>开始编译模块,这个过程时间比较长。  命令:<code>make modules</code></p>
+
+<p>编译完模块之后开始将编译后的模块转移到系统标准位置  命令：<code>make module_install</code></p>
+
+<p>最后执行 <code>make install</code>,这应该算是最后一步了，结果出问题了。</p>
+
+<p><img src="http://yoursite.com/images/image-18.png" alt="" /></p>
+
+<p>原因：当时装系统的时候boot分区是单挂的，分了80M进去，结果<code>make install</code>的时候报错：gzip: stdout: No space left on device.  看样子是boot分区太小gzip解压包的时候没有空间了。</p>
+
+<p>解决办法：删掉boot分区下边当前没用的所有内核，然后update-grub 结果boot还是太小，最后想着把boot umount掉，然后把活动分区标记为根分区，想了想太危险，万一搞坏了，现在ubuntu下的所有配好的环境都完蛋了，最后选择了虚拟机。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[忙碌、充实的日子]]></title>
+    <link href="http://yoursite.com/blog/2014/02/21/busy-day/"/>
+    <updated>2014-02-21T23:26:00+08:00</updated>
+    <id>http://yoursite.com/blog/2014/02/21/busy-day</id>
+    <content type="html"><![CDATA[<p>年后初八离开家人，别离了可爱的女朋友，只身一人来到了学校，继续着忙碌而又充实的日子。从年后过来学校到现在收尾了不少事。终于有时间来总结我的大二上学期的生活。</p>
+
+<p>记得暑假比别人大概早到校了一个月，提前开始了同样忙碌而又充实的日子。刚到校就开始开发一个微信公众平台，其实就是去熟悉了微信的公众的平台开发流程和php的一些基本用法。<a href="http://dsnc.me/project/">华科软件2013级微信公众平台</a>，当时做得最爽的一个功能就是给新生的“我到了”功能，帮助了不少学弟和学妹。也就是在开发这个过程中接触到了腾讯街景地图，然后基于街景这一块继续深入做了下去，也就有了后来的OverHust。</p>
+
+<p>OverHust，是一款基于街景的校园地图应用。当时接触到腾讯街景的时候就感觉街景很好玩，然后就萌生了写一个Android App的想法，了解一些基本情况后确定这个东西可以做，然后就找了一些人开始开发了。</p>
+
+<!--more-->
+
+
+<p>之前也做过一些android的应用，但是OverHust是我的第一个真正的产品。当OverHust刚开始开工的时候正好赶上了学校点团队的“斯达康种子杯”然后就随手报了名，顺便参加了比赛。然后就一路开发了下来，直到比赛最终决赛的时候做出了应用的初步版本。最终凭借着街景的有趣性、以及整个应用的界面设计和一些细节的把握等等各方面的原因，拿了大赛的一等奖，也拿了10000大洋，比赛也就结束了，但是应用离一个真正的产品还差得很远，于是就继续开发。一个个的实现各个功能模块，一个个的小细节改了又改，只为了让自己满意，让用户满意。在这期间也到光谷软件园democoffee关于OverHust做了一次分享，讲了Overust的用户定位、以及一些开发细节，当天也在democoffee认识了不少朋友，关于应用也和在场的很多人聊了很多。分享会之后，对于OverHust这个应用，自己静下心来想了很多很多，想了很多OverHust究竟能给用户带来什么？最终想明白了，就是街景与华科校园生活的精密结合。在期末考试之前放出了v0.8版测试，年后过来学校又接着开发了一段时间，现在整个应用v1.0基本已经开发完毕，过一段时间能上线了。</p>
+
+<p>OverHust是我大二上学期最大的收获，我学着去做一个完整的产品出来，尝试着去带一个产品出来，当然也完整的写了整个应用，可以体验了一下产品经理和程序员一块当的感觉。整体感觉就是做一个让用户用着很舒服的应用要考虑太多太多的东西。</p>
+
+<p>大二上学期另一个收获就是忙了将近两个月的团队（@联创团队）招新，从开始的招新策划到最后的新人进来团队开始新人任务整整忙了两个月，招新共有五轮考核（笔试、单面、熬夜测试、素质拓展、群面）。每一轮考核都有很多事要忙，那些日子整天事情多到只能用便签来记，要不记不住，事情实在太多，比如说借教室，面试者的考核等等很多的事都得来安排。整个招新流程下来，感觉自己成长了不少，学会了如何合理去安排人员、如何合理的给别人安排任务、如何处理一些矛盾、如何与一些领导去交流等等的很多东西，更重要的学会了承担。同时，看到自己招进来的人每天在启明八楼做着自己喜欢的事情，心里真心的开心。</p>
+
+<p>大二也想明白一个很简单的问题，当时武汉外边的一个创业者找到了我，希望我和他一块创业，然后我负责技术这一块，刚开始看着一些看起来很华丽的东西，比如说期权、股份之类的东西，很是动心，然后心里就开始动摇了。可是，静下心来好好想了一段时间发现自己太天真了。现在创业根本不是时候，首先自己没有过硬的技术实力，其次对于一个公司的运作完全没有概念、然后也还没真正了解这个行业、人际圈子也还很窄。现在唯一需要做的就是安心学东西，学技术，让自己变得有实力了再来考虑这些事情。</p>
+
+<p>最后，总结一下大二上学期的学习。大二上的学习基本上还是很满意的，面向对象、数据结构、计算机图形学这些课都上的挺认真的，就有一门毛概课基本没去上，最后的考试结果也还算满意。总之，大二上的课堂学习算是过关了，没有出现之前的挂科。</p>
+
+<p>一句话，忙碌而又充实的日子。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[MentalModel开发心得]]></title>
+    <link href="http://yoursite.com/blog/2013/10/28/mental-model/"/>
+    <updated>2013-10-28T08:39:00+08:00</updated>
+    <id>http://yoursite.com/blog/2013/10/28/mental-model</id>
+    <content type="html"><![CDATA[<p>学校工业设计系一个实验室的老师在研究Android的交互设计，研究到人的心智模型这一块时，需要做一个实验，然后呢，就要用到一个Android的App，最后我帮他做了这个App，这期间有很多的体会和经验，写下来留给自己看。</p>
+
+<p>这个应用大概是这样子的：</p>
+
+<p>   <img src="http://yoursite.com/images/实验2.jpg" width="250" height="400"/> <img src="http://yoursite.com/images/testtwo.png" width="250" height="400" /></p>
+
+<!--more-->
+
+
+<p>   <img src="http://yoursite.com/images/testthree.png" width="250" height="400" /> <img src="http://yoursite.com/images/image.png" width="250" height="400" /></p>
+
+<p>由于是实验型的App，这里边有将近45个页面，刚接触到这个应用时由于跟那老师的交流出了点问题，所以对应用的理解有偏差，没意识到会有这么多的界面，于是乎我就把没一个页面当作一个activity，开始一个新的页面activity是结束掉上一个页面的activity，当工程进行到后边时，深刻体会到了这种思路的缺陷。这应该也是第一次做到会有如此多的布局的App，深刻体会到了命名规范的好处。比如说，总共有四个实验，而每个实验有12中模式，那么对布局文件的命名很值得考量一番，要不会很乱的。</p>
+
+<p>这个App实验三和实验四是图形模式或者flash模式，并且每种模式大概会有20张左右的图片，如果不用listview去分批加载的话，就会出现内存溢出的问题，由于我刚开始是在genymotion上的调试的一直没遇到这问题，也没去考虑，当准备开始测试的时候，在真机上调试之后很容易就出现了这个问题，一下子加载20张图片，这。。。最终，是用listview解决的这个问题。</p>
+
+<p>既然是实验App，那么就肯定需要记录测试者的实验数据，这个实验记录的是测试者找到目标物的时间,7顺理成章的就写了一个专门记载时间的类，项目具体东西放github了。<a href="https://github.com/fanhongwei/MentalModel">MentalModel</a></p>
+
+<p>最后，在做这个App的过程中还学到的一个东西，就是真正结束掉一个App，具体是思路是就是利用堆栈的原理，在intent实现activity跳转的时候加<code>intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);</code>然后就可以轻松结束应用了，关于结束应用的方法网上还有很多，我就不说了。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[忙碌的两个月]]></title>
+    <link href="http://yoursite.com/blog/2013/10/28/two-busy-month/"/>
+    <updated>2013-10-28T08:37:00+08:00</updated>
+    <id>http://yoursite.com/blog/2013/10/28/two-busy-month</id>
+    <content type="html"><![CDATA[<p>大二生活的两个月已经过去了，停下来总结总结这两个月，对这两个月整体感觉过得很踏实。</p>
+
+<p>9月份就正式开始了自己的大二生活，大概看了看这学期的课表，感觉爽了很多，面向对象，计算机图形学，数据结构之类的课就都开了。第一眼看上去就很爽的样子，于是抱着一颗幸福的心就开始了大二生活。9月份最重要的事可以说是承担起了团队（联创团队）招新的事。9月3号之前写好的策划，然后9月8号正式开始招新，而我的生活也就随着招新的开始真正忙了起来，招新每一个环节都去盯，看安排的队友任务完成的怎么样，以及一些借教室，申请场地之类的事都得去忙，整个9月份我就像一个“要账”的似的，整天给这个队友打了电话给那个队友打电话的，我估计大家都有点怕接我电话了，不过有个好处呢就是我跟团队的每个人几乎都把关系搞熟了，还是蛮开心的。关于招新的流程就不多说了，详细写写招新之后的感悟吧。</p>
+
+<!--more-->
+
+
+<p>今年的招新还是挺成功的，拿到了680份报名表，经过后期的考核总共留下了65左右的人吧。在整个招新过程中我学会了如何去合理的安排任务，如何与别人沟通，如何去处理一些突发情况，更学会了遇事沉着冷静，淡定的去面对一切。然后，也发现了自己的一些问题，我感触最深的就是自己的号召力还是很有待提高的，换句话说就是那种吸引别人乐意帮你高效完成任务的魄力。总之呢，就是感觉自己对于与人沟通交流这一块还是很有发展空间的。虽然招新这一段时间（持续了有45天吧）没怎么写代码，自己的编程实力也没怎么提升，但是呢，学到了很多其他方面的能力。总之，招新这一段时间很值，也让我对联创的感情更加深了一个层次。</p>
+
+<p>这段时间的课的话，感觉都上的挺充实的，虽然写安卓一直用的java，但是呢，面向对象的课上我还是学到了其他好多东西，比如说UML模型之类的。计算机图形学的话，感觉上的也很开心的，学到了不少图形算法，包括opengl这个伟大的库。不过，这学期呢，也有很水的课，毛概课竟然有6个学分，然后就看到大家上课想方设法去回答问题（老师说，回答问题会有加分），我很讨厌这种行为，回答问题这种用来和老师探讨学术问题的方式沦落为了大家去争取一个高分的途径，为了分数那个很表面的东西，哎。。。</p>
+
+<p>现在呢，乱七八糟的该忙的也都忙完了，开始踏下心来好好提升自己的实力，更深入一个层次的去了解安卓，比如说，framework。多去了解整个业界的动态发展，让自己一直跟着这个步伐，另外呢，也去好好跟着团队算法组的同志们好好学学一些工程性的算法。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hello]]></title>
+    <link href="http://yoursite.com/blog/2013/08/25/hello/"/>
+    <updated>2013-08-25T19:13:00+08:00</updated>
+    <id>http://yoursite.com/blog/2013/08/25/hello</id>
+    <content type="html"><![CDATA[<p>终于搞定了，只想说一句“真他妈的蛋疼”。附上，桌面壁纸，犒劳一下疲惫的心灵。
+<img src="http://yoursite.com/images/2.png" alt="" /></p>
+]]></content>
+  </entry>
+  
+</feed>

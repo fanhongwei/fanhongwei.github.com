@@ -1,1 +1,573 @@
-My Octopress Page is coming soon &hellip;
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>vicvan</title>
+	<meta name="author" content="vicvan">
+
+	
+	<meta name="description" content="在Android中实现状态栏与顶栏同色，可以增加应用的美观性，提升用户体验。那么这一点是如何实现的呢？ 目前，比较常用的是github上一个叫做SystemBarTint的库。但是在实际使用的过程中，当与碎总的SwipeBackLayout滑动返回一起使用的时候， &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="vicvan" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">vicvan</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="https://www.google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:yoursite.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="https://www.google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:yoursite.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/03/04/android-statusbartint-and-swipebacklayout/">
+		
+			Android4.4及以上版本实现状态栏与顶栏同色</a>
+	</h2>
+	<div class="entry-content">
+		<p>在Android中实现状态栏与顶栏同色，可以增加应用的美观性，提升用户体验。那么这一点是如何实现的呢？</p>
+
+<p>目前，比较常用的是github上一个叫做<a href="https://github.com/jgilfelt/SystemBarTint">SystemBarTint</a>的库。但是在实际使用的过程中，当与碎总的<a href="https://github.com/ikew0ng/SwipeBackLayout">SwipeBackLayout</a>滑动返回一起使用的时候，会发现通知栏并不能和当前页面一起被滑走，在StatusBar与ActionBar连接的地方会有很明显的撕裂感，非常影响用户体验。所以在我们自己的项目中放弃了这种实现方式并寻求其他解决方案，最终通过阅读SwipeBackLayout源码和SystemBarTint源码找到了解决方案，实现了状态栏和顶栏同色与滑动返回的完美结合。</p>
+
+<p>首先我们通过SystemBarTint的源码分析来搞明白状态栏和变色是如何实现的</p>
+
+
+		
+		<a href="/blog/2015/03/04/android-statusbartint-and-swipebacklayout/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Mar 4th, 2015</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/andriod/'>andriod</a>
+
+
+</div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/12/11/android-develop-tip/">
+		
+			Android Develop Tips(一)</a>
+	</h2>
+	<div class="entry-content">
+		<h2>Android常用项目结构</h2>
+
+<p>在Android的开发过程中一直在不断的调整自己对于项目结构的架构方式，经过了多次的调整之后，现在基本每个项目都会以如下方式来架构：</p>
+
+<ul>
+<li><strong><em>api</em></strong>
+放置一些API口类</li>
+<li><strong><em>app</em></strong>
+放置一些与整个东西pp相关的类，如继承自Application的当前应用的Appliation类、继承自系统Resources写的当前应用的Resurces类、应用的版本管理VersionManager类等</li>
+<li><strong><em>bean</em></strong>
+主要用来放置java bean的类</li>
+<li><strong><em>io</em></strong>
+放置一些io操作的类，如网络请求、文件读写、数据库操作等等</li>
+<li><strong><em>provider</em></strong>
+放置provider相关的类</li>
+<li><strong><em>receiver</em></strong><br/>
+放置整应用里边需要的reiver类</li>
+<li><strong><em>service</em></strong>
+放置整个应用里边的sevice类</li>
+<li><strong><em>ui</em></strong>
+
+<ul>
+<li><strong><em>activity</em></strong>
+整个应用的actvity类</li>
+<li><strong><em>adapter</em></strong>
+整个应用的adapter类</li>
+<li><strong><em>controller</em></strong>
+整个用中用到的ew层进行操纵的roller类</li>
+<li><strong><em>fragment</em></strong>
+整个应中的fragemnt类</li>
+<li><strong><em>util</em></strong>
+对应用中ui进行操作的一些helper类</li>
+<li><strong><em>view</em></strong>
+整个应中可以分离出来的view</li>
+<li><strong><em>widget</em></strong>
+整个应用的自定义控件</li>
+</ul>
+</li>
+<li><strong><em>util</em></strong>
+各种各样的工具类</li>
+</ul>
+
+
+<p>我现在基本上每个项目都是这种架构方式了，另外，我习惯将自己平时的积累的一些工具类之类的类整理到一个Common的library module中，自己的每个项目都会把这个common module倒入进来，这样子方便了很多。</p>
+
+
+		
+		<a href="/blog/2014/12/11/android-develop-tip/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Dec 11th, 2014</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>android</a>
+
+
+</div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/11/15/to-mac/">
+		
+			To Mac</a>
+	</h2>
+	<div class="entry-content">
+		<p>经历了好久的外包填坑，终于把电脑从黑苹果换到了白苹果，各种环境也都搭好了，当然也包括博客环境了，所以博客之后恢复正常更新。</p>
+
+<p><img src="/images/image-19.png" alt="" /></p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Nov 15th, 2014</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/life/'>life</a>
+
+
+</div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/05/12/after-install-ubuntu14-dot-04/">
+		
+			After Install Ubuntu 14.04 LTS</a>
+	</h2>
+	<div class="entry-content">
+		<h1>前奏</h1>
+
+<p>之前从ubuntu 13.10升级到ubuntu 14.04 LTS,由于输入法的问题,在删除iBus的时候不小心删除了Unity的一些东西,结果桌面环境挂掉了,无奈重装系统,装完系统倒是焕然一新了,可是各种缺环境.然后开始了一系列配置环境的艰辛历程,通过这篇博文记录这艰辛历程，以备下次强迫症患了再一次作大死。</p>
+
+<h1>开工</h1>
+
+<h3><em>基本系统配置</em></h3>
+
+<p><strong>换源:</strong> 果断将源换成我大<a href="http://hustunique.com">联创</a>自己的源 <a href="http://mirrors.hustunique.com">mirrors.hustunique.com</a>.之后<code>sudo apt-get update</code>更新一下.</p>
+
+<p><strong>安装chrome:</strong> 直接<a href="https://www.google.com/intl/zh-CN/chrome/browser/">chrome官网</a>下载chrome的deb包,然后通过软件中心安装即可.很庆幸的14.04中没有之前版本中出现的缺少lib的问题.</p>
+
+<p><strong>终端配置:</strong> 安装Termiantor终端,此终端比自带的终端强悍很多.</p>
+
+<p><strong>终端环境：</strong> 弃用bash,换上高大上的zsh.通过github上的 <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>来管理zsh配置,执行以下shell即可</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install zsh
+</span><span class='line'>curl -L http://install.ohmyz.sh | sh  //自动安装
+</span><span class='line'>chsh -s /bin/zsh
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+
+		
+		<a href="/blog/2014/05/12/after-install-ubuntu14-dot-04/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+May 12th, 2014</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/linux/'>linux</a>
+
+
+</div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/04/16/android-feedback/">
+		
+			Android-FeedBack</a>
+	</h2>
+	<div class="entry-content">
+		<h1>选择</h1>
+
+<p>之前开发OverHust的时候，需要用到用户反馈这一功能，于是就在考虑怎么实现<strong>用户反馈</strong>这一功能。</p>
+
+<p>目前，常规方法如下：</p>
+
+<blockquote><ul>
+<li><p>利用第三方服务，例如：<a href="http://www.umeng.com/">友盟</a></p></li>
+<li><p>调用用户已登录的邮箱帐号发送邮件</p></li>
+</ul>
+</blockquote>
+
+<h4>利用第三方服务</h4>
+
+<p><code>优点</code>：使用第三方服务，只需要调用接口，简单粗暴。</p>
+
+<p><code>缺点</code>：导入Library工程，自定义度不高。如果仅仅会用到第三方的用户反馈这一服务的话，更没必要导入别人的Library工程。</p>
+
+<h4>调用用户已登录的邮箱帐号发送邮件</h4>
+
+<p><code>优点</code>：直接调用系统的发送邮件服务，更加简单粗暴。</p>
+
+<p><code>缺点</code>：如果用户没有在系统中登录邮箱帐号，那就悲剧了。</p>
+
+
+		
+		<a href="/blog/2014/04/16/android-feedback/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Apr 16th, 2014</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>android</a>
+
+
+</div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/03/09/linux-kernel/">
+		
+			Linux内核编译</a>
+	</h2>
+	<div class="entry-content">
+		<p>系统发行版ubuntu13.04，内核版本3.12.13
+首先，官网下载所需内核。</p>
+
+<p>为了之后的方便，切换到root权限    命令：<code>sudo -i</code></p>
+
+<p>复制内核包到制定目录    命令：<code>cp ./linux-3.12.13.tar.xz   /usr/src</code></p>
+
+<p>解压内核包   命令：<code>tar -xvf linux-3.12.13.tar.xz</code></p>
+
+<p>切换到/usr/src目录下  命令：<code>cd /usr/src</code></p>
+
+<p><img src="/images/image-5.png" alt="" /></p>
+
+
+		
+		<a href="/blog/2014/03/09/linux-kernel/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Mar 9th, 2014</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/linux/'>linux</a>
+
+
+</div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2014/02/21/busy-day/">
+		
+			忙碌、充实的日子</a>
+	</h2>
+	<div class="entry-content">
+		<p>年后初八离开家人，别离了可爱的女朋友，只身一人来到了学校，继续着忙碌而又充实的日子。从年后过来学校到现在收尾了不少事。终于有时间来总结我的大二上学期的生活。</p>
+
+<p>记得暑假比别人大概早到校了一个月，提前开始了同样忙碌而又充实的日子。刚到校就开始开发一个微信公众平台，其实就是去熟悉了微信的公众的平台开发流程和php的一些基本用法。<a href="http://dsnc.me/project/">华科软件2013级微信公众平台</a>，当时做得最爽的一个功能就是给新生的“我到了”功能，帮助了不少学弟和学妹。也就是在开发这个过程中接触到了腾讯街景地图，然后基于街景这一块继续深入做了下去，也就有了后来的OverHust。</p>
+
+<p>OverHust，是一款基于街景的校园地图应用。当时接触到腾讯街景的时候就感觉街景很好玩，然后就萌生了写一个Android App的想法，了解一些基本情况后确定这个东西可以做，然后就找了一些人开始开发了。</p>
+
+
+		
+		<a href="/blog/2014/02/21/busy-day/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Feb 21st, 2014</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/life/'>life</a>
+
+
+</div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/10/28/mental-model/">
+		
+			MentalModel开发心得</a>
+	</h2>
+	<div class="entry-content">
+		<p>学校工业设计系一个实验室的老师在研究Android的交互设计，研究到人的心智模型这一块时，需要做一个实验，然后呢，就要用到一个Android的App，最后我帮他做了这个App，这期间有很多的体会和经验，写下来留给自己看。</p>
+
+<p>这个应用大概是这样子的：</p>
+
+<p>   <img src="/images/实验2.jpg" width="250" height="400"/> <img src="/images/testtwo.png" width="250" height="400" /></p>
+
+
+		
+		<a href="/blog/2013/10/28/mental-model/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Oct 28th, 2013</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>android</a>
+
+
+</div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/10/28/two-busy-month/">
+		
+			忙碌的两个月</a>
+	</h2>
+	<div class="entry-content">
+		<p>大二生活的两个月已经过去了，停下来总结总结这两个月，对这两个月整体感觉过得很踏实。</p>
+
+<p>9月份就正式开始了自己的大二生活，大概看了看这学期的课表，感觉爽了很多，面向对象，计算机图形学，数据结构之类的课就都开了。第一眼看上去就很爽的样子，于是抱着一颗幸福的心就开始了大二生活。9月份最重要的事可以说是承担起了团队（联创团队）招新的事。9月3号之前写好的策划，然后9月8号正式开始招新，而我的生活也就随着招新的开始真正忙了起来，招新每一个环节都去盯，看安排的队友任务完成的怎么样，以及一些借教室，申请场地之类的事都得去忙，整个9月份我就像一个“要账”的似的，整天给这个队友打了电话给那个队友打电话的，我估计大家都有点怕接我电话了，不过有个好处呢就是我跟团队的每个人几乎都把关系搞熟了，还是蛮开心的。关于招新的流程就不多说了，详细写写招新之后的感悟吧。</p>
+
+
+		
+		<a href="/blog/2013/10/28/two-busy-month/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Oct 28th, 2013</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/life/'>life</a>
+
+
+</div>
+	
+</div>
+</article>
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2013/08/25/hello/">
+		
+			Hello</a>
+	</h2>
+	<div class="entry-content">
+		<p>终于搞定了，只想说一句“真他妈的蛋疼”。附上，桌面壁纸，犒劳一下疲惫的心灵。
+<img src="/images/2.png" alt="" /></p>
+
+		
+		
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Aug 25th, 2013</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/life/'>life</a>
+
+
+</div>
+	
+</div>
+</article>
+
+<nav id="pagenavi">
+    
+    
+    <div class="center"><a href="/blog/archives">Blog Archives</a></div>
+</nav>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    vicvan
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+</body>
+</html>

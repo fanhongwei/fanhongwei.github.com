@@ -1,0 +1,194 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Linux内核编译 - vicvan</title>
+	<meta name="author" content="vicvan">
+
+	
+	<meta name="description" content="系统发行版ubuntu13.04，内核版本3.12.13
+首先，官网下载所需内核。 为了之后的方便，切换到root权限 命令：sudo -i 复制内核包到制定目录 命令：cp ./linux-3.12.13.tar.xz /usr/src 解压内核包 命令：tar -xvf linux-3.12. &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="vicvan" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">vicvan</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="https://www.google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:yoursite.com">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="https://www.google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:yoursite.com">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Linux内核编译</h2>
+	<div class="entry-content"><p>系统发行版ubuntu13.04，内核版本3.12.13
+首先，官网下载所需内核。</p>
+
+<p>为了之后的方便，切换到root权限    命令：<code>sudo -i</code></p>
+
+<p>复制内核包到制定目录    命令：<code>cp ./linux-3.12.13.tar.xz   /usr/src</code></p>
+
+<p>解压内核包   命令：<code>tar -xvf linux-3.12.13.tar.xz</code></p>
+
+<p>切换到/usr/src目录下  命令：<code>cd /usr/src</code></p>
+
+<p><img src="/images/image-5.png" alt="" /></p>
+
+<!--more-->
+
+
+<p><img src="/images/image-9.png" alt="" /></p>
+
+<p>把原来编译产生的垃圾删除   命令：<code>make mrproper</code></p>
+
+<p>配置内核,选用基于图形窗口模式的配置界面   命令：<code>make xconfig</code></p>
+
+<p>正常的话应该可以开始配置内核了，可惜ubuntu没有自带qt环境或者我之前吧qt环境卸载了</p>
+
+<p><img src="/images/image-7.png" alt="" /></p>
+
+<p>缺qt3环境，然后去装qt3环境，发现现在大多数源里边已经没有qt3了，索性安装qt4的环境，重新开始配置内核，发现2.6的内核必须要qt3的环境，于是换到了3.12.13的内核。</p>
+
+<p>重新执行 <code>make xconfig</code>,出现配置界面</p>
+
+<p><img src="/images/image-11.png" alt="" /></p>
+
+<p>开始配置内核，看不懂，找到了@金步国的一篇博文  <a href="http://www.jinbuguo.com/kernel/longterm-3_10-options.html">博文链接</a></p>
+
+<p><img src="/images/image-12.png" alt="" /></p>
+
+<p>为了确保所有有关文件都处于最新版本状态  命令：<code>make clean</code></p>
+
+<p>开始编译压缩形式的内核  命令：<code>make zImage</code></p>
+
+<p><img src="/images/image-14.png" alt="" /></p>
+
+<p>大概编译了20左右，内核编译完毕。</p>
+
+<p><img src="/images/image-16.png" alt="" /></p>
+
+<p>开始编译模块,这个过程时间比较长。  命令:<code>make modules</code></p>
+
+<p>编译完模块之后开始将编译后的模块转移到系统标准位置  命令：<code>make module_install</code></p>
+
+<p>最后执行 <code>make install</code>,这应该算是最后一步了，结果出问题了。</p>
+
+<p><img src="/images/image-18.png" alt="" /></p>
+
+<p>原因：当时装系统的时候boot分区是单挂的，分了80M进去，结果<code>make install</code>的时候报错：gzip: stdout: No space left on device.  看样子是boot分区太小gzip解压包的时候没有空间了。</p>
+
+<p>解决办法：删掉boot分区下边当前没用的所有内核，然后update-grub 结果boot还是太小，最后想着把boot umount掉，然后把活动分区标记为根分区，想了想太危险，万一搞坏了，现在ubuntu下的所有配好的环境都完蛋了，最后选择了虚拟机。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Mar 9th, 2014</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/linux/'>linux</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		
+	</div>
+	
+</div>
+
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    vicvan
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+</body>
+</html>
