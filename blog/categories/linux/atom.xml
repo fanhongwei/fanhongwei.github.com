@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: linux | vicvan]]></title>
-  <link href="http://yoursite.com/blog/categories/linux/atom.xml" rel="self"/>
-  <link href="http://yoursite.com/"/>
-  <updated>2015-07-21T00:34:52+08:00</updated>
-  <id>http://yoursite.com/</id>
+  <link href="http://fanhongwei.github.io/blog/categories/linux/atom.xml" rel="self"/>
+  <link href="http://fanhongwei.github.io/"/>
+  <updated>2015-08-19T20:02:06+08:00</updated>
+  <id>http://fanhongwei.github.io/</id>
   <author>
     <name><![CDATA[vicvan]]></name>
     <email><![CDATA[fanhongweiqq@gmail.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[After install Ubuntu 14.04 LTS]]></title>
-    <link href="http://yoursite.com/blog/2014/05/12/after-install-ubuntu14-dot-04/"/>
+    <link href="http://fanhongwei.github.io/blog/2014/05/12/after-install-ubuntu14-dot-04/"/>
     <updated>2014-05-12T14:34:00+08:00</updated>
-    <id>http://yoursite.com/blog/2014/05/12/after-install-ubuntu14-dot-04</id>
+    <id>http://fanhongwei.github.io/blog/2014/05/12/after-install-ubuntu14-dot-04</id>
     <content type="html"><![CDATA[<h1>前奏</h1>
 
 <p>之前从ubuntu 13.10升级到ubuntu 14.04 LTS,由于输入法的问题,在删除iBus的时候不小心删除了Unity的一些东西,结果桌面环境挂掉了,无奈重装系统,装完系统倒是焕然一新了,可是各种缺环境.然后开始了一系列配置环境的艰辛历程,通过这篇博文记录这艰辛历程，以备下次强迫症患了再一次作大死。</p>
@@ -33,24 +33,30 @@
 <p><strong>终端配置:</strong> 安装Termiantor终端,此终端比自带的终端强悍很多.</p>
 
 <p><strong>终端环境：</strong> 弃用bash,换上高大上的zsh.通过github上的 <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>来管理zsh配置,执行以下shell即可
-```
-sudo apt-get install zsh
-curl -L <a href="http://install.ohmyz.sh">http://install.ohmyz.sh</a> | sh  //自动安装
-chsh -s /bin/zsh</p>
-
-<p>```</p>
-
-<!--more-->
-
-
-<p><strong>键盘映射修改:</strong> 由于个人习惯,总是喜欢将CapsLk替换为Ctrl,通过Xmodmap来修改键盘映射,在/home下添加.Xmodmap文件</p>
-
-<p>.Xmodmap
-<code>
-remove Lock = Caps_Lock
-keysym Caps_Lock = Control_L
-add control = Control_L
-</code></p>
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install zsh
+</span><span class='line'>curl -L http://install.ohmyz.sh | sh  //自动安装
+</span><span class='line'>chsh -s /bin/zsh&lt;/p&gt;
+</span><span class='line'>&lt;div class="highlight"&gt;&lt;pre&gt;&lt;code class="language-text" data-lang="text"&gt;&lt;!--more--&gt;
+</span><span class='line'>
+</span><span class='line'>**键盘映射修改:** 由于个人习惯,总是喜欢将CapsLk替换为Ctrl,通过Xmodmap来修改键盘映射,在/home下添加.Xmodmap文件
+</span><span class='line'>
+</span><span class='line'>.Xmodmap
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+</span><span class='line'>&lt;p&gt;remove Lock = Caps&lt;em&gt;Lock
+</span><span class='line'>keysym Caps&lt;/em&gt;Lock = Control&lt;em&gt;L
+</span><span class='line'>add control = Control&lt;/em&gt;L</span></code></pre></td></tr></table></div></figure></p>
 
 <p><strong>主题配置:</strong> 首先安装Ubuntu Tweak这个主题管理软件.</p>
 
@@ -88,7 +94,7 @@ sudo apt-get install gimp
 Type=Application
 Name=Genymotion
 Icon=/home/dsnc/Downloads/genymotion/icons/icon.png
-Exec="/home/dsnc/Downloads/genymotion/genymotion"
+Exec=&quot;/home/dsnc/Downloads/genymotion/genymotion&quot;
 Terminal=false
 Categories=Development;IDE;
 </code></p>
@@ -96,20 +102,19 @@ Categories=Development;IDE;
 <h3><em>博客管理</em></h3>
 
 <p><strong>Ruby环境配置:</strong> 个人博客是用Octopress搭建的,所以得配置ruby环境,因为14.04比较新,配置起来比较纠结,缺少各种依赖库,一下是我的成功配置过程</p>
-
-<pre><code>sudo apt-get update
+<div class="highlight"><pre><code class="language-text" data-lang="text">sudo apt-get update
 sudo apt-get install curl
 \curl -sSL https://get.rvm.io | bash -s stable       //install RVM by using curl
 source ~/.rvm/scripts/rvm          //load RVM
-type rvm | head -n 1          //if install success,there is "rvm is a function"
+type rvm | head -n 1          //if install success,there is &quot;rvm is a function&quot;
 
-//install lib,without these the "rvm requirements will failed"
+//install lib,without these the &quot;rvm requirements will failed&quot;
 sudo apt-get install gawk g++ libreadline6-dev zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake libtool bison libffi-dev
 rvm requirements  
 rvm install ruby
-</code></pre>
-
-<blockquote><ul>
+</code></pre></div>
+<blockquote>
+<ul>
 <li>RVM:Ruby Version Manager</li>
 </ul>
 </blockquote>
@@ -142,9 +147,9 @@ sudo apt-get install shutter
   
   <entry>
     <title type="html"><![CDATA[Linux内核编译]]></title>
-    <link href="http://yoursite.com/blog/2014/03/09/linux-kernel/"/>
+    <link href="http://fanhongwei.github.io/blog/2014/03/09/linux-kernel/"/>
     <updated>2014-03-09T21:05:00+08:00</updated>
-    <id>http://yoursite.com/blog/2014/03/09/linux-kernel</id>
+    <id>http://fanhongwei.github.io/blog/2014/03/09/linux-kernel</id>
     <content type="html"><![CDATA[<p>系统发行版ubuntu13.04，内核版本3.12.13
 首先，官网下载所需内核。</p>
 
@@ -156,12 +161,11 @@ sudo apt-get install shutter
 
 <p>切换到/usr/src目录下  命令：<code>cd /usr/src</code></p>
 
-<p><img src="/images/image-5.png" alt="" /></p>
+<p><img src="/images/image-5.png" alt=""></p>
 
 <!--more-->
 
-
-<p><img src="/images/image-9.png" alt="" /></p>
+<p><img src="/images/image-9.png" alt=""></p>
 
 <p>把原来编译产生的垃圾删除   命令：<code>make mrproper</code></p>
 
@@ -169,27 +173,27 @@ sudo apt-get install shutter
 
 <p>正常的话应该可以开始配置内核了，可惜ubuntu没有自带qt环境或者我之前吧qt环境卸载了</p>
 
-<p><img src="/images/image-7.png" alt="" /></p>
+<p><img src="/images/image-7.png" alt=""></p>
 
 <p>缺qt3环境，然后去装qt3环境，发现现在大多数源里边已经没有qt3了，索性安装qt4的环境，重新开始配置内核，发现2.6的内核必须要qt3的环境，于是换到了3.12.13的内核。</p>
 
 <p>重新执行 <code>make xconfig</code>,出现配置界面</p>
 
-<p><img src="/images/image-11.png" alt="" /></p>
+<p><img src="/images/image-11.png" alt=""></p>
 
 <p>开始配置内核，看不懂，找到了@金步国的一篇博文  <a href="http://www.jinbuguo.com/kernel/longterm-3_10-options.html">博文链接</a></p>
 
-<p><img src="/images/image-12.png" alt="" /></p>
+<p><img src="/images/image-12.png" alt=""></p>
 
 <p>为了确保所有有关文件都处于最新版本状态  命令：<code>make clean</code></p>
 
 <p>开始编译压缩形式的内核  命令：<code>make zImage</code></p>
 
-<p><img src="/images/image-14.png" alt="" /></p>
+<p><img src="/images/image-14.png" alt=""></p>
 
 <p>大概编译了20左右，内核编译完毕。</p>
 
-<p><img src="/images/image-16.png" alt="" /></p>
+<p><img src="/images/image-16.png" alt=""></p>
 
 <p>开始编译模块,这个过程时间比较长。  命令:<code>make modules</code></p>
 
@@ -197,7 +201,7 @@ sudo apt-get install shutter
 
 <p>最后执行 <code>make install</code>,这应该算是最后一步了，结果出问题了。</p>
 
-<p><img src="/images/image-18.png" alt="" /></p>
+<p><img src="/images/image-18.png" alt=""></p>
 
 <p>原因：当时装系统的时候boot分区是单挂的，分了80M进去，结果<code>make install</code>的时候报错：gzip: stdout: No space left on device.  看样子是boot分区太小gzip解压包的时候没有空间了。</p>
 

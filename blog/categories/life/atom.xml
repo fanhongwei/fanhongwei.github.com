@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: life | vicvan]]></title>
-  <link href="http://yoursite.com/blog/categories/life/atom.xml" rel="self"/>
-  <link href="http://yoursite.com/"/>
-  <updated>2015-07-21T00:34:52+08:00</updated>
-  <id>http://yoursite.com/</id>
+  <link href="http://fanhongwei.github.io/blog/categories/life/atom.xml" rel="self"/>
+  <link href="http://fanhongwei.github.io/"/>
+  <updated>2015-08-19T20:02:06+08:00</updated>
+  <id>http://fanhongwei.github.io/</id>
   <author>
     <name><![CDATA[vicvan]]></name>
     <email><![CDATA[fanhongweiqq@gmail.com]]></email>
@@ -15,30 +15,27 @@
   
   <entry>
     <title type="html"><![CDATA[To Mac]]></title>
-    <link href="http://yoursite.com/blog/2014/11/15/to-mac/"/>
+    <link href="http://fanhongwei.github.io/blog/2014/11/15/to-mac/"/>
     <updated>2014-11-15T11:04:00+08:00</updated>
-    <id>http://yoursite.com/blog/2014/11/15/to-mac</id>
+    <id>http://fanhongwei.github.io/blog/2014/11/15/to-mac</id>
     <content type="html"><![CDATA[<p>经历了好久的外包填坑，终于把电脑从黑苹果换到了白苹果，各种环境也都搭好了，当然也包括博客环境了，所以博客之后恢复正常更新。</p>
 
-<p><img src="/images/image-19.png" alt="" /></p>
+<p><img src="/images/image-19.png" alt=""></p>
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[忙碌、充实的日子]]></title>
-    <link href="http://yoursite.com/blog/2014/02/21/busy-day/"/>
+    <link href="http://fanhongwei.github.io/blog/2014/02/21/busy-day/"/>
     <updated>2014-02-21T23:26:00+08:00</updated>
-    <id>http://yoursite.com/blog/2014/02/21/busy-day</id>
+    <id>http://fanhongwei.github.io/blog/2014/02/21/busy-day</id>
     <content type="html"><![CDATA[<p>年后初八离开家人，别离了可爱的女朋友，只身一人来到了学校，继续着忙碌而又充实的日子。从年后过来学校到现在收尾了不少事。终于有时间来总结我的大二上学期的生活。</p>
 
 <p>记得暑假比别人大概早到校了一个月，提前开始了同样忙碌而又充实的日子。刚到校就开始开发一个微信公众平台，其实就是去熟悉了微信的公众的平台开发流程和php的一些基本用法。<a href="http://dsnc.me/project/">华科软件2013级微信公众平台</a>，当时做得最爽的一个功能就是给新生的“我到了”功能，帮助了不少学弟和学妹。也就是在开发这个过程中接触到了腾讯街景地图，然后基于街景这一块继续深入做了下去，也就有了后来的OverHust。</p>
 
-<p>OverHust，是一款基于街景的校园地图应用。当时接触到腾讯街景的时候就感觉街景很好玩，然后就萌生了写一个Android App的想法，了解一些基本情况后确定这个东西可以做，然后就找了一些人开始开发了。</p>
-
-<!--more-->
-
-
-<p>之前也做过一些android的应用，但是OverHust是我的第一个真正的产品。当OverHust刚开始开工的时候正好赶上了学校点团队的“斯达康种子杯”然后就随手报了名，顺便参加了比赛。然后就一路开发了下来，直到比赛最终决赛的时候做出了应用的初步版本。最终凭借着街景的有趣性、以及整个应用的界面设计和一些细节的把握等等各方面的原因，拿了大赛的一等奖，也拿了10000大洋，比赛也就结束了，但是应用离一个真正的产品还差得很远，于是就继续开发。一个个的实现各个功能模块，一个个的小细节改了又改，只为了让自己满意，让用户满意。在这期间也到光谷软件园democoffee关于OverHust做了一次分享，讲了Overust的用户定位、以及一些开发细节，当天也在democoffee认识了不少朋友，关于应用也和在场的很多人聊了很多。分享会之后，对于OverHust这个应用，自己静下心来想了很多很多，想了很多OverHust究竟能给用户带来什么？最终想明白了，就是街景与华科校园生活的精密结合。在期末考试之前放出了v0.8版测试，年后过来学校又接着开发了一段时间，现在整个应用v1.0基本已经开发完毕，过一段时间能上线了。</p>
+<p>OverHust，是一款基于街景的校园地图应用。当时接触到腾讯街景的时候就感觉街景很好玩，然后就萌生了写一个Android App的想法，了解一些基本情况后确定这个东西可以做，然后就找了一些人开始开发了。
+&lt;!--more--&gt;
+之前也做过一些android的应用，但是OverHust是我的第一个真正的产品。当OverHust刚开始开工的时候正好赶上了学校点团队的“斯达康种子杯”然后就随手报了名，顺便参加了比赛。然后就一路开发了下来，直到比赛最终决赛的时候做出了应用的初步版本。最终凭借着街景的有趣性、以及整个应用的界面设计和一些细节的把握等等各方面的原因，拿了大赛的一等奖，也拿了10000大洋，比赛也就结束了，但是应用离一个真正的产品还差得很远，于是就继续开发。一个个的实现各个功能模块，一个个的小细节改了又改，只为了让自己满意，让用户满意。在这期间也到光谷软件园democoffee关于OverHust做了一次分享，讲了Overust的用户定位、以及一些开发细节，当天也在democoffee认识了不少朋友，关于应用也和在场的很多人聊了很多。分享会之后，对于OverHust这个应用，自己静下心来想了很多很多，想了很多OverHust究竟能给用户带来什么？最终想明白了，就是街景与华科校园生活的精密结合。在期末考试之前放出了v0.8版测试，年后过来学校又接着开发了一段时间，现在整个应用v1.0基本已经开发完毕，过一段时间能上线了。</p>
 
 <p>OverHust是我大二上学期最大的收获，我学着去做一个完整的产品出来，尝试着去带一个产品出来，当然也完整的写了整个应用，可以体验了一下产品经理和程序员一块当的感觉。整体感觉就是做一个让用户用着很舒服的应用要考虑太多太多的东西。</p>
 
@@ -54,15 +51,14 @@
   
   <entry>
     <title type="html"><![CDATA[忙碌的两个月]]></title>
-    <link href="http://yoursite.com/blog/2013/10/28/two-busy-month/"/>
+    <link href="http://fanhongwei.github.io/blog/2013/10/28/two-busy-month/"/>
     <updated>2013-10-28T08:37:00+08:00</updated>
-    <id>http://yoursite.com/blog/2013/10/28/two-busy-month</id>
+    <id>http://fanhongwei.github.io/blog/2013/10/28/two-busy-month</id>
     <content type="html"><![CDATA[<p>大二生活的两个月已经过去了，停下来总结总结这两个月，对这两个月整体感觉过得很踏实。</p>
 
 <p>9月份就正式开始了自己的大二生活，大概看了看这学期的课表，感觉爽了很多，面向对象，计算机图形学，数据结构之类的课就都开了。第一眼看上去就很爽的样子，于是抱着一颗幸福的心就开始了大二生活。9月份最重要的事可以说是承担起了团队（联创团队）招新的事。9月3号之前写好的策划，然后9月8号正式开始招新，而我的生活也就随着招新的开始真正忙了起来，招新每一个环节都去盯，看安排的队友任务完成的怎么样，以及一些借教室，申请场地之类的事都得去忙，整个9月份我就像一个“要账”的似的，整天给这个队友打了电话给那个队友打电话的，我估计大家都有点怕接我电话了，不过有个好处呢就是我跟团队的每个人几乎都把关系搞熟了，还是蛮开心的。关于招新的流程就不多说了，详细写写招新之后的感悟吧。</p>
 
 <!--more-->
-
 
 <p>今年的招新还是挺成功的，拿到了680份报名表，经过后期的考核总共留下了65左右的人吧。在整个招新过程中我学会了如何去合理的安排任务，如何与别人沟通，如何去处理一些突发情况，更学会了遇事沉着冷静，淡定的去面对一切。然后，也发现了自己的一些问题，我感触最深的就是自己的号召力还是很有待提高的，换句话说就是那种吸引别人乐意帮你高效完成任务的魄力。总之呢，就是感觉自己对于与人沟通交流这一块还是很有发展空间的。虽然招新这一段时间（持续了有45天吧）没怎么写代码，自己的编程实力也没怎么提升，但是呢，学到了很多其他方面的能力。总之，招新这一段时间很值，也让我对联创的感情更加深了一个层次。</p>
 
@@ -74,11 +70,11 @@
   
   <entry>
     <title type="html"><![CDATA[Hello]]></title>
-    <link href="http://yoursite.com/blog/2013/08/25/hello/"/>
+    <link href="http://fanhongwei.github.io/blog/2013/08/25/hello/"/>
     <updated>2013-08-25T19:13:00+08:00</updated>
-    <id>http://yoursite.com/blog/2013/08/25/hello</id>
+    <id>http://fanhongwei.github.io/blog/2013/08/25/hello</id>
     <content type="html"><![CDATA[<p>终于搞定了，只想说一句“真他妈的蛋疼”。附上，桌面壁纸，犒劳一下疲惫的心灵。
-<img src="/images/2.png" alt="" /></p>
+<img src="/images/2.png" alt=""></p>
 ]]></content>
   </entry>
   

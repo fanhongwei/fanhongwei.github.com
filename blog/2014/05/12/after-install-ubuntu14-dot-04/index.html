@@ -46,7 +46,7 @@
 		<div class="container">
 			<form action="https://www.google.com/search" method="get">
 				<input type="text" name="q" results="0">
-				<input type="hidden" name="q" value="site:yoursite.com">
+				<input type="hidden" name="q" value="site:fanhongwei.github.io">
 			</form>
 		</div>
 	</div>
@@ -69,7 +69,7 @@
 	</div>
 	<form class="search" action="https://www.google.com/search" method="get">
 		<input class="alignright" type="text" name="q" results="0">
-		<input type="hidden" name="q" value="site:yoursite.com">
+		<input type="hidden" name="q" value="site:fanhongwei.github.io">
 	</form>
 </nav>
 
@@ -93,47 +93,37 @@
 
 <p><strong>终端配置:</strong> 安装Termiantor终端,此终端比自带的终端强悍很多.</p>
 
-<p><strong>终端环境：</strong> 弃用bash,换上高大上的zsh.通过github上的 <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>来管理zsh配置,执行以下shell即可</p>
-
+<p><strong>终端环境：</strong> 弃用bash,换上高大上的zsh.通过github上的 <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>来管理zsh配置,执行以下shell即可
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install zsh
 </span><span class='line'>curl -L http://install.ohmyz.sh | sh  //自动安装
 </span><span class='line'>chsh -s /bin/zsh
-</span></code></pre></td></tr></table></div></figure>
-
-
-
+</span></code></pre></td></tr></table></div></figure></p>
 
 <!--more-->
 
-
 <p><strong>键盘映射修改:</strong> 由于个人习惯,总是喜欢将CapsLk替换为Ctrl,通过Xmodmap来修改键盘映射,在/home下添加.Xmodmap文件</p>
 
-<p>.Xmodmap</p>
-
+<p>.Xmodmap
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>remove Lock = Caps_Lock
-</span><span class='line'>keysym Caps_Lock = Control_L
-</span><span class='line'>add control = Control_L</span></code></pre></td></tr></table></div></figure>
-
+</pre></td><td class='code'><pre><code class=''><span class='line'>remove Lock = Caps<em>Lock
+</span><span class='line'>keysym Caps</em>Lock = Control<em>L
+</span><span class='line'>add control = Control</em>L</span></code></pre></td></tr></table></div></figure></p>
 
 <p><strong>主题配置:</strong> 首先安装Ubuntu Tweak这个主题管理软件.</p>
 
-<p>然后安装我自己喜欢的Numix主题</p>
-
+<p>然后安装我自己喜欢的Numix主题
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:numix/ppa
 </span><span class='line'>sudo apt-get update
 </span><span class='line'>sudo apt-get install numix-gtk-theme</span></code></pre></td></tr></table></div></figure>
-
-
-<p>字体选择钟爱的Manaco.
+字体选择钟爱的Manaco.
 最后通过Ubuntu Tweak工具去管理设置这些配置。</p>
 
 <p><strong>输入法：</strong> 好不容易搜狗支持Linux就用它吧,前往<a href="http://pinyin.sogou.com/linux/">官网</a>下载deb包,之后安装即可,前提是得安装fcitx.关于输入法这一块会出不少问题,耐心点,慢慢来.</p>
@@ -144,22 +134,19 @@
 
 <p><strong>Android Studio:</strong> 前往 <a href="http://developer.android.com/sdk/installing/studio.html">Android开发者网站</a>下载Android Studio.另外,Android Studio有creat Desktop Entry这个功能,不再需要我们自己去写.desktop文件.</p>
 
-<p><strong>GIMP:</strong> 这个主要就是平时设计师给图之后用来取色或者切图之类的.</p>
-
+<p><strong>GIMP:</strong> 这个主要就是平时设计师给图之后用来取色或者切图之类的.
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:otto-kesselgulasch/gimp
 </span><span class='line'>sudo apt-get update
-</span><span class='line'>sudo apt-get install gimp</span></code></pre></td></tr></table></div></figure>
-
+</span><span class='line'>sudo apt-get install gimp</span></code></pre></td></tr></table></div></figure></p>
 
 <p><strong>DropBox:</strong> 方便与设计师进行图片的同步,前往 <a href="https://www.dropbox.com/install?os=lnx">DropBox官网</a>下载deb包即可。</p>
 
 <p><strong>Genymotion:</strong> 目前作为一个学生党开发者，没有大量的手持设备用来适配，通过Genymotion这些虚拟设备可以达到同样的效果。为了方便,在/usr/share/applications目录下创建genymotion.desktop文件用于快捷启动</p>
 
-<p>genmotion.desktop</p>
-
+<p>genmotion.desktop
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -171,10 +158,9 @@
 </span><span class='line'>Type=Application
 </span><span class='line'>Name=Genymotion
 </span><span class='line'>Icon=/home/dsnc/Downloads/genymotion/icons/icon.png
-</span><span class='line'>Exec="/home/dsnc/Downloads/genymotion/genymotion"
+</span><span class='line'>Exec=&quot;/home/dsnc/Downloads/genymotion/genymotion&quot;
 </span><span class='line'>Terminal=false
-</span><span class='line'>Categories=Development;IDE;</span></code></pre></td></tr></table></div></figure>
-
+</span><span class='line'>Categories=Development;IDE;</span></code></pre></td></tr></table></div></figure></p>
 
 <h3><em>博客管理</em></h3>
 
@@ -201,8 +187,8 @@
 </span><span class='line'>rvm requirements  
 </span><span class='line'>rvm install ruby</span></code></pre></td></tr></table></div></figure>
 
-
-<blockquote><ul>
+<blockquote>
+<ul>
 <li>RVM:Ruby Version Manager</li>
 </ul>
 </blockquote>
@@ -215,25 +201,21 @@
 
 <p><strong>WPS:</strong> 前往 <a href="http://linux.wps.cn/">WPS官网</a>下载deb包即可.</p>
 
-<p><strong>Synapse:</strong> 快速启动器</p>
-
+<p><strong>Synapse:</strong> 快速启动器
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:synapse-core/testing
 </span><span class='line'>sudo apt-get update
-</span><span class='line'>sudo apt-get install synapse</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>sudo apt-get install synapse</span></code></pre></td></tr></table></div></figure></p>
 
-
-<p><strong>截图工具：</strong> 这个我习惯使用的是Shutter</p>
-
+<p><strong>截图工具：</strong> 这个我习惯使用的是Shutter
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:shutter/ppa
 </span><span class='line'>sudo apt-get update
-</span><span class='line'>sudo apt-get install shutter</span></code></pre></td></tr></table></div></figure>
-
+</span><span class='line'>sudo apt-get install shutter</span></code></pre></td></tr></table></div></figure></p>
 
 <h2><em>越来越发现Ubuntu softerware center还是有很多好玩的应用,并且博文中提到的很多软件也都可以同多软件中心直接安装,不用通过添加PPA源的方式安装</em></h2>
 </div>

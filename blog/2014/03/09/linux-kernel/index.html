@@ -47,7 +47,7 @@
 		<div class="container">
 			<form action="https://www.google.com/search" method="get">
 				<input type="text" name="q" results="0">
-				<input type="hidden" name="q" value="site:yoursite.com">
+				<input type="hidden" name="q" value="site:fanhongwei.github.io">
 			</form>
 		</div>
 	</div>
@@ -70,7 +70,7 @@
 	</div>
 	<form class="search" action="https://www.google.com/search" method="get">
 		<input class="alignright" type="text" name="q" results="0">
-		<input type="hidden" name="q" value="site:yoursite.com">
+		<input type="hidden" name="q" value="site:fanhongwei.github.io">
 	</form>
 </nav>
 
@@ -91,12 +91,11 @@
 
 <p>切换到/usr/src目录下  命令：<code>cd /usr/src</code></p>
 
-<p><img src="/images/image-5.png" alt="" /></p>
+<p><img src="/images/image-5.png" alt=""></p>
 
 <!--more-->
 
-
-<p><img src="/images/image-9.png" alt="" /></p>
+<p><img src="/images/image-9.png" alt=""></p>
 
 <p>把原来编译产生的垃圾删除   命令：<code>make mrproper</code></p>
 
@@ -104,27 +103,27 @@
 
 <p>正常的话应该可以开始配置内核了，可惜ubuntu没有自带qt环境或者我之前吧qt环境卸载了</p>
 
-<p><img src="/images/image-7.png" alt="" /></p>
+<p><img src="/images/image-7.png" alt=""></p>
 
 <p>缺qt3环境，然后去装qt3环境，发现现在大多数源里边已经没有qt3了，索性安装qt4的环境，重新开始配置内核，发现2.6的内核必须要qt3的环境，于是换到了3.12.13的内核。</p>
 
 <p>重新执行 <code>make xconfig</code>,出现配置界面</p>
 
-<p><img src="/images/image-11.png" alt="" /></p>
+<p><img src="/images/image-11.png" alt=""></p>
 
 <p>开始配置内核，看不懂，找到了@金步国的一篇博文  <a href="http://www.jinbuguo.com/kernel/longterm-3_10-options.html">博文链接</a></p>
 
-<p><img src="/images/image-12.png" alt="" /></p>
+<p><img src="/images/image-12.png" alt=""></p>
 
 <p>为了确保所有有关文件都处于最新版本状态  命令：<code>make clean</code></p>
 
 <p>开始编译压缩形式的内核  命令：<code>make zImage</code></p>
 
-<p><img src="/images/image-14.png" alt="" /></p>
+<p><img src="/images/image-14.png" alt=""></p>
 
 <p>大概编译了20左右，内核编译完毕。</p>
 
-<p><img src="/images/image-16.png" alt="" /></p>
+<p><img src="/images/image-16.png" alt=""></p>
 
 <p>开始编译模块,这个过程时间比较长。  命令:<code>make modules</code></p>
 
@@ -132,7 +131,7 @@
 
 <p>最后执行 <code>make install</code>,这应该算是最后一步了，结果出问题了。</p>
 
-<p><img src="/images/image-18.png" alt="" /></p>
+<p><img src="/images/image-18.png" alt=""></p>
 
 <p>原因：当时装系统的时候boot分区是单挂的，分了80M进去，结果<code>make install</code>的时候报错：gzip: stdout: No space left on device.  看样子是boot分区太小gzip解压包的时候没有空间了。</p>
 

@@ -47,7 +47,7 @@
 		<div class="container">
 			<form action="https://www.google.com/search" method="get">
 				<input type="text" name="q" results="0">
-				<input type="hidden" name="q" value="site:yoursite.com">
+				<input type="hidden" name="q" value="site:fanhongwei.github.io">
 			</form>
 		</div>
 	</div>
@@ -70,7 +70,7 @@
 	</div>
 	<form class="search" action="https://www.google.com/search" method="get">
 		<input class="alignright" type="text" name="q" results="0">
-		<input type="hidden" name="q" value="site:yoursite.com">
+		<input type="hidden" name="q" value="site:fanhongwei.github.io">
 	</form>
 </nav>
 
@@ -86,7 +86,8 @@
 
 <p>目前，常规方法如下：</p>
 
-<blockquote><ul>
+<blockquote>
+<ul>
 <li><p>利用第三方服务，例如：<a href="http://www.umeng.com/">友盟</a></p></li>
 <li><p>调用用户已登录的邮箱帐号发送邮件</p></li>
 </ul>
@@ -106,7 +107,6 @@
 
 <!--more-->
 
-
 <p><em>详细了解上述两种方法各自的优劣之后,发现他们都不能很好的满足需求，因此，另谋出路。于是就在stackoverflow上发现可以用<code>JavaMail API</code>来实现。首先，不用导入一些其他Library工程，其次虽然也是用邮件服务，但是发信邮件帐号是在应用内指定的，与用户无关。当然，也是由于我自己想体验一下<code>JavaMail API</code>，之后开发应用还是更多的会用第三方服务，因为第三方服务有很多我用的着的功能。</em></p>
 
 <h1>实现</h1>
@@ -117,8 +117,7 @@
 
 <p>之后，写几个工具类就ok了（附上我项目中的这几个类）。</p>
 
-<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/JSSEProvider.java">JSSEProvider,java</a></p>
-
+<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/JSSEProvider.java">JSSEProvider,java</a>
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -169,11 +168,9 @@
 </span><span class='line'>        <span class="o">});</span>
 </span><span class='line'>    <span class="o">}</span>
 </span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
+</span></code></pre></td></tr></table></div></figure></p>
 
-
-<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/GmailSender.java">GmailSender.java</a></p>
-
+<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/GmailSender.java">GmailSender.java</a>
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -401,9 +398,7 @@
 </span><span class='line'>    <span class="o">}</span>
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-<p>最后，自己封装一个发送邮件的工具类。</p>
+最后，自己封装一个发送邮件的工具类。</p>
 
 <p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/SendFeedback.java">SendFeedback.java</a></p>
 
@@ -564,7 +559,6 @@
 </span><span class='line'>    <span class="o">}</span>
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
-
 </div>
 
 

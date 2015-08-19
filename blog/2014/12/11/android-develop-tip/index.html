@@ -49,7 +49,7 @@ app
 		<div class="container">
 			<form action="https://www.google.com/search" method="get">
 				<input type="text" name="q" results="0">
-				<input type="hidden" name="q" value="site:yoursite.com">
+				<input type="hidden" name="q" value="site:fanhongwei.github.io">
 			</form>
 		</div>
 	</div>
@@ -72,7 +72,7 @@ app
 	</div>
 	<form class="search" action="https://www.google.com/search" method="get">
 		<input class="alignright" type="text" name="q" results="0">
-		<input type="hidden" name="q" value="site:yoursite.com">
+		<input type="hidden" name="q" value="site:fanhongwei.github.io">
 	</form>
 </nav>
 
@@ -97,7 +97,7 @@ app
 放置一些io操作的类，如网络请求、文件读写、数据库操作等等</li>
 <li><strong><em>provider</em></strong>
 放置provider相关的类</li>
-<li><strong><em>receiver</em></strong><br/>
+<li><strong><em>receiver</em></strong><br>
 放置整应用里边需要的reiver类</li>
 <li><strong><em>service</em></strong>
 放置整个应用里边的sevice类</li>
@@ -118,17 +118,14 @@ app
 整个应中可以分离出来的view</li>
 <li><strong><em>widget</em></strong>
 整个应用的自定义控件</li>
-</ul>
-</li>
+</ul></li>
 <li><strong><em>util</em></strong>
 各种各样的工具类</li>
 </ul>
 
-
 <p>我现在基本上每个项目都是这种架构方式了，另外，我习惯将自己平时的积累的一些工具类之类的类整理到一个Common的library module中，自己的每个项目都会把这个common module倒入进来，这样子方便了很多。</p>
 
 <!--more-->
-
 
 <h2>Gradle</h2>
 
@@ -278,8 +275,7 @@ app
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-<p><code>apply plugin: 'com.android.application'</code> 显然这是一个构建Android项目Gradle Plugin，另外，如果希望当前module是以一个library project被编译的话应该使用 <code>apply plugin: 'com.android.library'</code> 这个plugin。</p>
+<p><code>apply plugin: &#39;com.android.application&#39;</code> 显然这是一个构建Android项目Gradle Plugin，另外，如果希望当前module是以一个library project被编译的话应该使用 <code>apply plugin: &#39;com.android.library&#39;</code> 这个plugin。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -291,9 +287,6 @@ app
 </span><span class='line'><span class="n">这一块是plugin中的android</span> <span class="n">project构建</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-
-
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -303,9 +296,6 @@ app
 </span><span class='line'>
 </span><span class='line'><span class="n">这一块是用来指定CompileSdkVersion和BuildToolsVersion的</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -331,9 +321,6 @@ app
 </span><span class='line'><span class="n">AndroidMainfest</span><span class="o">.</span><span class="na">xml中关于这一块的配置不再有效</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-
-
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -353,9 +340,6 @@ app
 </span><span class='line'><span class="n">这一块主要是对编译过程的配置</span><span class="err">，</span><span class="n">如果这个地方不做处理的话</span><span class="err">，</span><span class="n">在编译的时候就连warning之类的都会导致编译通不过</span><span class="err">，</span><span class="n">所以配</span>
 </span><span class='line'><span class="n">置这一块基本是必须的</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -391,9 +375,6 @@ app
 </span><span class='line'><span class="n">这一块是对签名的配置</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-
-
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -427,9 +408,6 @@ app
 </span><span class='line'><span class="n">assets</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">assets</span><span class="err">&#39;</span><span class="o">])</span>
 </span><span class='line'><span class="n">这个视个人项目文件结构来具体配置</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -479,9 +457,6 @@ app
 </span><span class='line'><span class="n">productFlavor中加入了友盟的多渠道信息统计</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-
-
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -509,7 +484,6 @@ app
 </span><span class='line'><span class="n">include</span> <span class="err">&#39;</span><span class="o">:</span><span class="n">app</span><span class="err">&#39;</span><span class="o">,</span> <span class="err">&#39;</span><span class="o">:</span><span class="n">Common</span><span class="err">&#39;</span> <span class="err">。</span> <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">code</span><span class="o">.</span><span class="na">gson</span><span class="o">:</span><span class="nl">gson:</span><span class="mf">2.3</span><span class="err">&#39;</span> <span class="n">这个是通过从远程maven仓库的</span>
 </span><span class='line'><span class="n">形式来编译第三方library到当前project</span><span class="err">，</span><span class="n">我个人现在目前更倾向于这种形式导入第三方library</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
-
 </div>
 
 

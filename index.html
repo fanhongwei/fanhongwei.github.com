@@ -7,7 +7,8 @@
 	<meta name="author" content="vicvan">
 
 	
-	<meta name="description" content="在Android中实现状态栏与顶栏同色，可以增加应用的美观性，提升用户体验。那么这一点是如何实现的呢？ 目前，比较常用的是github上一个叫做SystemBarTint的库。但是在实际使用的过程中，当与碎总的SwipeBackLayout滑动返回一起使用的时候， &hellip;">
+	<meta name="description" content="关于Android Resource这一块老罗博客有详细分析，并且罗老师的博客大家都懂的，质量很高。但是我还是决定把自己从
+开发者的角度对这一块的理解记录下来，所以就有了这篇文章，本文章也来自于对罗老师博客的学习研究。 文章主要从 代码编写、代码编译、代码运行 三个阶段来分析。 代码编写阶段 &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -46,7 +47,7 @@
 		<div class="container">
 			<form action="https://www.google.com/search" method="get">
 				<input type="text" name="q" results="0">
-				<input type="hidden" name="q" value="site:yoursite.com">
+				<input type="hidden" name="q" value="site:fanhongwei.github.io">
 			</form>
 		</div>
 	</div>
@@ -69,7 +70,7 @@
 	</div>
 	<form class="search" action="https://www.google.com/search" method="get">
 		<input class="alignright" type="text" name="q" results="0">
-		<input type="hidden" name="q" value="site:yoursite.com">
+		<input type="hidden" name="q" value="site:fanhongwei.github.io">
 	</form>
 </nav>
 
@@ -78,6 +79,59 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/08/18/android-resource-walkthrough/">
+		
+			Android Resource Walkthrough</a>
+	</h2>
+	<div class="entry-content">
+		<blockquote>
+<p>关于Android Resource这一块<a href="http://blog.csdn.net/luoshengyang/article/details/8738877">老罗博客</a>有详细分析，并且罗老师的博客大家都懂的，质量很高。但是我还是决定把自己从
+开发者的角度对这一块的理解记录下来，所以就有了这篇文章，本文章也来自于对罗老师博客的学习研究。</p>
+</blockquote>
+
+<p>文章主要从 <strong>代码编写</strong>、<strong>代码编译</strong>、<strong>代码运行</strong> 三个阶段来分析。</p>
+
+<h2>代码编写阶段</h2>
+
+<p>首先我们来看Android应用资源分类,Android应用程序资源可以分为两大类，分别是assets和res。</p>
+
+<ul>
+<li>assets
+
+<ul>
+<li>assets类资源放在工程根目录的assets子目录下，它里面保存的是一些原始的文件，可以以任何方式来进行组织。这些文件最终会被原装不动地打包在apk文件中。如果我们要在程序中访问这些文件，那么
+就需要指定文件名来访问。</li>
+</ul></li>
+</ul>
+
+
+		
+		<a href="/blog/2015/08/18/android-resource-walkthrough/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Aug 18th, 2015</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>android</a>
+
+
+</div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -142,7 +196,7 @@ Mar 4th, 2015</div>
 放置一些io操作的类，如网络请求、文件读写、数据库操作等等</li>
 <li><strong><em>provider</em></strong>
 放置provider相关的类</li>
-<li><strong><em>receiver</em></strong><br/>
+<li><strong><em>receiver</em></strong><br>
 放置整应用里边需要的reiver类</li>
 <li><strong><em>service</em></strong>
 放置整个应用里边的sevice类</li>
@@ -163,12 +217,10 @@ Mar 4th, 2015</div>
 整个应中可以分离出来的view</li>
 <li><strong><em>widget</em></strong>
 整个应用的自定义控件</li>
-</ul>
-</li>
+</ul></li>
 <li><strong><em>util</em></strong>
 各种各样的工具类</li>
 </ul>
-
 
 <p>我现在基本上每个项目都是这种架构方式了，另外，我习惯将自己平时的积累的一些工具类之类的类整理到一个Common的library module中，自己的每个项目都会把这个common module倒入进来，这样子方便了很多。</p>
 
@@ -207,7 +259,7 @@ Dec 11th, 2014</div>
 	<div class="entry-content">
 		<p>经历了好久的外包填坑，终于把电脑从黑苹果换到了白苹果，各种环境也都搭好了，当然也包括博客环境了，所以博客之后恢复正常更新。</p>
 
-<p><img src="/images/image-19.png" alt="" /></p>
+<p><img src="/images/image-19.png" alt=""></p>
 
 		
 		
@@ -255,18 +307,14 @@ Nov 15th, 2014</div>
 
 <p><strong>终端配置:</strong> 安装Termiantor终端,此终端比自带的终端强悍很多.</p>
 
-<p><strong>终端环境：</strong> 弃用bash,换上高大上的zsh.通过github上的 <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>来管理zsh配置,执行以下shell即可</p>
-
+<p><strong>终端环境：</strong> 弃用bash,换上高大上的zsh.通过github上的 <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>来管理zsh配置,执行以下shell即可
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install zsh
 </span><span class='line'>curl -L http://install.ohmyz.sh | sh  //自动安装
 </span><span class='line'>chsh -s /bin/zsh
-</span></code></pre></td></tr></table></div></figure>
-
-
-
+</span></code></pre></td></tr></table></div></figure></p>
 
 
 		
@@ -307,7 +355,8 @@ May 12th, 2014</div>
 
 <p>目前，常规方法如下：</p>
 
-<blockquote><ul>
+<blockquote>
+<ul>
 <li><p>利用第三方服务，例如：<a href="http://www.umeng.com/">友盟</a></p></li>
 <li><p>调用用户已登录的邮箱帐号发送邮件</p></li>
 </ul>
@@ -369,7 +418,7 @@ Apr 16th, 2014</div>
 
 <p>切换到/usr/src目录下  命令：<code>cd /usr/src</code></p>
 
-<p><img src="/images/image-5.png" alt="" /></p>
+<p><img src="/images/image-5.png" alt=""></p>
 
 
 		
@@ -408,11 +457,22 @@ Mar 9th, 2014</div>
 
 <p>记得暑假比别人大概早到校了一个月，提前开始了同样忙碌而又充实的日子。刚到校就开始开发一个微信公众平台，其实就是去熟悉了微信的公众的平台开发流程和php的一些基本用法。<a href="http://dsnc.me/project/">华科软件2013级微信公众平台</a>，当时做得最爽的一个功能就是给新生的“我到了”功能，帮助了不少学弟和学妹。也就是在开发这个过程中接触到了腾讯街景地图，然后基于街景这一块继续深入做了下去，也就有了后来的OverHust。</p>
 
-<p>OverHust，是一款基于街景的校园地图应用。当时接触到腾讯街景的时候就感觉街景很好玩，然后就萌生了写一个Android App的想法，了解一些基本情况后确定这个东西可以做，然后就找了一些人开始开发了。</p>
+<p>OverHust，是一款基于街景的校园地图应用。当时接触到腾讯街景的时候就感觉街景很好玩，然后就萌生了写一个Android App的想法，了解一些基本情况后确定这个东西可以做，然后就找了一些人开始开发了。
+&lt;!--more--&gt;
+之前也做过一些android的应用，但是OverHust是我的第一个真正的产品。当OverHust刚开始开工的时候正好赶上了学校点团队的“斯达康种子杯”然后就随手报了名，顺便参加了比赛。然后就一路开发了下来，直到比赛最终决赛的时候做出了应用的初步版本。最终凭借着街景的有趣性、以及整个应用的界面设计和一些细节的把握等等各方面的原因，拿了大赛的一等奖，也拿了10000大洋，比赛也就结束了，但是应用离一个真正的产品还差得很远，于是就继续开发。一个个的实现各个功能模块，一个个的小细节改了又改，只为了让自己满意，让用户满意。在这期间也到光谷软件园democoffee关于OverHust做了一次分享，讲了Overust的用户定位、以及一些开发细节，当天也在democoffee认识了不少朋友，关于应用也和在场的很多人聊了很多。分享会之后，对于OverHust这个应用，自己静下心来想了很多很多，想了很多OverHust究竟能给用户带来什么？最终想明白了，就是街景与华科校园生活的精密结合。在期末考试之前放出了v0.8版测试，年后过来学校又接着开发了一段时间，现在整个应用v1.0基本已经开发完毕，过一段时间能上线了。</p>
 
+<p>OverHust是我大二上学期最大的收获，我学着去做一个完整的产品出来，尝试着去带一个产品出来，当然也完整的写了整个应用，可以体验了一下产品经理和程序员一块当的感觉。整体感觉就是做一个让用户用着很舒服的应用要考虑太多太多的东西。</p>
+
+<p>大二上学期另一个收获就是忙了将近两个月的团队（@联创团队）招新，从开始的招新策划到最后的新人进来团队开始新人任务整整忙了两个月，招新共有五轮考核（笔试、单面、熬夜测试、素质拓展、群面）。每一轮考核都有很多事要忙，那些日子整天事情多到只能用便签来记，要不记不住，事情实在太多，比如说借教室，面试者的考核等等很多的事都得来安排。整个招新流程下来，感觉自己成长了不少，学会了如何合理去安排人员、如何合理的给别人安排任务、如何处理一些矛盾、如何与一些领导去交流等等的很多东西，更重要的学会了承担。同时，看到自己招进来的人每天在启明八楼做着自己喜欢的事情，心里真心的开心。</p>
+
+<p>大二也想明白一个很简单的问题，当时武汉外边的一个创业者找到了我，希望我和他一块创业，然后我负责技术这一块，刚开始看着一些看起来很华丽的东西，比如说期权、股份之类的东西，很是动心，然后心里就开始动摇了。可是，静下心来好好想了一段时间发现自己太天真了。现在创业根本不是时候，首先自己没有过硬的技术实力，其次对于一个公司的运作完全没有概念、然后也还没真正了解这个行业、人际圈子也还很窄。现在唯一需要做的就是安心学东西，学技术，让自己变得有实力了再来考虑这些事情。</p>
+
+<p>最后，总结一下大二上学期的学习。大二上的学习基本上还是很满意的，面向对象、数据结构、计算机图形学这些课都上的挺认真的，就有一门毛概课基本没去上，最后的考试结果也还算满意。总之，大二上的课堂学习算是过关了，没有出现之前的挂科。</p>
+
+<p>一句话，忙碌而又充实的日子。</p>
 
 		
-		<a href="/blog/2014/02/21/busy-day/" class="more-link">Read on &rarr;</a>
+		
 	</div>
 
 
@@ -447,7 +507,7 @@ Feb 21st, 2014</div>
 
 <p>这个应用大概是这样子的：</p>
 
-<p>   <img src="/images/实验2.jpg" width="250" height="400"/> <img src="/images/testtwo.png" width="250" height="400" /></p>
+<p><img src="/images/实验2.jpg" width="250" height="400"/> <img src="/images/testtwo.png" width="250" height="400" /></p>
 
 
 		
@@ -510,43 +570,10 @@ Oct 28th, 2013</div>
 </div>
 </article>
 
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/08/25/hello/">
-		
-			Hello</a>
-	</h2>
-	<div class="entry-content">
-		<p>终于搞定了，只想说一句“真他妈的蛋疼”。附上，桌面壁纸，犒劳一下疲惫的心灵。
-<img src="/images/2.png" alt="" /></p>
-
-		
-		
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-Aug 25th, 2013</div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/life/'>life</a>
-
-
-</div>
-	
-</div>
-</article>
-
 <nav id="pagenavi">
     
+    
+        <a href="/posts/2" class="next">Next</a>
     
     <div class="center"><a href="/blog/archives">Blog Archives</a></div>
 </nav>

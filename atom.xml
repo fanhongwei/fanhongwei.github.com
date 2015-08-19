@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[vicvan]]></title>
-  <link href="http://yoursite.com/atom.xml" rel="self"/>
-  <link href="http://yoursite.com/"/>
-  <updated>2015-07-21T00:34:52+08:00</updated>
-  <id>http://yoursite.com/</id>
+  <link href="http://fanhongwei.github.io/atom.xml" rel="self"/>
+  <link href="http://fanhongwei.github.io/"/>
+  <updated>2015-08-19T20:02:06+08:00</updated>
+  <id>http://fanhongwei.github.io/</id>
   <author>
     <name><![CDATA[vicvan]]></name>
     <email><![CDATA[fanhongweiqq@gmail.com]]></email>
@@ -14,10 +14,664 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Android Resource walkthrough]]></title>
+    <link href="http://fanhongwei.github.io/blog/2015/08/18/android-resource-walkthrough/"/>
+    <updated>2015-08-18T23:13:17+08:00</updated>
+    <id>http://fanhongwei.github.io/blog/2015/08/18/android-resource-walkthrough</id>
+    <content type="html"><![CDATA[<blockquote>
+<p>关于Android Resource这一块<a href="http://blog.csdn.net/luoshengyang/article/details/8738877">老罗博客</a>有详细分析，并且罗老师的博客大家都懂的，质量很高。但是我还是决定把自己从
+开发者的角度对这一块的理解记录下来，所以就有了这篇文章，本文章也来自于对罗老师博客的学习研究。</p>
+</blockquote>
+
+<p>文章主要从 <strong>代码编写</strong>、<strong>代码编译</strong>、<strong>代码运行</strong> 三个阶段来分析。</p>
+
+<h2>代码编写阶段</h2>
+
+<p>首先我们来看Android应用资源分类,Android应用程序资源可以分为两大类，分别是assets和res。</p>
+
+<ul>
+<li>assets
+
+<ul>
+<li>assets类资源放在工程根目录的assets子目录下，它里面保存的是一些原始的文件，可以以任何方式来进行组织。这些文件最终会被原装不动地打包在apk文件中。如果我们要在程序中访问这些文件，那么
+就需要指定文件名来访问。</li>
+</ul></li>
+</ul>
+
+<!-- More-->
+
+<ul>
+<li>res
+
+<ul>
+<li>animator 这类资源以XML文件保存在res/animator目录下，用来描述属性动画。</li>
+<li>anim 这类资源以XML文件保存在res/anim目录下，用来描述补间动画。</li>
+<li>color 这类资源以XML文件保存在res/color目录下，用来描述对象颜色状态。</li>
+<li>drawable(mipmap) 这类资源以XML或者Bitmap文件保存在res/drawable目录下，用来描述可绘制对象。</li>
+<li>layout 这类资源以XML文件保存在res/layout目录下，用来描述应用程序界面布局。</li>
+<li>menu 这类资源以XML文件保存在res/menu目录下，用来描述应用程序菜单.</li>
+<li>raw 这类资源以任意格式的文件保存在res/raw目录下，它们和assets类资源一样，都是原装不动地打包在apk文件中的，不过它们会被赋予资源ID，这样我们就可以在程序中通过ID来访问它们。</li>
+<li>values 这类资源以XML文件保存在res/values目录下，用来描述一些简单值，例如，数组、颜色、尺寸、字符串和样式值等，一般来说，这六种不同的值分别保存在名称为arrays.xml、colors.xml、
+dimens.xml、strings.xml和styles.xml文件中。</li>
+<li>xml 这类资源以XML文件保存在res/xml目录下，一般就是用来描述应用程序的配置信息。</li>
+</ul></li>
+</ul>
+
+<p>我们在一般开发App过程中resource这一块主要就是操作这些文件夹，需要额外说的地方就是Android resource对于多分辨率、多语言、多版本、多屏幕等的支持。在这一块有一种说法就是Android默认应用程序资源的组织
+方式有18个维度，当然如果从系统层次搞明白Android资源加载的话我们是可以自定义一些维度进去的。</p>
+
+<table><thead>
+<tr>
+<th style="text-align: left">配置</th>
+<th style="text-align: right">限定修饰词</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">MCC and MNC</td>
+<td style="text-align: right">mcc310等</td>
+</tr>
+<tr>
+<td style="text-align: left">language and region</td>
+<td style="text-align: right">en、fr、en-rFR、zh等</td>
+</tr>
+<tr>
+<td style="text-align: left">layout direction</td>
+<td style="text-align: right">ldrtl、ldltr等</td>
+</tr>
+<tr>
+<td style="text-align: left">smallestWidth</td>
+<td style="text-align: right">sw320dp、sw600dp等</td>
+</tr>
+<tr>
+<td style="text-align: left">available width</td>
+<td style="text-align: right">w720dp、w1024dp等</td>
+</tr>
+<tr>
+<td style="text-align: left">available height</td>
+<td style="text-align: right">h720dp、h1024dp等</td>
+</tr>
+<tr>
+<td style="text-align: left">screen size</td>
+<td style="text-align: right">small、normal、large、xlarge等</td>
+</tr>
+<tr>
+<td style="text-align: left">screen aspect</td>
+<td style="text-align: right">long、notlong</td>
+</tr>
+<tr>
+<td style="text-align: left">screen orientation</td>
+<td style="text-align: right">port、land</td>
+</tr>
+<tr>
+<td style="text-align: left">UI mode</td>
+<td style="text-align: right">car、desk、television等</td>
+</tr>
+<tr>
+<td style="text-align: left">night mode</td>
+<td style="text-align: right">night、notnight</td>
+</tr>
+<tr>
+<td style="text-align: left">screen pixel density</td>
+<td style="text-align: right">ldpi、mdpi、hdpi、xhdpi等</td>
+</tr>
+<tr>
+<td style="text-align: left">touchscreen type</td>
+<td style="text-align: right">notouch、finger</td>
+</tr>
+<tr>
+<td style="text-align: left">keyboard availability</td>
+<td style="text-align: right">keysexposed、keyshidden、keysoft</td>
+</tr>
+<tr>
+<td style="text-align: left">primary text input method</td>
+<td style="text-align: right">nokeys、qwerty、12key</td>
+</tr>
+<tr>
+<td style="text-align: left">navigation key availability</td>
+<td style="text-align: right">navexposed、 navhidden</td>
+</tr>
+<tr>
+<td style="text-align: left">primary non-touch navigation method</td>
+<td style="text-align: right">nonav、dpad、trackball等</td>
+</tr>
+<tr>
+<td style="text-align: left">platform version(API level)</td>
+<td style="text-align: right">v14、v16、v21等</td>
+</tr>
+</tbody></table>
+
+<h2>代码编译阶段</h2>
+
+<p>Android resource资源是通过aapt(Android Asset Package Tool)打包到应用apk中的，在打包之前会做以下三件事情</p>
+
+<ul>
+<li>将类型为res/animator、res/anim、res/color、res/drawable（非Bitmap文件，即非.png、.9.png、.jpg、.gif文件）、res/layout、res/menu、res/values和res/xml的资源文件会从文
+本格式的XML文件编译成二进制格式的XML文件。
+
+<ul>
+<li>二进制格式的XML文件占用空间更小。这是由于所有XML元素的标签、属性名称、属性值和内容所涉及到的字符串都会被统一收集到一个字符串资源池中去，并且会去重。有了这个字符串资源池，原来使用字符串的
+地方就会被替换成一个索引到字符串资源池的整数值，从而可以减少文件的大小。</li>
+<li>二进制格式的XML文件解析速度更快。这是由于二进制格式的XML元素里面不再包含有字符串值，因此就避免了进行字符串解析，从而提高速度。</li>
+</ul></li>
+<li>赋予每一个非assets资源一个ID值，这些ID值以常量的形式定义在R.java文件中。</li>
+<li>生成一个resources.arsc文件，用来描述具有ID值的资源的配置信息，它的内容就相当于是一个资源索引表。</li>
+</ul>
+
+<p>接下来我们就按照Android资源打包工具的执行流程来分析</p>
+
+<ul>
+<li>解析AndroidManifest.xml
+
+<ul>
+<li>解析AndroidManifest.xml是为了得到应用程序的包名称，有了包名称就可以创建ResourceTable对象了。
+
+<ul>
+<li>ResourceTable用来总体描述一个资源表，具体ResourceTable可以在源码/frameworks/base/tools/aapt目录下找到。</li>
+</ul></li>
+</ul></li>
+<li>添加被引用资源包
+
+<ul>
+<li>在原生Android中，编译应用程序资源的时候，一般会涉及到两个包，其中一个是被引用的系统资源包（Android系统编译的时候会在out/target/common/obj/APPS/framework-res_intermediates
+目录下生成一个package-export.apk），另外一个就是当前正在编译的应用程序资源包。当然一些第三方定制ROM也会有自己的资源包，也会被添加进来。</li>
+</ul></li>
+<li>收集资源文件
+
+<ul>
+<li>在编译应用程序之前，Android资源打包工具aapt会创建一个AaptAssets对象，用来收集需要编译的资源文件。
+
+<ul>
+<li>AaptAssets类可以在/frameworks/base/tools/aapt目录下可以找到。</li>
+<li>收集到的资源是按照类型来保存的，在AaptAssets中有一个ResourceTypeSet的变量在记录。</li>
+</ul></li>
+</ul></li>
+<li>将收集到的资源增加到资源表
+
+<ul>
+<li>将上一步收集到的资源文件同时增加到资源表中，即第一步创建的ResourceTable对象。注意，这一步不会将values类型的资源收集到资源表。</li>
+</ul></li>
+<li>编译values类资源
+
+<ul>
+<li>values类型的资源是在编译的过程中收集的，也会同样添加到ResourceTable对象中。</li>
+</ul></li>
+<li>给Bag资源分配ID
+
+<ul>
+<li>values类型的资源，如string、bag、style、plurals和array类的资源。这些资源会给自己定义一些专用的值，这些带有专用值的资源就统称为Bag资源。
+在继续编译其它非values的资源之前，需要给之前收集到的Bag资源分配资源ID，因为它们可能会被其它非values类资源引用到。</li>
+</ul></li>
+<li>编译xml资源文件
+
+<ul>
+<li>这一步会编译除了values类型的所有资源。这一块比较繁杂，如果有兴趣可以单独研究，我就大概看了下。
+
+<ul>
+<li>解析xml文件</li>
+<li>赋予属性名称资源ID</li>
+<li>解析属性值</li>
+<li>将xml文件转换为二进制格式</li>
+<li>收集有资源ID的属性的名称字符串</li>
+<li>收集其他字符串</li>
+<li>写入xml文件头</li>
+<li>写入字符串资源池</li>
+<li>写入资源ID</li>
+<li>将xml文件里边的字符串替换掉</li>
+</ul></li>
+</ul></li>
+<li>生成资源符号
+
+<ul>
+<li>Android资源打包工具aapt只要遍历每一个ResourceTable对象里边的type，并根据entry的名称以及出现的次序来计算的到资源ID。</li>
+</ul></li>
+<li>生成资源索引表
+
+<ul>
+<li>这个过程就是生成resources.arsc的过程
+
+<ul>
+<li>收集类型字符串</li>
+<li>收集资源项名称字符串</li>
+<li>收集资源项值字符串</li>
+<li>生成Package数据块（这一块同样略复杂）
+
+<ul>
+<li>写入Package资源项元信息数据块头部,这一块有一个比较注意的点就是，类似于Android或者第三方定制rom会在resource里边定义public标签的属性之，这个地方是为了保证不论何时编译，这些
+属性值ID的唯一性。</li>
+<li>写入字符串资源池</li>
+<li>写入资源项名称字符串资源池</li>
+<li>写入类型规范数据块</li>
+<li>写入类型资源项数据块</li>
+</ul></li>
+<li>写入资源索引表头部</li>
+<li>写入资源项的字符串资源池</li>
+<li>写入Package数据块</li>
+</ul></li>
+</ul></li>
+<li>编译AndroidManifest.xml
+
+<ul>
+<li>当前边步骤都进行完之后就会把AndroidManifest.xml也编译成二进制格式的xml文件，之所以要在应用程序的所有资源都编译完成之后再编译AndroidManifest，是因为后者可能会引用前者。</li>
+</ul></li>
+<li>生成R.java文件
+
+<ul>
+<li>前边步骤已经将所有资源以及对应的ID都收集起来了，直接写入到R.java中即可。</li>
+</ul></li>
+<li>打包APK文件
+
+<ul>
+<li>assets目录打包进apk</li>
+<li>res目录打包进apk，除了res/values，因为values目录下的资源在编译的过程中都直接写入到资源索引表中去了，这也是为什么values类型资源会单独编译的原因。</li>
+<li>资源索引文件resources.arsc打包进apk</li>
+<li>AndroidManifest.xml打包进apk</li>
+<li>其他文件打包进apk，比如class.dex、签名等。</li>
+</ul></li>
+</ul>
+
+<h2>代码运行阶段　</h2>
+
+<p>在代码运行阶段主要是通过AssetManager和Resources两个类来完成资源的加载的。Resources类根据ID（ID来源于之前生成并打包进apk的resources.arsc文件）来查找资源，AssetManager根据文件
+名来查找资源。我们同样以一个Activity OnCreate的流程来分析</p>
+
+<ul>
+<li>Activity.setContentView
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Set the activity content from a layout resource.  The resource will be</span>
+</span><span class='line'><span class="cm">     * inflated, adding all top-level views to the activity.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @param layoutResID Resource ID to be inflated.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @see #setContentView(android.view.View)</span>
+</span><span class='line'><span class="cm">     * @see #setContentView(android.view.View, android.view.ViewGroup.LayoutParams)</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setContentView</span><span class="o">(</span><span class="kt">int</span> <span class="n">layoutResID</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">getWindow</span><span class="o">().</span><span class="na">setContentView</span><span class="o">(</span><span class="n">layoutResID</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">initWindowDecorActionBar</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></li>
+<li>PhoneWindow.setContentView
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@Override</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setContentView</span><span class="o">(</span><span class="kt">int</span> <span class="n">layoutResID</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="c1">// Note: FEATURE<em>CONTENT</em>TRANSITIONS may be set in the process of installing the window</span>
+</span><span class='line'>        <span class="c1">// decor, when theme attributes and the like are crystalized. Do not check the feature</span>
+</span><span class='line'>        <span class="c1">// before this happens.</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">mContentParent</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">installDecor</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="o">(!</span><span class="n">hasFeature</span><span class="o">(</span><span class="n">FEATURE<em>CONTENT</em>TRANSITIONS</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mContentParent</span><span class="o">.</span><span class="na">removeAllViews</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">hasFeature</span><span class="o">(</span><span class="n">FEATURE<em>CONTENT</em>TRANSITIONS</span><span class="o">))</span> <span class="o">{</span>
+</span><span class='line'>            <span class="kd">final</span> <span class="n">Scene</span> <span class="n">newScene</span> <span class="o">=</span> <span class="n">Scene</span><span class="o">.</span><span class="na">getSceneForLayout</span><span class="o">(</span><span class="n">mContentParent</span><span class="o">,</span> <span class="n">layoutResID</span><span class="o">,</span>
+</span><span class='line'>                    <span class="n">getContext</span><span class="o">());</span>
+</span><span class='line'>            <span class="n">transitionTo</span><span class="o">(</span><span class="n">newScene</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">mLayoutInflater</span><span class="o">.</span><span class="na">inflate</span><span class="o">(</span><span class="n">layoutResID</span><span class="o">,</span> <span class="n">mContentParent</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">Callback</span> <span class="n">cb</span> <span class="o">=</span> <span class="n">getCallback</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">cb</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">isDestroyed</span><span class="o">())</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">cb</span><span class="o">.</span><span class="na">onContentChanged</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></li>
+<li>LayoutInflater.inflate
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Inflate a new view hierarchy from the specified xml resource. Throws</span>
+</span><span class='line'><span class="cm">     * {@link InflateException} if there is an error.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @param resource ID for an XML layout resource to load (e.g.,</span>
+</span><span class='line'><span class="cm">     *        &lt;code&gt;R.layout.main_page&lt;/code&gt;)</span>
+</span><span class='line'><span class="cm">     * @param root Optional view to be the parent of the generated hierarchy (if</span>
+</span><span class='line'><span class="cm">     *        &lt;em&gt;attachToRoot&lt;/em&gt; is true), or else simply an object that</span>
+</span><span class='line'><span class="cm">     *        provides a set of LayoutParams values for root of the returned</span>
+</span><span class='line'><span class="cm">     *        hierarchy (if &lt;em&gt;attachToRoot&lt;/em&gt; is false.)</span>
+</span><span class='line'><span class="cm">     * @param attachToRoot Whether the inflated hierarchy should be attached to</span>
+</span><span class='line'><span class="cm">     *        the root parameter? If false, root is only used to create the</span>
+</span><span class='line'><span class="cm">     *        correct subclass of LayoutParams for the root view in the XML.</span>
+</span><span class='line'><span class="cm">     * @return The root View of the inflated hierarchy. If root was supplied and</span>
+</span><span class='line'><span class="cm">     *         attachToRoot is true, this is root; otherwise it is the root of</span>
+</span><span class='line'><span class="cm">     *         the inflated XML file.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">View</span> <span class="nf">inflate</span><span class="o">(</span><span class="kt">int</span> <span class="n">resource</span><span class="o">,</span> <span class="n">ViewGroup</span> <span class="n">root</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">attachToRoot</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">Resources</span> <span class="n">res</span> <span class="o">=</span> <span class="n">getContext</span><span class="o">().</span><span class="na">getResources</span><span class="o">();</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">DEBUG</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;INFLATING from resource: &amp;quot;&quot;</span> <span class="o">+</span> <span class="n">res</span><span class="o">.</span><span class="na">getResourceName</span><span class="o">(</span><span class="n">resource</span><span class="o">)</span> <span class="o">+</span> <span class="s">&quot;&amp;quot; (&quot;</span>
+</span><span class='line'>                    <span class="o">+</span> <span class="n">Integer</span><span class="o">.</span><span class="na">toHexString</span><span class="o">(</span><span class="n">resource</span><span class="o">)</span> <span class="o">+</span> <span class="s">&quot;)&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kd">final</span> <span class="n">XmlResourceParser</span> <span class="n">parser</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="na">getLayout</span><span class="o">(</span><span class="n">resource</span><span class="o">);</span>
+</span><span class='line'>        <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="nf">inflate</span><span class="o">(</span><span class="n">parser</span><span class="o">,</span> <span class="n">root</span><span class="o">,</span> <span class="n">attachToRoot</span><span class="o">);</span>
+</span><span class='line'>        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+</span><span class='line'>            <span class="n">parser</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+<ul>
+<li>最终调用到了Resource.getLayout</li>
+</ul></li>
+<li>Resources.getLayout
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm">     * Return an XmlResourceParser through which you can read a view layout</span>
+</span><span class='line'><span class="cm">     * description for the given resource ID.  This parser has limited</span>
+</span><span class='line'><span class="cm">     * functionality -- in particular, you can&#39;t change its input, and only</span>
+</span><span class='line'><span class="cm">     * the high-level events are available.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * &lt;p&gt;This function is really a simple wrapper for calling</span>
+</span><span class='line'><span class="cm">     * {@link #getXml} with a layout resource.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @param id The desired resource identifier, as generated by the aapt</span>
+</span><span class='line'><span class="cm">     *           tool. This integer encodes the package, type, and resource</span>
+</span><span class='line'><span class="cm">     *           entry. The value 0 is an invalid identifier.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @return A new parser object through which you can read</span>
+</span><span class='line'><span class="cm">     *         the XML data.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @see #getXml</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="kd">public</span> <span class="n">XmlResourceParser</span> <span class="nf">getLayout</span><span class="o">(</span><span class="kt">int</span> <span class="n">id</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">NotFoundException</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nf">loadXmlResourceParser</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="s">&quot;layout&quot;</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></li>
+<li>Resources.loadXmlResourceParser</li>
+<li>Resources.getValue</li>
+<li>AssetManager.getResourceValue</li>
+<li>AssetManager.loadResourceValue
+
+<ul>
+<li>这是一个native方法，对应到android<em>content</em>AssetManager<em>loadResourceValue函数，这个函数定义在文件frameworks/base/core/jni/android</em>util_AssetManager.cpp中。
+得到的资源项值及其配置信息拷贝到参数outValue所描述的一个Java层的TypedValue对象中。这个地方会有一个ResTable的对象用来记录一系列数据。</li>
+</ul></li>
+<li>AssetManager.getResources
+
+<ul>
+<li>AssetManager类的成员函数getResources的实现看起来比较复杂，但是它要做的事情就是解析当前应用程序所使用的资源包里面的resources.arsc文件。</li>
+</ul></li>
+<li>ResTable.getResource
+
+<ul>
+<li>根据之前AssetManager.loadResourceValue得到的各种信息，在上一步解析resources.arsc得到的数据中get到相应的value值。这一块的逻辑处理非常复杂，我并没有深入研究下去。</li>
+</ul></li>
+<li>ResTable.resolveReference
+
+<ul>
+<li>ResTable类的成员函数resolveReference的实现其实很简单，它就是对参数value所描述的一个资源项值进行解析。</li>
+</ul></li>
+<li>Resources.loadXmlResourceParser
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/<em>package</em>/</span> <span class="n">XmlResourceParser</span> <span class="nf">loadXmlResourceParser</span><span class="o">(</span><span class="n">String</span> <span class="n">file</span><span class="o">,</span> <span class="kt">int</span> <span class="n">id</span><span class="o">,</span>
+</span><span class='line'>            <span class="kt">int</span> <span class="n">assetCookie</span><span class="o">,</span> <span class="n">String</span> <span class="n">type</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">NotFoundException</span> <span class="o">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">id</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>                <span class="c1">// These may be compiled...</span>
+</span><span class='line'>                <span class="kd">synchronized</span> <span class="o">(</span><span class="n">mCachedXmlBlockIds</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                    <span class="c1">// First see if this block is in our cache.</span>
+</span><span class='line'>                    <span class="kd">final</span> <span class="kt">int</span> <span class="n">num</span> <span class="o">=</span> <span class="n">mCachedXmlBlockIds</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+</span><span class='line'>                    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">num</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+</span><span class='line'>                        <span class="k">if</span> <span class="o">(</span><span class="n">mCachedXmlBlockIds</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">==</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                            <span class="c1">//System.out.println(&quot;**** REUSING XML BLOCK!  id=&quot;</span>
+</span><span class='line'>                            <span class="c1">//                   + id + &quot;, index=&quot; + i);</span>
+</span><span class='line'>                            <span class="k">return</span> <span class="n">mCachedXmlBlocks</span><span class="o">[</span><span class="n">i</span><span class="o">].</span><span class="na">newParser</span><span class="o">();</span>
+</span><span class='line'>                        <span class="o">}</span>
+</span><span class='line'>                    <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>                    <span class="c1">// Not in the cache, create a new block and put it at</span>
+</span><span class='line'>                    <span class="c1">// the next slot in the cache.</span>
+</span><span class='line'>                    <span class="n">XmlBlock</span> <span class="n">block</span> <span class="o">=</span> <span class="n">mAssets</span><span class="o">.</span><span class="na">openXmlBlockAsset</span><span class="o">(</span>
+</span><span class='line'>                            <span class="n">assetCookie</span><span class="o">,</span> <span class="n">file</span><span class="o">);</span>
+</span><span class='line'>                    <span class="k">if</span> <span class="o">(</span><span class="n">block</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                        <span class="kt">int</span> <span class="n">pos</span> <span class="o">=</span> <span class="n">mLastCachedXmlBlockIndex</span><span class="o">+</span><span class="mi">1</span><span class="o">;</span>
+</span><span class='line'>                        <span class="k">if</span> <span class="o">(</span><span class="n">pos</span> <span class="o">&gt;=</span> <span class="n">num</span><span class="o">)</span> <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+</span><span class='line'>                        <span class="n">mLastCachedXmlBlockIndex</span> <span class="o">=</span> <span class="n">pos</span><span class="o">;</span>
+</span><span class='line'>                        <span class="n">XmlBlock</span> <span class="n">oldBlock</span> <span class="o">=</span> <span class="n">mCachedXmlBlocks</span><span class="o">[</span><span class="n">pos</span><span class="o">];</span>
+</span><span class='line'>                        <span class="k">if</span> <span class="o">(</span><span class="n">oldBlock</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                            <span class="n">oldBlock</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+</span><span class='line'>                        <span class="o">}</span>
+</span><span class='line'>                        <span class="n">mCachedXmlBlockIds</span><span class="o">[</span><span class="n">pos</span><span class="o">]</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+</span><span class='line'>                        <span class="n">mCachedXmlBlocks</span><span class="o">[</span><span class="n">pos</span><span class="o">]</span> <span class="o">=</span> <span class="n">block</span><span class="o">;</span>
+</span><span class='line'>                        <span class="c1">//System.out.println(&quot;**** CACHING NEW XML BLOCK!  id=&quot;</span>
+</span><span class='line'>                        <span class="c1">//                   + id + &quot;, index=&quot; + pos);</span>
+</span><span class='line'>                        <span class="k">return</span> <span class="n">block</span><span class="o">.</span><span class="na">newParser</span><span class="o">();</span>
+</span><span class='line'>                    <span class="o">}</span>
+</span><span class='line'>                <span class="o">}</span>
+</span><span class='line'>            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">NotFoundException</span> <span class="n">rnf</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">NotFoundException</span><span class="o">(</span>
+</span><span class='line'>                        <span class="s">&quot;File &quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="s">&quot; from xml type &quot;</span> <span class="o">+</span> <span class="n">type</span> <span class="o">+</span> <span class="s">&quot; resource ID #0x&quot;</span>
+</span><span class='line'>                        <span class="o">+</span> <span class="n">Integer</span><span class="o">.</span><span class="na">toHexString</span><span class="o">(</span><span class="n">id</span><span class="o">));</span>
+</span><span class='line'>                <span class="n">rnf</span><span class="o">.</span><span class="na">initCause</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+</span><span class='line'>                <span class="k">throw</span> <span class="n">rnf</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">throw</span> <span class="k">new</span> <span class="nf">NotFoundException</span><span class="o">(</span>
+</span><span class='line'>                <span class="s">&quot;File &quot;</span> <span class="o">+</span> <span class="n">file</span> <span class="o">+</span> <span class="s">&quot; from xml type &quot;</span> <span class="o">+</span> <span class="n">type</span> <span class="o">+</span> <span class="s">&quot; resource ID #0x&quot;</span>
+</span><span class='line'>                <span class="o">+</span> <span class="n">Integer</span><span class="o">.</span><span class="na">toHexString</span><span class="o">(</span><span class="n">id</span><span class="o">));</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></li>
+<li>AssetManager.openXmlBlockAsset
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="cm">/*<em></span>
+</span><span class='line'><span class="cm">     * {@hide}</span>
+</span><span class='line'><span class="cm">     * Retrieve a non-asset as a compiled XML file.  Not for use by</span>
+</span><span class='line'><span class="cm">     * applications.</span>
+</span><span class='line'><span class="cm">     *</span>
+</span><span class='line'><span class="cm">     * @param cookie Identifier of the package to be opened.</span>
+</span><span class='line'><span class="cm">     * @param fileName Name of the asset to retrieve.</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'>    <span class="cm">/</em>package*/</span> <span class="kd">final</span> <span class="n">XmlBlock</span> <span class="nf">openXmlBlockAsset</span><span class="o">(</span><span class="kt">int</span> <span class="n">cookie</span><span class="o">,</span> <span class="n">String</span> <span class="n">fileName</span><span class="o">)</span>
+</span><span class='line'>        <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
+</span><span class='line'>        <span class="kd">synchronized</span> <span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(!</span><span class="n">mOpen</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="k">throw</span> <span class="k">new</span> <span class="nf">RuntimeException</span><span class="o">(</span><span class="s">&quot;Assetmanager has been closed&quot;</span><span class="o">);</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>            <span class="kt">long</span> <span class="n">xmlBlock</span> <span class="o">=</span> <span class="n">openXmlAssetNative</span><span class="o">(</span><span class="n">cookie</span><span class="o">,</span> <span class="n">fileName</span><span class="o">);</span>
+</span><span class='line'>            <span class="k">if</span> <span class="o">(</span><span class="n">xmlBlock</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>                <span class="n">XmlBlock</span> <span class="n">res</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">XmlBlock</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">xmlBlock</span><span class="o">);</span>
+</span><span class='line'>                <span class="n">incRefsLocked</span><span class="o">(</span><span class="n">res</span><span class="o">.</span><span class="na">hashCode</span><span class="o">());</span>
+</span><span class='line'>                <span class="k">return</span> <span class="n">res</span><span class="o">;</span>
+</span><span class='line'>            <span class="o">}</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'>        <span class="k">throw</span> <span class="k">new</span> <span class="nf">FileNotFoundException</span><span class="o">(</span><span class="s">&quot;Asset XML file: &quot;</span> <span class="o">+</span> <span class="n">fileName</span><span class="o">);</span>
+</span><span class='line'>    <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></li>
+<li>AssetManager.openXmlAssetNative</li>
+</ul>
+
+<p>...</p>
+
+<p>这中间有一系列的native方法调用</p>
+
+<ul>
+<li>LayoutInflater.inflate
+
+<ul>
+<li>这一步根据之前得到的Parser对象来继续进行</li>
+</ul></li>
+<li>LayoutInflater.createViewFromTag
+
+<ul>
+<li>根据应用的属性值得到一个view</li>
+</ul></li>
+<li>PhoneLayoutInflater.onCreateView</li>
+<li>LayoutInflater.createView</li>
+</ul>
+
+<p>这一块会有一个疑问，应用是如何找到资源的？在之前提到的编译阶段，系统提供的apk资源包的资源也会被收集进来，那么运行阶段是如何找到的呢？</p>
+
+<p>系统的资源打包在/system/framework/framework-res.apk文件中，它在应用程序进程中是通过一个单独的Resources对象和一个单独的AssetManager对象来管理的。这个单独的Resources
+对象就保存在Resources类的静态成员变量mSystem中，我们可以通过Resources类的静态成员函数getSystem就可以获得这个Resources对象，而这个单独的AssetManager对象就保存在AssetManager
+类的静态成员变量sSystem中，我们可以通过AssetManager类的静态成员函数getSystem同样可以获得这个AssetManager对象。</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Android4.4及以上版本实现状态栏与顶栏同色]]></title>
-    <link href="http://yoursite.com/blog/2015/03/04/android-statusbartint-and-swipebacklayout/"/>
+    <link href="http://fanhongwei.github.io/blog/2015/03/04/android-statusbartint-and-swipebacklayout/"/>
     <updated>2015-03-04T19:28:35+08:00</updated>
-    <id>http://yoursite.com/blog/2015/03/04/android-statusbartint-and-swipebacklayout</id>
+    <id>http://fanhongwei.github.io/blog/2015/03/04/android-statusbartint-and-swipebacklayout</id>
     <content type="html"><![CDATA[<p>在Android中实现状态栏与顶栏同色，可以增加应用的美观性，提升用户体验。那么这一点是如何实现的呢？</p>
 
 <p>目前，比较常用的是github上一个叫做<a href="https://github.com/jgilfelt/SystemBarTint">SystemBarTint</a>的库。但是在实际使用的过程中，当与碎总的<a href="https://github.com/ikew0ng/SwipeBackLayout">SwipeBackLayout</a>滑动返回一起使用的时候，会发现通知栏并不能和当前页面一起被滑走，在StatusBar与ActionBar连接的地方会有很明显的撕裂感，非常影响用户体验。所以在我们自己的项目中放弃了这种实现方式并寻求其他解决方案，最终通过阅读SwipeBackLayout源码和SystemBarTint源码找到了解决方案，实现了状态栏和顶栏同色与滑动返回的完美结合。</p>
@@ -25,9 +679,6 @@
 <p>首先我们通过SystemBarTint的源码分析来搞明白状态栏和变色是如何实现的</p>
 
 <!--More-->
-
-
-
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -133,7 +784,6 @@
 </span><span class='line'>    <span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
 <p>可以看到在27～31行通过条件判断首先设置statusbar为透明（只有Android4.4及以上的系统才可以设置statusbar为透明，这也是状态栏变色只在Android4.4及以上系统有效的原因），将statusbar设置为透明之后，statusbar下边的那一层黑条就不见了，当前页面的内容也就会顶到屏幕最上边了（statusbar和navigationbar其实是两个window）。接下来，我们再来看一段代码</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -161,7 +811,6 @@
 </span><span class='line'>        <span class="n">decorViewGroup</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">mStatusBarTintView</span><span class="o">);</span>
 </span><span class='line'>    <span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
-
 
 <p>通过这一段代码可以看出，SystemBarTint通过给decorview add了一个和statusbar高度一样的view进去。</p>
 
@@ -248,7 +897,6 @@
 </span><span class='line'>    <span class="o">}</span>
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
-
 
 <p>可以看到在14行的地方有一个mHelper.onPostCreate(),我们接着往下看</p>
 
@@ -346,7 +994,6 @@
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
 <p>可以发现在33行的位置有一个mSwipeBackLayout.attachToActivity(mActivity)，我们接着看下去</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -383,11 +1030,9 @@
 </span><span class='line'>    <span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
 <p>终于，我们找到了最初始的位置，通过这一段代码，我们会发现SwipeBackLayout的原理其实就是获取到当前页面的DecorView然后再获取到这棵view树位于0位置的view并将其移除，之后再把SwipeBackLayout(通过源码可以知道这个Layout是继承自FrameLayout的) add到DecorView里边来。</p>
 
-<p>综合分析了SystemBarTint和SwipebackLayout的源码之后，我们也就知道为什么statusbar不能一起划走的原因了，因为SystemBarTint是给DecorView add了一个和statusbar同高的view,而SwipeBackLayout也是DecorView的子view，这两个view在同一层次上，所以不能一起滑走。知道原因之后，解决方案也就浮出了水面，我们可以在把那个view add到SwipwBacklayout里边来，这样子就可以一起滑走了。下面代码是我们项目里边的实现方式</p>
-
+<p>综合分析了SystemBarTint和SwipebackLayout的源码之后，我们也就知道为什么statusbar不能一起划走的原因了，因为SystemBarTint是给DecorView add了一个和statusbar同高的view,而SwipeBackLayout也是DecorView的子view，这两个view在同一层次上，所以不能一起滑走。知道原因之后，解决方案也就浮出了水面，我们可以在把那个view add到SwipwBacklayout里边来，这样子就可以一起滑走了。下面代码是我们项目里边的实现方式
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -420,13 +1065,13 @@
 <span class='line-number'>30</span>
 <span class='line-number'>31</span>
 <span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@TargetApi</span><span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">KITKAT</span><span class="o">)</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@TargetApi</span><span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION<em>CODES</span><span class="o">.</span><span class="na">KITKAT</span><span class="o">)</span>
 </span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">setSystemBarTransparent</span><span class="o">()</span> <span class="o">{</span>
 </span><span class='line'>        <span class="n">Window</span> <span class="n">window</span> <span class="o">=</span> <span class="n">getWindow</span><span class="o">();</span>
 </span><span class='line'>        <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">layoutParams</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="na">getAttributes</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_STATUS</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG</em>TRANSLUCENT<em>STATUS</span><span class="o">;</span>
 </span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">immerseNavigationBar</span><span class="o">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">SmartBarUtils</span><span class="o">.</span><span class="na">isMeizu</span><span class="o">())</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_NAVIGATION</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG</em>TRANSLUCENT<em>NAVIGATION</span><span class="o">;</span>
 </span><span class='line'>        <span class="o">}</span>
 </span><span class='line'>        <span class="n">window</span><span class="o">.</span><span class="na">setAttributes</span><span class="o">(</span><span class="n">layoutParams</span><span class="o">);</span>
 </span><span class='line'>
@@ -449,25 +1094,23 @@
 </span><span class='line'>
 </span><span class='line'>        <span class="n">View</span> <span class="n">hackView</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">View</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
 </span><span class='line'>        <span class="n">setStatusViewBackground</span><span class="o">(</span><span class="n">hackView</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">contentFrame</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">hackView</span><span class="o">,</span> <span class="n">ViewGroup</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">MATCH_PARENT</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">contentFrame</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">hackView</span><span class="o">,</span> <span class="n">ViewGroup</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">MATCH</em>PARENT</span><span class="o">,</span>
 </span><span class='line'>                <span class="n">CommonUtils</span><span class="o">.</span><span class="na">getStatusBarHeight</span><span class="o">(</span><span class="k">this</span><span class="o">));</span>
 </span><span class='line'>    <span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-<p>可以看到我们是把这个view add到content这一层了,也不再需要用到SystemBarTint这个库了。</p>
+可以看到我们是把这个view add到content这一层了,也不再需要用到SystemBarTint这个库了。</p>
 
 <p>最后通过hierarchyviewer工具load出来一个view布局很容易看明白这个问题，截图如下</p>
 
-<p><img src="http://yoursite.com/images/image-34.png" alt="" /></p>
+<p><img src="http://fanhongwei.github.io/images/image-34.png" alt=""></p>
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Develop Tips(一)]]></title>
-    <link href="http://yoursite.com/blog/2014/12/11/android-develop-tip/"/>
+    <link href="http://fanhongwei.github.io/blog/2014/12/11/android-develop-tip/"/>
     <updated>2014-12-11T00:07:34+08:00</updated>
-    <id>http://yoursite.com/blog/2014/12/11/android-develop-tip</id>
+    <id>http://fanhongwei.github.io/blog/2014/12/11/android-develop-tip</id>
     <content type="html"><![CDATA[<h2>Android常用项目结构</h2>
 
 <p>在Android的开发过程中一直在不断的调整自己对于项目结构的架构方式，经过了多次的调整之后，现在基本每个项目都会以如下方式来架构：</p>
@@ -483,7 +1126,7 @@
 放置一些io操作的类，如网络请求、文件读写、数据库操作等等</li>
 <li><strong><em>provider</em></strong>
 放置provider相关的类</li>
-<li><strong><em>receiver</em></strong><br/>
+<li><strong><em>receiver</em></strong><br>
 放置整应用里边需要的reiver类</li>
 <li><strong><em>service</em></strong>
 放置整个应用里边的sevice类</li>
@@ -504,17 +1147,14 @@
 整个应中可以分离出来的view</li>
 <li><strong><em>widget</em></strong>
 整个应用的自定义控件</li>
-</ul>
-</li>
+</ul></li>
 <li><strong><em>util</em></strong>
 各种各样的工具类</li>
 </ul>
 
-
 <p>我现在基本上每个项目都是这种架构方式了，另外，我习惯将自己平时的积累的一些工具类之类的类整理到一个Common的library module中，自己的每个项目都会把这个common module倒入进来，这样子方便了很多。</p>
 
 <!--more-->
-
 
 <h2>Gradle</h2>
 
@@ -664,8 +1304,7 @@
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-<p><code>apply plugin: 'com.android.application'</code> 显然这是一个构建Android项目Gradle Plugin，另外，如果希望当前module是以一个library project被编译的话应该使用 <code>apply plugin: 'com.android.library'</code> 这个plugin。</p>
+<p><code>apply plugin: &#39;com.android.application&#39;</code> 显然这是一个构建Android项目Gradle Plugin，另外，如果希望当前module是以一个library project被编译的话应该使用 <code>apply plugin: &#39;com.android.library&#39;</code> 这个plugin。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -677,9 +1316,6 @@
 </span><span class='line'><span class="n">这一块是plugin中的android</span> <span class="n">project构建</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-
-
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -689,9 +1325,6 @@
 </span><span class='line'>
 </span><span class='line'><span class="n">这一块是用来指定CompileSdkVersion和BuildToolsVersion的</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -717,9 +1350,6 @@
 </span><span class='line'><span class="n">AndroidMainfest</span><span class="o">.</span><span class="na">xml中关于这一块的配置不再有效</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-
-
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -739,9 +1369,6 @@
 </span><span class='line'><span class="n">这一块主要是对编译过程的配置</span><span class="err">，</span><span class="n">如果这个地方不做处理的话</span><span class="err">，</span><span class="n">在编译的时候就连warning之类的都会导致编译通不过</span><span class="err">，</span><span class="n">所以配</span>
 </span><span class='line'><span class="n">置这一块基本是必须的</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -777,9 +1404,6 @@
 </span><span class='line'><span class="n">这一块是对签名的配置</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-
-
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -813,9 +1437,6 @@
 </span><span class='line'><span class="n">assets</span><span class="o">.</span><span class="na">srcDirs</span> <span class="o">=</span> <span class="o">[</span><span class="err">&#39;</span><span class="n">assets</span><span class="err">&#39;</span><span class="o">])</span>
 </span><span class='line'><span class="n">这个视个人项目文件结构来具体配置</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -865,9 +1486,6 @@
 </span><span class='line'><span class="n">productFlavor中加入了友盟的多渠道信息统计</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-
-
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -895,26 +1513,25 @@
 </span><span class='line'><span class="n">include</span> <span class="err">&#39;</span><span class="o">:</span><span class="n">app</span><span class="err">&#39;</span><span class="o">,</span> <span class="err">&#39;</span><span class="o">:</span><span class="n">Common</span><span class="err">&#39;</span> <span class="err">。</span> <span class="n">compile</span> <span class="err">&#39;</span><span class="n">com</span><span class="o">.</span><span class="na">google</span><span class="o">.</span><span class="na">code</span><span class="o">.</span><span class="na">gson</span><span class="o">:</span><span class="nl">gson:</span><span class="mf">2.3</span><span class="err">&#39;</span> <span class="n">这个是通过从远程maven仓库的</span>
 </span><span class='line'><span class="n">形式来编译第三方library到当前project</span><span class="err">，</span><span class="n">我个人现在目前更倾向于这种形式导入第三方library</span><span class="err">。</span>
 </span></code></pre></td></tr></table></div></figure>
-
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[To Mac]]></title>
-    <link href="http://yoursite.com/blog/2014/11/15/to-mac/"/>
+    <link href="http://fanhongwei.github.io/blog/2014/11/15/to-mac/"/>
     <updated>2014-11-15T11:04:00+08:00</updated>
-    <id>http://yoursite.com/blog/2014/11/15/to-mac</id>
+    <id>http://fanhongwei.github.io/blog/2014/11/15/to-mac</id>
     <content type="html"><![CDATA[<p>经历了好久的外包填坑，终于把电脑从黑苹果换到了白苹果，各种环境也都搭好了，当然也包括博客环境了，所以博客之后恢复正常更新。</p>
 
-<p><img src="http://yoursite.com/images/image-19.png" alt="" /></p>
+<p><img src="http://fanhongwei.github.io/images/image-19.png" alt=""></p>
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[After install Ubuntu 14.04 LTS]]></title>
-    <link href="http://yoursite.com/blog/2014/05/12/after-install-ubuntu14-dot-04/"/>
+    <link href="http://fanhongwei.github.io/blog/2014/05/12/after-install-ubuntu14-dot-04/"/>
     <updated>2014-05-12T14:34:00+08:00</updated>
-    <id>http://yoursite.com/blog/2014/05/12/after-install-ubuntu14-dot-04</id>
+    <id>http://fanhongwei.github.io/blog/2014/05/12/after-install-ubuntu14-dot-04</id>
     <content type="html"><![CDATA[<h1>前奏</h1>
 
 <p>之前从ubuntu 13.10升级到ubuntu 14.04 LTS,由于输入法的问题,在删除iBus的时候不小心删除了Unity的一些东西,结果桌面环境挂掉了,无奈重装系统,装完系统倒是焕然一新了,可是各种缺环境.然后开始了一系列配置环境的艰辛历程,通过这篇博文记录这艰辛历程，以备下次强迫症患了再一次作大死。</p>
@@ -929,47 +1546,37 @@
 
 <p><strong>终端配置:</strong> 安装Termiantor终端,此终端比自带的终端强悍很多.</p>
 
-<p><strong>终端环境：</strong> 弃用bash,换上高大上的zsh.通过github上的 <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>来管理zsh配置,执行以下shell即可</p>
-
+<p><strong>终端环境：</strong> 弃用bash,换上高大上的zsh.通过github上的 <a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a>来管理zsh配置,执行以下shell即可
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install zsh
 </span><span class='line'>curl -L http://install.ohmyz.sh | sh  //自动安装
 </span><span class='line'>chsh -s /bin/zsh
-</span></code></pre></td></tr></table></div></figure>
-
-
-
+</span></code></pre></td></tr></table></div></figure></p>
 
 <!--more-->
 
-
 <p><strong>键盘映射修改:</strong> 由于个人习惯,总是喜欢将CapsLk替换为Ctrl,通过Xmodmap来修改键盘映射,在/home下添加.Xmodmap文件</p>
 
-<p>.Xmodmap</p>
-
+<p>.Xmodmap
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>remove Lock = Caps_Lock
-</span><span class='line'>keysym Caps_Lock = Control_L
-</span><span class='line'>add control = Control_L</span></code></pre></td></tr></table></div></figure>
-
+</pre></td><td class='code'><pre><code class=''><span class='line'>remove Lock = Caps<em>Lock
+</span><span class='line'>keysym Caps</em>Lock = Control<em>L
+</span><span class='line'>add control = Control</em>L</span></code></pre></td></tr></table></div></figure></p>
 
 <p><strong>主题配置:</strong> 首先安装Ubuntu Tweak这个主题管理软件.</p>
 
-<p>然后安装我自己喜欢的Numix主题</p>
-
+<p>然后安装我自己喜欢的Numix主题
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:numix/ppa
 </span><span class='line'>sudo apt-get update
 </span><span class='line'>sudo apt-get install numix-gtk-theme</span></code></pre></td></tr></table></div></figure>
-
-
-<p>字体选择钟爱的Manaco.
+字体选择钟爱的Manaco.
 最后通过Ubuntu Tweak工具去管理设置这些配置。</p>
 
 <p><strong>输入法：</strong> 好不容易搜狗支持Linux就用它吧,前往<a href="http://pinyin.sogou.com/linux/">官网</a>下载deb包,之后安装即可,前提是得安装fcitx.关于输入法这一块会出不少问题,耐心点,慢慢来.</p>
@@ -980,22 +1587,19 @@
 
 <p><strong>Android Studio:</strong> 前往 <a href="http://developer.android.com/sdk/installing/studio.html">Android开发者网站</a>下载Android Studio.另外,Android Studio有creat Desktop Entry这个功能,不再需要我们自己去写.desktop文件.</p>
 
-<p><strong>GIMP:</strong> 这个主要就是平时设计师给图之后用来取色或者切图之类的.</p>
-
+<p><strong>GIMP:</strong> 这个主要就是平时设计师给图之后用来取色或者切图之类的.
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:otto-kesselgulasch/gimp
 </span><span class='line'>sudo apt-get update
-</span><span class='line'>sudo apt-get install gimp</span></code></pre></td></tr></table></div></figure>
-
+</span><span class='line'>sudo apt-get install gimp</span></code></pre></td></tr></table></div></figure></p>
 
 <p><strong>DropBox:</strong> 方便与设计师进行图片的同步,前往 <a href="https://www.dropbox.com/install?os=lnx">DropBox官网</a>下载deb包即可。</p>
 
 <p><strong>Genymotion:</strong> 目前作为一个学生党开发者，没有大量的手持设备用来适配，通过Genymotion这些虚拟设备可以达到同样的效果。为了方便,在/usr/share/applications目录下创建genymotion.desktop文件用于快捷启动</p>
 
-<p>genmotion.desktop</p>
-
+<p>genmotion.desktop
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -1007,10 +1611,9 @@
 </span><span class='line'>Type=Application
 </span><span class='line'>Name=Genymotion
 </span><span class='line'>Icon=/home/dsnc/Downloads/genymotion/icons/icon.png
-</span><span class='line'>Exec="/home/dsnc/Downloads/genymotion/genymotion"
+</span><span class='line'>Exec=&quot;/home/dsnc/Downloads/genymotion/genymotion&quot;
 </span><span class='line'>Terminal=false
-</span><span class='line'>Categories=Development;IDE;</span></code></pre></td></tr></table></div></figure>
-
+</span><span class='line'>Categories=Development;IDE;</span></code></pre></td></tr></table></div></figure></p>
 
 <h3><em>博客管理</em></h3>
 
@@ -1037,8 +1640,8 @@
 </span><span class='line'>rvm requirements  
 </span><span class='line'>rvm install ruby</span></code></pre></td></tr></table></div></figure>
 
-
-<blockquote><ul>
+<blockquote>
+<ul>
 <li>RVM:Ruby Version Manager</li>
 </ul>
 </blockquote>
@@ -1051,25 +1654,21 @@
 
 <p><strong>WPS:</strong> 前往 <a href="http://linux.wps.cn/">WPS官网</a>下载deb包即可.</p>
 
-<p><strong>Synapse:</strong> 快速启动器</p>
-
+<p><strong>Synapse:</strong> 快速启动器
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:synapse-core/testing
 </span><span class='line'>sudo apt-get update
-</span><span class='line'>sudo apt-get install synapse</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>sudo apt-get install synapse</span></code></pre></td></tr></table></div></figure></p>
 
-
-<p><strong>截图工具：</strong> 这个我习惯使用的是Shutter</p>
-
+<p><strong>截图工具：</strong> 这个我习惯使用的是Shutter
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:shutter/ppa
 </span><span class='line'>sudo apt-get update
-</span><span class='line'>sudo apt-get install shutter</span></code></pre></td></tr></table></div></figure>
-
+</span><span class='line'>sudo apt-get install shutter</span></code></pre></td></tr></table></div></figure></p>
 
 <h2><em>越来越发现Ubuntu softerware center还是有很多好玩的应用,并且博文中提到的很多软件也都可以同多软件中心直接安装,不用通过添加PPA源的方式安装</em></h2>
 ]]></content>
@@ -1077,16 +1676,17 @@
   
   <entry>
     <title type="html"><![CDATA[Android-FeedBack]]></title>
-    <link href="http://yoursite.com/blog/2014/04/16/android-feedback/"/>
+    <link href="http://fanhongwei.github.io/blog/2014/04/16/android-feedback/"/>
     <updated>2014-04-16T21:24:00+08:00</updated>
-    <id>http://yoursite.com/blog/2014/04/16/android-feedback</id>
+    <id>http://fanhongwei.github.io/blog/2014/04/16/android-feedback</id>
     <content type="html"><![CDATA[<h1>选择</h1>
 
 <p>之前开发OverHust的时候，需要用到用户反馈这一功能，于是就在考虑怎么实现<strong>用户反馈</strong>这一功能。</p>
 
 <p>目前，常规方法如下：</p>
 
-<blockquote><ul>
+<blockquote>
+<ul>
 <li><p>利用第三方服务，例如：<a href="http://www.umeng.com/">友盟</a></p></li>
 <li><p>调用用户已登录的邮箱帐号发送邮件</p></li>
 </ul>
@@ -1106,7 +1706,6 @@
 
 <!--more-->
 
-
 <p><em>详细了解上述两种方法各自的优劣之后,发现他们都不能很好的满足需求，因此，另谋出路。于是就在stackoverflow上发现可以用<code>JavaMail API</code>来实现。首先，不用导入一些其他Library工程，其次虽然也是用邮件服务，但是发信邮件帐号是在应用内指定的，与用户无关。当然，也是由于我自己想体验一下<code>JavaMail API</code>，之后开发应用还是更多的会用第三方服务，因为第三方服务有很多我用的着的功能。</em></p>
 
 <h1>实现</h1>
@@ -1117,8 +1716,7 @@
 
 <p>之后，写几个工具类就ok了（附上我项目中的这几个类）。</p>
 
-<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/JSSEProvider.java">JSSEProvider,java</a></p>
-
+<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/JSSEProvider.java">JSSEProvider,java</a>
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -1169,11 +1767,9 @@
 </span><span class='line'>        <span class="o">});</span>
 </span><span class='line'>    <span class="o">}</span>
 </span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
+</span></code></pre></td></tr></table></div></figure></p>
 
-
-<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/GmailSender.java">GmailSender.java</a></p>
-
+<p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/GmailSender.java">GmailSender.java</a>
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -1401,9 +1997,7 @@
 </span><span class='line'>    <span class="o">}</span>
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-<p>最后，自己封装一个发送邮件的工具类。</p>
+最后，自己封装一个发送邮件的工具类。</p>
 
 <p><a href="https://github.com/fanhongwei/OverHust/blob/master/OverHust/src/main/java/com/unique/overhust/Feedback/SendFeedback.java">SendFeedback.java</a></p>
 
@@ -1564,15 +2158,14 @@
 </span><span class='line'>    <span class="o">}</span>
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
-
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[Linux内核编译]]></title>
-    <link href="http://yoursite.com/blog/2014/03/09/linux-kernel/"/>
+    <link href="http://fanhongwei.github.io/blog/2014/03/09/linux-kernel/"/>
     <updated>2014-03-09T21:05:00+08:00</updated>
-    <id>http://yoursite.com/blog/2014/03/09/linux-kernel</id>
+    <id>http://fanhongwei.github.io/blog/2014/03/09/linux-kernel</id>
     <content type="html"><![CDATA[<p>系统发行版ubuntu13.04，内核版本3.12.13
 首先，官网下载所需内核。</p>
 
@@ -1584,12 +2177,11 @@
 
 <p>切换到/usr/src目录下  命令：<code>cd /usr/src</code></p>
 
-<p><img src="http://yoursite.com/images/image-5.png" alt="" /></p>
+<p><img src="http://fanhongwei.github.io/images/image-5.png" alt=""></p>
 
 <!--more-->
 
-
-<p><img src="http://yoursite.com/images/image-9.png" alt="" /></p>
+<p><img src="http://fanhongwei.github.io/images/image-9.png" alt=""></p>
 
 <p>把原来编译产生的垃圾删除   命令：<code>make mrproper</code></p>
 
@@ -1597,27 +2189,27 @@
 
 <p>正常的话应该可以开始配置内核了，可惜ubuntu没有自带qt环境或者我之前吧qt环境卸载了</p>
 
-<p><img src="http://yoursite.com/images/image-7.png" alt="" /></p>
+<p><img src="http://fanhongwei.github.io/images/image-7.png" alt=""></p>
 
 <p>缺qt3环境，然后去装qt3环境，发现现在大多数源里边已经没有qt3了，索性安装qt4的环境，重新开始配置内核，发现2.6的内核必须要qt3的环境，于是换到了3.12.13的内核。</p>
 
 <p>重新执行 <code>make xconfig</code>,出现配置界面</p>
 
-<p><img src="http://yoursite.com/images/image-11.png" alt="" /></p>
+<p><img src="http://fanhongwei.github.io/images/image-11.png" alt=""></p>
 
 <p>开始配置内核，看不懂，找到了@金步国的一篇博文  <a href="http://www.jinbuguo.com/kernel/longterm-3_10-options.html">博文链接</a></p>
 
-<p><img src="http://yoursite.com/images/image-12.png" alt="" /></p>
+<p><img src="http://fanhongwei.github.io/images/image-12.png" alt=""></p>
 
 <p>为了确保所有有关文件都处于最新版本状态  命令：<code>make clean</code></p>
 
 <p>开始编译压缩形式的内核  命令：<code>make zImage</code></p>
 
-<p><img src="http://yoursite.com/images/image-14.png" alt="" /></p>
+<p><img src="http://fanhongwei.github.io/images/image-14.png" alt=""></p>
 
 <p>大概编译了20左右，内核编译完毕。</p>
 
-<p><img src="http://yoursite.com/images/image-16.png" alt="" /></p>
+<p><img src="http://fanhongwei.github.io/images/image-16.png" alt=""></p>
 
 <p>开始编译模块,这个过程时间比较长。  命令:<code>make modules</code></p>
 
@@ -1625,7 +2217,7 @@
 
 <p>最后执行 <code>make install</code>,这应该算是最后一步了，结果出问题了。</p>
 
-<p><img src="http://yoursite.com/images/image-18.png" alt="" /></p>
+<p><img src="http://fanhongwei.github.io/images/image-18.png" alt=""></p>
 
 <p>原因：当时装系统的时候boot分区是单挂的，分了80M进去，结果<code>make install</code>的时候报错：gzip: stdout: No space left on device.  看样子是boot分区太小gzip解压包的时候没有空间了。</p>
 
@@ -1635,19 +2227,16 @@
   
   <entry>
     <title type="html"><![CDATA[忙碌、充实的日子]]></title>
-    <link href="http://yoursite.com/blog/2014/02/21/busy-day/"/>
+    <link href="http://fanhongwei.github.io/blog/2014/02/21/busy-day/"/>
     <updated>2014-02-21T23:26:00+08:00</updated>
-    <id>http://yoursite.com/blog/2014/02/21/busy-day</id>
+    <id>http://fanhongwei.github.io/blog/2014/02/21/busy-day</id>
     <content type="html"><![CDATA[<p>年后初八离开家人，别离了可爱的女朋友，只身一人来到了学校，继续着忙碌而又充实的日子。从年后过来学校到现在收尾了不少事。终于有时间来总结我的大二上学期的生活。</p>
 
 <p>记得暑假比别人大概早到校了一个月，提前开始了同样忙碌而又充实的日子。刚到校就开始开发一个微信公众平台，其实就是去熟悉了微信的公众的平台开发流程和php的一些基本用法。<a href="http://dsnc.me/project/">华科软件2013级微信公众平台</a>，当时做得最爽的一个功能就是给新生的“我到了”功能，帮助了不少学弟和学妹。也就是在开发这个过程中接触到了腾讯街景地图，然后基于街景这一块继续深入做了下去，也就有了后来的OverHust。</p>
 
-<p>OverHust，是一款基于街景的校园地图应用。当时接触到腾讯街景的时候就感觉街景很好玩，然后就萌生了写一个Android App的想法，了解一些基本情况后确定这个东西可以做，然后就找了一些人开始开发了。</p>
-
-<!--more-->
-
-
-<p>之前也做过一些android的应用，但是OverHust是我的第一个真正的产品。当OverHust刚开始开工的时候正好赶上了学校点团队的“斯达康种子杯”然后就随手报了名，顺便参加了比赛。然后就一路开发了下来，直到比赛最终决赛的时候做出了应用的初步版本。最终凭借着街景的有趣性、以及整个应用的界面设计和一些细节的把握等等各方面的原因，拿了大赛的一等奖，也拿了10000大洋，比赛也就结束了，但是应用离一个真正的产品还差得很远，于是就继续开发。一个个的实现各个功能模块，一个个的小细节改了又改，只为了让自己满意，让用户满意。在这期间也到光谷软件园democoffee关于OverHust做了一次分享，讲了Overust的用户定位、以及一些开发细节，当天也在democoffee认识了不少朋友，关于应用也和在场的很多人聊了很多。分享会之后，对于OverHust这个应用，自己静下心来想了很多很多，想了很多OverHust究竟能给用户带来什么？最终想明白了，就是街景与华科校园生活的精密结合。在期末考试之前放出了v0.8版测试，年后过来学校又接着开发了一段时间，现在整个应用v1.0基本已经开发完毕，过一段时间能上线了。</p>
+<p>OverHust，是一款基于街景的校园地图应用。当时接触到腾讯街景的时候就感觉街景很好玩，然后就萌生了写一个Android App的想法，了解一些基本情况后确定这个东西可以做，然后就找了一些人开始开发了。
+&lt;!--more--&gt;
+之前也做过一些android的应用，但是OverHust是我的第一个真正的产品。当OverHust刚开始开工的时候正好赶上了学校点团队的“斯达康种子杯”然后就随手报了名，顺便参加了比赛。然后就一路开发了下来，直到比赛最终决赛的时候做出了应用的初步版本。最终凭借着街景的有趣性、以及整个应用的界面设计和一些细节的把握等等各方面的原因，拿了大赛的一等奖，也拿了10000大洋，比赛也就结束了，但是应用离一个真正的产品还差得很远，于是就继续开发。一个个的实现各个功能模块，一个个的小细节改了又改，只为了让自己满意，让用户满意。在这期间也到光谷软件园democoffee关于OverHust做了一次分享，讲了Overust的用户定位、以及一些开发细节，当天也在democoffee认识了不少朋友，关于应用也和在场的很多人聊了很多。分享会之后，对于OverHust这个应用，自己静下心来想了很多很多，想了很多OverHust究竟能给用户带来什么？最终想明白了，就是街景与华科校园生活的精密结合。在期末考试之前放出了v0.8版测试，年后过来学校又接着开发了一段时间，现在整个应用v1.0基本已经开发完毕，过一段时间能上线了。</p>
 
 <p>OverHust是我大二上学期最大的收获，我学着去做一个完整的产品出来，尝试着去带一个产品出来，当然也完整的写了整个应用，可以体验了一下产品经理和程序员一块当的感觉。整体感觉就是做一个让用户用着很舒服的应用要考虑太多太多的东西。</p>
 
@@ -1663,19 +2252,18 @@
   
   <entry>
     <title type="html"><![CDATA[MentalModel开发心得]]></title>
-    <link href="http://yoursite.com/blog/2013/10/28/mental-model/"/>
+    <link href="http://fanhongwei.github.io/blog/2013/10/28/mental-model/"/>
     <updated>2013-10-28T08:39:00+08:00</updated>
-    <id>http://yoursite.com/blog/2013/10/28/mental-model</id>
+    <id>http://fanhongwei.github.io/blog/2013/10/28/mental-model</id>
     <content type="html"><![CDATA[<p>学校工业设计系一个实验室的老师在研究Android的交互设计，研究到人的心智模型这一块时，需要做一个实验，然后呢，就要用到一个Android的App，最后我帮他做了这个App，这期间有很多的体会和经验，写下来留给自己看。</p>
 
 <p>这个应用大概是这样子的：</p>
 
-<p>   <img src="http://yoursite.com/images/实验2.jpg" width="250" height="400"/> <img src="http://yoursite.com/images/testtwo.png" width="250" height="400" /></p>
+<p><img src="http://fanhongwei.github.io/images/实验2.jpg" width="250" height="400"/> <img src="http://fanhongwei.github.io/images/testtwo.png" width="250" height="400" /></p>
 
 <!--more-->
 
-
-<p>   <img src="http://yoursite.com/images/testthree.png" width="250" height="400" /> <img src="http://yoursite.com/images/image.png" width="250" height="400" /></p>
+<p><img src="http://fanhongwei.github.io/images/testthree.png" width="250" height="400" /> <img src="http://fanhongwei.github.io/images/image.png" width="250" height="400" /></p>
 
 <p>由于是实验型的App，这里边有将近45个页面，刚接触到这个应用时由于跟那老师的交流出了点问题，所以对应用的理解有偏差，没意识到会有这么多的界面，于是乎我就把没一个页面当作一个activity，开始一个新的页面activity是结束掉上一个页面的activity，当工程进行到后边时，深刻体会到了这种思路的缺陷。这应该也是第一次做到会有如此多的布局的App，深刻体会到了命名规范的好处。比如说，总共有四个实验，而每个实验有12中模式，那么对布局文件的命名很值得考量一番，要不会很乱的。</p>
 
@@ -1689,15 +2277,14 @@
   
   <entry>
     <title type="html"><![CDATA[忙碌的两个月]]></title>
-    <link href="http://yoursite.com/blog/2013/10/28/two-busy-month/"/>
+    <link href="http://fanhongwei.github.io/blog/2013/10/28/two-busy-month/"/>
     <updated>2013-10-28T08:37:00+08:00</updated>
-    <id>http://yoursite.com/blog/2013/10/28/two-busy-month</id>
+    <id>http://fanhongwei.github.io/blog/2013/10/28/two-busy-month</id>
     <content type="html"><![CDATA[<p>大二生活的两个月已经过去了，停下来总结总结这两个月，对这两个月整体感觉过得很踏实。</p>
 
 <p>9月份就正式开始了自己的大二生活，大概看了看这学期的课表，感觉爽了很多，面向对象，计算机图形学，数据结构之类的课就都开了。第一眼看上去就很爽的样子，于是抱着一颗幸福的心就开始了大二生活。9月份最重要的事可以说是承担起了团队（联创团队）招新的事。9月3号之前写好的策划，然后9月8号正式开始招新，而我的生活也就随着招新的开始真正忙了起来，招新每一个环节都去盯，看安排的队友任务完成的怎么样，以及一些借教室，申请场地之类的事都得去忙，整个9月份我就像一个“要账”的似的，整天给这个队友打了电话给那个队友打电话的，我估计大家都有点怕接我电话了，不过有个好处呢就是我跟团队的每个人几乎都把关系搞熟了，还是蛮开心的。关于招新的流程就不多说了，详细写写招新之后的感悟吧。</p>
 
 <!--more-->
-
 
 <p>今年的招新还是挺成功的，拿到了680份报名表，经过后期的考核总共留下了65左右的人吧。在整个招新过程中我学会了如何去合理的安排任务，如何与别人沟通，如何去处理一些突发情况，更学会了遇事沉着冷静，淡定的去面对一切。然后，也发现了自己的一些问题，我感触最深的就是自己的号召力还是很有待提高的，换句话说就是那种吸引别人乐意帮你高效完成任务的魄力。总之呢，就是感觉自己对于与人沟通交流这一块还是很有发展空间的。虽然招新这一段时间（持续了有45天吧）没怎么写代码，自己的编程实力也没怎么提升，但是呢，学到了很多其他方面的能力。总之，招新这一段时间很值，也让我对联创的感情更加深了一个层次。</p>
 
@@ -1709,11 +2296,11 @@
   
   <entry>
     <title type="html"><![CDATA[Hello]]></title>
-    <link href="http://yoursite.com/blog/2013/08/25/hello/"/>
+    <link href="http://fanhongwei.github.io/blog/2013/08/25/hello/"/>
     <updated>2013-08-25T19:13:00+08:00</updated>
-    <id>http://yoursite.com/blog/2013/08/25/hello</id>
+    <id>http://fanhongwei.github.io/blog/2013/08/25/hello</id>
     <content type="html"><![CDATA[<p>终于搞定了，只想说一句“真他妈的蛋疼”。附上，桌面壁纸，犒劳一下疲惫的心灵。
-<img src="http://yoursite.com/images/2.png" alt="" /></p>
+<img src="http://fanhongwei.github.io/images/2.png" alt=""></p>
 ]]></content>
   </entry>
   

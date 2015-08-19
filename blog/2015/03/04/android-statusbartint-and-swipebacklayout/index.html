@@ -46,7 +46,7 @@
 		<div class="container">
 			<form action="https://www.google.com/search" method="get">
 				<input type="text" name="q" results="0">
-				<input type="hidden" name="q" value="site:yoursite.com">
+				<input type="hidden" name="q" value="site:fanhongwei.github.io">
 			</form>
 		</div>
 	</div>
@@ -69,7 +69,7 @@
 	</div>
 	<form class="search" action="https://www.google.com/search" method="get">
 		<input class="alignright" type="text" name="q" results="0">
-		<input type="hidden" name="q" value="site:yoursite.com">
+		<input type="hidden" name="q" value="site:fanhongwei.github.io">
 	</form>
 </nav>
 
@@ -86,9 +86,6 @@
 <p>首先我们通过SystemBarTint的源码分析来搞明白状态栏和变色是如何实现的</p>
 
 <!--More-->
-
-
-
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -194,7 +191,6 @@
 </span><span class='line'>    <span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
 <p>可以看到在27～31行通过条件判断首先设置statusbar为透明（只有Android4.4及以上的系统才可以设置statusbar为透明，这也是状态栏变色只在Android4.4及以上系统有效的原因），将statusbar设置为透明之后，statusbar下边的那一层黑条就不见了，当前页面的内容也就会顶到屏幕最上边了（statusbar和navigationbar其实是两个window）。接下来，我们再来看一段代码</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -222,7 +218,6 @@
 </span><span class='line'>        <span class="n">decorViewGroup</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">mStatusBarTintView</span><span class="o">);</span>
 </span><span class='line'>    <span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
-
 
 <p>通过这一段代码可以看出，SystemBarTint通过给decorview add了一个和statusbar高度一样的view进去。</p>
 
@@ -309,7 +304,6 @@
 </span><span class='line'>    <span class="o">}</span>
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
-
 
 <p>可以看到在14行的地方有一个mHelper.onPostCreate(),我们接着往下看</p>
 
@@ -407,7 +401,6 @@
 </span><span class='line'><span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
 <p>可以发现在33行的位置有一个mSwipeBackLayout.attachToActivity(mActivity)，我们接着看下去</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -444,11 +437,9 @@
 </span><span class='line'>    <span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
 <p>终于，我们找到了最初始的位置，通过这一段代码，我们会发现SwipeBackLayout的原理其实就是获取到当前页面的DecorView然后再获取到这棵view树位于0位置的view并将其移除，之后再把SwipeBackLayout(通过源码可以知道这个Layout是继承自FrameLayout的) add到DecorView里边来。</p>
 
-<p>综合分析了SystemBarTint和SwipebackLayout的源码之后，我们也就知道为什么statusbar不能一起划走的原因了，因为SystemBarTint是给DecorView add了一个和statusbar同高的view,而SwipeBackLayout也是DecorView的子view，这两个view在同一层次上，所以不能一起滑走。知道原因之后，解决方案也就浮出了水面，我们可以在把那个view add到SwipwBacklayout里边来，这样子就可以一起滑走了。下面代码是我们项目里边的实现方式</p>
-
+<p>综合分析了SystemBarTint和SwipebackLayout的源码之后，我们也就知道为什么statusbar不能一起划走的原因了，因为SystemBarTint是给DecorView add了一个和statusbar同高的view,而SwipeBackLayout也是DecorView的子view，这两个view在同一层次上，所以不能一起滑走。知道原因之后，解决方案也就浮出了水面，我们可以在把那个view add到SwipwBacklayout里边来，这样子就可以一起滑走了。下面代码是我们项目里边的实现方式
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -481,13 +472,13 @@
 <span class='line-number'>30</span>
 <span class='line-number'>31</span>
 <span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@TargetApi</span><span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION_CODES</span><span class="o">.</span><span class="na">KITKAT</span><span class="o">)</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="nd">@TargetApi</span><span class="o">(</span><span class="n">Build</span><span class="o">.</span><span class="na">VERSION<em>CODES</span><span class="o">.</span><span class="na">KITKAT</span><span class="o">)</span>
 </span><span class='line'>    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">setSystemBarTransparent</span><span class="o">()</span> <span class="o">{</span>
 </span><span class='line'>        <span class="n">Window</span> <span class="n">window</span> <span class="o">=</span> <span class="n">getWindow</span><span class="o">();</span>
 </span><span class='line'>        <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">layoutParams</span> <span class="o">=</span> <span class="n">window</span><span class="o">.</span><span class="na">getAttributes</span><span class="o">();</span>
-</span><span class='line'>        <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_STATUS</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG</em>TRANSLUCENT<em>STATUS</span><span class="o">;</span>
 </span><span class='line'>        <span class="k">if</span> <span class="o">(</span><span class="n">immerseNavigationBar</span><span class="o">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">SmartBarUtils</span><span class="o">.</span><span class="na">isMeizu</span><span class="o">())</span> <span class="o">{</span>
-</span><span class='line'>            <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG_TRANSLUCENT_NAVIGATION</span><span class="o">;</span>
+</span><span class='line'>            <span class="n">layoutParams</span><span class="o">.</span><span class="na">flags</span> <span class="o">|=</span> <span class="n">WindowManager</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">FLAG</em>TRANSLUCENT<em>NAVIGATION</span><span class="o">;</span>
 </span><span class='line'>        <span class="o">}</span>
 </span><span class='line'>        <span class="n">window</span><span class="o">.</span><span class="na">setAttributes</span><span class="o">(</span><span class="n">layoutParams</span><span class="o">);</span>
 </span><span class='line'>
@@ -510,17 +501,15 @@
 </span><span class='line'>
 </span><span class='line'>        <span class="n">View</span> <span class="n">hackView</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">View</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
 </span><span class='line'>        <span class="n">setStatusViewBackground</span><span class="o">(</span><span class="n">hackView</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">contentFrame</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">hackView</span><span class="o">,</span> <span class="n">ViewGroup</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">MATCH_PARENT</span><span class="o">,</span>
+</span><span class='line'>        <span class="n">contentFrame</span><span class="o">.</span><span class="na">addView</span><span class="o">(</span><span class="n">hackView</span><span class="o">,</span> <span class="n">ViewGroup</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">.</span><span class="na">MATCH</em>PARENT</span><span class="o">,</span>
 </span><span class='line'>                <span class="n">CommonUtils</span><span class="o">.</span><span class="na">getStatusBarHeight</span><span class="o">(</span><span class="k">this</span><span class="o">));</span>
 </span><span class='line'>    <span class="o">}</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-<p>可以看到我们是把这个view add到content这一层了,也不再需要用到SystemBarTint这个库了。</p>
+可以看到我们是把这个view add到content这一层了,也不再需要用到SystemBarTint这个库了。</p>
 
 <p>最后通过hierarchyviewer工具load出来一个view布局很容易看明白这个问题，截图如下</p>
 
-<p><img src="/images/image-34.png" alt="" /></p>
+<p><img src="/images/image-34.png" alt=""></p>
 </div>
 
 
