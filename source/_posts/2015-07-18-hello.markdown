@@ -1,0 +1,9 @@
+---
+layout: post
+title: "Hello"
+date: 2013-08-25 19:13
+comments: true
+categories: Life
+---
+终于搞定了，只想说一句“真他妈的蛋疼”。附上，桌面壁纸，犒劳一下疲惫的心灵。
+![](/images/2.png)

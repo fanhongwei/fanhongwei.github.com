@@ -2,10 +2,10 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://yoursite.com
-title: My Octopress Blog
-subtitle: A blogging framework for hackers.
-author: Your Name
+url: http://fanhongwei.github.io
+title: vicvan 
+subtitle: A coding man.
+author: vicvan 
 simple_search: https://www.google.com/search
 description:
 
@@ -19,7 +19,7 @@ date_format: "ordinal"
 subscribe_rss: /atom.xml
 subscribe_email:
 # RSS feeds can list your email address if you like
-email:
+email: fanhongweiqq@gmail.com
 
 # ----------------------- #
 #    Jekyll & Plugins     #
@@ -35,10 +35,14 @@ code_dir: downloads/code
 category_dir: blog/categories
 markdown: rdiscount
 rdiscount:
-  extensions:
+    extensions:
     - autolink
     - footnotes
     - smart
+markdown: redcarpet
+redcarpet:
+    extensions:
+    - tables
 highlighter: pygments # default python pygments have been replaced by pygments.rb
 
 paginate: 10          # Posts per page on the blog index

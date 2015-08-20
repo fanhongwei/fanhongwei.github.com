@@ -1,0 +1,11 @@
+---
+layout: post
+title: "To Mac"
+date: 2014-11-15 11:04
+comments: true
+categories: Life
+---
+
+经历了好久的外包填坑，终于把电脑从黑苹果换到了白苹果，各种环境也都搭好了，当然也包括博客环境了，所以博客之后恢复正常更新。
+
+![](/images/image-19.png)
