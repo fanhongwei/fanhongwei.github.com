@@ -721,7 +721,7 @@ dimens.xml、strings.xml和styles.xml文件中。</li>
 <li>LayoutInflater.createView</li>
 </ul>
 
-<p>这一块会有一个疑问，应用是如何找到资源的？在之前提到的编译阶段，系统提供的apk资源包的资源也会被收集进来，那么运行阶段是如何找到的呢？</p>
+<p>这一块会有一个疑问，应用是如何找到Android系统资源的？在之前提到的编译阶段，系统提供的apk资源包的资源也会被收集进来，那么运行阶段是如何找到的呢？</p>
 
 <p>系统的资源打包在/system/framework/framework-res.apk文件中，它在应用程序进程中是通过一个单独的Resources对象和一个单独的AssetManager对象来管理的。这个单独的Resources
 对象就保存在Resources类的静态成员变量mSystem中，我们可以通过Resources类的静态成员函数getSystem就可以获得这个Resources对象，而这个单独的AssetManager对象就保存在AssetManager
