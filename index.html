@@ -7,8 +7,7 @@
 	<meta name="author" content="vicvan">
 
 	
-	<meta name="description" content="关于Android Resource这一块老罗博客有详细分析，并且罗老师的博客大家都懂的，质量很高。但是我还是决定把自己从
-开发者的角度对这一块的理解记录下来，所以就有了这篇文章，本文章也来自于对罗老师博客的学习研究。 文章主要从 代码编写、代码编译、代码运行 三个阶段来分析。 代码编写阶段 &hellip;">
+	<meta name="description" content="在Android M中Google做了很多优化性能、提升用户体验的事情，比如说：App权限、Google Now on Tap、Doze省电系统、AppLinks、DeepLinks等。最近工作接触到了AppLinks、DeepLinks这两个提升用户体验的优化， &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -79,6 +78,49 @@
 		
 	
 	<div id="content" class="inner">
+
+
+    <article class="post">
+	<h2 class="title">
+		
+		<a href="/blog/2015/12/17/app-links-deep-links/">
+		
+			Android M DeepLinks AppLinks 详解</a>
+	</h2>
+	<div class="entry-content">
+		<blockquote>
+<p>在Android M中Google做了很多优化性能、提升用户体验的事情，比如说：App权限、Google Now on Tap、Doze省电系统、AppLinks、DeepLinks等。最近工作接触到了AppLinks、DeepLinks这两个提升用户体验的优化，于是将自己对这两个优化的分析理解记录了下来。</p>
+</blockquote>
+
+<p><strong>DeepLinks、AppLinks是两个比较容易混淆的概念，但是在Android M中是两个完全不同的东西。</strong></p>
+
+<h1>DeepLinks</h1>
+
+<p>从概念上不容易理解DeepLinks，所以举个例子来说。比如我们的手机安装了微信，当其他App发起一个Action为android.intent.action.SEND的intent的时候，Android系统会弹出Choose Picker供用户选择被调起应用，如果微信适配了Android M的DeepLinks，给DeepLinks中添加了常用8位微信联系人，那么在系统弹出的Choose Picker中会直接显示这8位联系人，供用户选择，直接将消息发送至选择用户。</p>
+
+
+		
+		<a href="/blog/2015/12/17/app-links-deep-links/" class="more-link">Read on &rarr;</a>
+	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Dec 17th, 2015</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>android</a>
+
+
+</div>
+	
+</div>
+</article>
 
 
     <article class="post">
@@ -526,43 +568,6 @@ Oct 28th, 2013</div>
 
 
 	<a class='category' href='/blog/categories/android/'>android</a>
-
-
-</div>
-	
-</div>
-</article>
-
-
-    <article class="post">
-	<h2 class="title">
-		
-		<a href="/blog/2013/10/28/two-busy-month/">
-		
-			忙碌的两个月</a>
-	</h2>
-	<div class="entry-content">
-		<p>大二生活的两个月已经过去了，停下来总结总结这两个月，对这两个月整体感觉过得很踏实。</p>
-
-<p>9月份就正式开始了自己的大二生活，大概看了看这学期的课表，感觉爽了很多，面向对象，计算机图形学，数据结构之类的课就都开了。第一眼看上去就很爽的样子，于是抱着一颗幸福的心就开始了大二生活。9月份最重要的事可以说是承担起了团队（联创团队）招新的事。9月3号之前写好的策划，然后9月8号正式开始招新，而我的生活也就随着招新的开始真正忙了起来，招新每一个环节都去盯，看安排的队友任务完成的怎么样，以及一些借教室，申请场地之类的事都得去忙，整个9月份我就像一个“要账”的似的，整天给这个队友打了电话给那个队友打电话的，我估计大家都有点怕接我电话了，不过有个好处呢就是我跟团队的每个人几乎都把关系搞熟了，还是蛮开心的。关于招新的流程就不多说了，详细写写招新之后的感悟吧。</p>
-
-
-		
-		<a href="/blog/2013/10/28/two-busy-month/" class="more-link">Read on &rarr;</a>
-	</div>
-
-
-<div class="meta">
-	<div class="date">
-
-
-
-
-Oct 28th, 2013</div>
-	<div class="tags">
-
-
-	<a class='category' href='/blog/categories/life/'>life</a>
 
 
 </div>

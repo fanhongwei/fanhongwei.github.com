@@ -4,7 +4,7 @@
   <title><![CDATA[Category: android | vicvan]]></title>
   <link href="http://fanhongwei.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://fanhongwei.github.io/"/>
-  <updated>2015-09-04T21:27:50+08:00</updated>
+  <updated>2015-12-17T21:34:42+08:00</updated>
   <id>http://fanhongwei.github.io/</id>
   <author>
     <name><![CDATA[vicvan]]></name>
@@ -12,6 +12,607 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Android M DeepLinks AppLinks 详解]]></title>
+    <link href="http://fanhongwei.github.io/blog/2015/12/17/app-links-deep-links/"/>
+    <updated>2015-12-17T16:23:19+08:00</updated>
+    <id>http://fanhongwei.github.io/blog/2015/12/17/app-links-deep-links</id>
+    <content type="html"><![CDATA[<blockquote>
+<p>在Android M中Google做了很多优化性能、提升用户体验的事情，比如说：App权限、Google Now on Tap、Doze省电系统、AppLinks、DeepLinks等。最近工作接触到了AppLinks、DeepLinks这两个提升用户体验的优化，于是将自己对这两个优化的分析理解记录了下来。</p>
+</blockquote>
+
+<p><strong>DeepLinks、AppLinks是两个比较容易混淆的概念，但是在Android M中是两个完全不同的东西。</strong></p>
+
+<h1>DeepLinks</h1>
+
+<p>从概念上不容易理解DeepLinks，所以举个例子来说。比如我们的手机安装了微信，当其他App发起一个Action为android.intent.action.SEND的intent的时候，Android系统会弹出Choose Picker供用户选择被调起应用，如果微信适配了Android M的DeepLinks，给DeepLinks中添加了常用8位微信联系人，那么在系统弹出的Choose Picker中会直接显示这8位联系人，供用户选择，直接将消息发送至选择用户。</p>
+
+<!--more-->
+
+<h4>DeepLinks适配</h4>
+
+<ul>
+<li>继承自Android SDK的ChooserTargetService实现自己的Service</li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text">public class SampleChooserTargetService extends ChooserTargetService {
+
+    @Override
+    public List&lt;ChooserTarget&gt; onGetChooserTargets(ComponentName targetActivityName, IntentFilter matchedFilter) {
+        final List&lt;ChooserTarget&gt; targets = new ArrayList&lt;&gt;();
+        for (int i = 0; i &lt; length; i++) {
+            // The title of the target
+            final String title = ...
+            // The icon to represent the target
+            final Icon icon = ...
+            // Ranking score for this target between 0.0f and 1.0f
+            final float score = ...
+            // PendingIntent to fill in and send if the user chooses this target
+            final PendingIntent action = ...
+            targets.add(new ChooserTarget(title, icon, score, action));
+        }
+        return targets;
+    }
+
+}
+</code></pre></div>
+<ul>
+<li>在AndroidManifest中声明Service</li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text">&lt;service android:name=&quot;.SampleChooserTargetService&quot;
+             android:label=&quot;@string/service_name&quot;
+             android:permission=&quot;android.permission.BIND_CHOOSER_TARGET_SERVICE&quot;&gt;
+         &lt;intent-filter&gt;
+             &lt;action android:name=&quot;android.service.chooser.ChooserTargetService&quot; /&gt;
+         &lt;/intent-filter&gt;
+&lt;/service&gt;
+</code></pre></div>
+<ul>
+<li>在需要响应的Activity中添加meta-data</li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text"> &lt;activity android:name=&quot;.SampleActivity&quot;
+             android:label=&quot;@string/sample_activity_label&quot;&gt;
+         &lt;intent-filter&gt;
+             &lt;action android:name=&quot;android.intent.action.SEND&quot; /&gt;
+         &lt;/intent-filter&gt;
+         &lt;meta-data android:name=&quot;android.service.chooser.chooser_target_service&quot;
+                 android:value=&quot;.SampleChooserTargetService&quot; /&gt;
+     &lt;/activity&gt;
+</code></pre></div>
+<h4>DeepLinks分析</h4>
+
+<p>DeepLinks主要涉及到Android Framework中的ResolverActivity和ChooserActivity，在API 23之前ChooserActivity几乎没有东西，但是在v23中增加了不少代码，DeepLinks逻辑一定在这一部分增加的代码中，我们结合代码详细分析。</p>
+
+<p>从ResolverActivity的onCreate开始分析</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">protected void onCreate(Bundle savedInstanceState, Intent intent,
+            CharSequence title, int defaultTitleRes, Intent[] initialIntents,
+            List&lt;ResolveInfo&gt; rList, boolean alwaysUseOption) {
+        setTheme(R.style.Theme_DeviceDefault_Resolver);
+        super.onCreate(savedInstanceState);
+
+        // Determine whether we should show that intent is forwarded
+        // from managed profile to owner or other way around.
+        setProfileSwitchMessageId(intent.getContentUserHint());
+
+        ...
+
+        // Add our initial intent as the first item, regardless of what else has already been added.
+        mIntents.add(0, new Intent(intent));
+
+        final String referrerPackage = getReferrerPackageName();
+
+        mResolverComparator = new ResolverComparator(this, getTargetIntent(), referrerPackage);
+
+        if (configureContentView(mIntents, initialIntents, rList, alwaysUseOption)) {
+            return;
+        }
+
+        // Prevent the Resolver window from becoming the top fullscreen window and thus from taking
+        // control of the system bars.
+        getWindow().clearFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR);
+        ...
+
+}
+</code></pre></div>
+<p>在20行的位置调用了confiureContentView方法</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">/**
+     * Returns true if the activity is finishing and creation should halt
+     */
+    boolean configureContentView(List&lt;Intent&gt; payloadIntents, Intent[] initialIntents,
+            List&lt;ResolveInfo&gt; rList, boolean alwaysUseOption) {
+        // The last argument of createAdapter is whether to do special handling
+        // of the last used choice to highlight it in the list.  We need to always
+        // turn this off when running under voice interaction, since it results in
+        // a more complicated UI that the current voice interaction flow is not able
+        // to handle.
+        mAdapter = createAdapter(this, payloadIntents, initialIntents, rList,
+                mLaunchedFromUid, alwaysUseOption &amp;&amp; !isVoiceInteraction());
+
+        final int layoutId;
+        if (mAdapter.hasFilteredItem()) {
+            layoutId = R.layout.resolver_list_with_default;
+            alwaysUseOption = false;
+        } else {
+            layoutId = getLayoutResource();
+        }
+        mAlwaysUseOption = alwaysUseOption;
+        ...
+    }
+</code></pre></div>
+<p>在方法的开头调用了createAdapter这个地方应该是构造Choose Picker用到的Adapter，ChooserActivity继承自ResolverActivity，会发现ChooserActivity重写了createAdapter</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">@Override
+    ResolveListAdapter createAdapter(Context context, List&lt;Intent&gt; payloadIntents,
+            Intent[] initialIntents, List&lt;ResolveInfo&gt; rList, int launchedFromUid,
+            boolean filterLastUsed) {
+        final ChooserListAdapter adapter = new ChooserListAdapter(context, payloadIntents,
+                initialIntents, rList, launchedFromUid, filterLastUsed);
+        if (DEBUG) Log.d(TAG, &quot;Adapter created; querying services&quot;);
+        queryTargetServices(adapter);
+        return adapter;
+    }
+</code></pre></div>
+<p>在这个地方应该注意到queryTargetServices</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">void queryTargetServices(ChooserListAdapter adapter) {
+        final PackageManager pm = getPackageManager();
+        int targetsToQuery = 0;
+        for (int i = 0, N = adapter.getDisplayResolveInfoCount(); i &lt; N; i++) {
+            final DisplayResolveInfo dri = adapter.getDisplayResolveInfo(i);
+            final ActivityInfo ai = dri.getResolveInfo().activityInfo;
+            final Bundle md = ai.metaData;
+            final String serviceName = md != null ? convertServiceName(ai.packageName,
+                    md.getString(ChooserTargetService.META_DATA_NAME)) : null;
+            if (serviceName != null) {
+                final ComponentName serviceComponent = new ComponentName(
+                        ai.packageName, serviceName);
+                final Intent serviceIntent = new Intent(ChooserTargetService.SERVICE_INTERFACE)
+                        .setComponent(serviceComponent);
+
+                if (DEBUG) {
+                    Log.d(TAG, &quot;queryTargets found target with service &quot; + serviceComponent);
+                }
+
+                try {
+                    final String perm = pm.getServiceInfo(serviceComponent, 0).permission;
+                    if (!ChooserTargetService.BIND_PERMISSION.equals(perm)) {
+                        Log.w(TAG, &quot;ChooserTargetService &quot; + serviceComponent + &quot; does not require&quot;
+                                + &quot; permission &quot; + ChooserTargetService.BIND_PERMISSION
+                                + &quot; - this service will not be queried for ChooserTargets.&quot;
+                                + &quot; add android:permission=\&quot;&quot;
+                                + ChooserTargetService.BIND_PERMISSION + &quot;\&quot;&quot;
+                                + &quot; to the &lt;service&gt; tag for &quot; + serviceComponent
+                                + &quot; in the manifest.&quot;);
+                        continue;
+                    }
+                } catch (NameNotFoundException e) {
+                    Log.e(TAG, &quot;Could not look up service &quot; + serviceComponent, e);
+                    continue;
+                }
+
+                final ChooserTargetServiceConnection conn =
+                        new ChooserTargetServiceConnection(this, dri);
+                if (bindServiceAsUser(serviceIntent, conn, BIND_AUTO_CREATE | BIND_NOT_FOREGROUND,
+                        UserHandle.CURRENT)) {
+                    if (DEBUG) {
+                        Log.d(TAG, &quot;Binding service connection for target &quot; + dri
+                                + &quot; intent &quot; + serviceIntent);
+                    }
+                    mServiceConnections.add(conn);
+                    targetsToQuery++;
+                }
+            }
+            if (targetsToQuery &gt;= QUERY_TARGET_SERVICE_LIMIT) {
+                if (DEBUG) Log.d(TAG, &quot;queryTargets hit query target limit &quot;
+                        + QUERY_TARGET_SERVICE_LIMIT);
+                break;
+            }
+        }
+
+        if (!mServiceConnections.isEmpty()) {
+            if (DEBUG) Log.d(TAG, &quot;queryTargets setting watchdog timer for &quot;
+                    + WATCHDOG_TIMEOUT_MILLIS + &quot;ms&quot;);
+            mChooserHandler.sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT,
+                    WATCHDOG_TIMEOUT_MILLIS);
+        } else {
+            sendVoiceChoicesIfNeeded();
+        }
+    }
+</code></pre></div>
+<p>可以看到queryTargetServices主要遍历可调起Activity,并根据我们适配过程中添加的meta-data数据取到ChooserTargetService，并作一系列操作，最后将ChooserTargetServiceConnection添加到List mServiceConnections中。接下来分析ChooserTargetServiceConnection这个内部类</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">static class ChooserTargetServiceConnection implements ServiceConnection {
+        private final DisplayResolveInfo mOriginalTarget;
+        private ComponentName mConnectedComponent;
+        private ChooserActivity mChooserActivity;
+        private final Object mLock = new Object();
+
+        private final IChooserTargetResult mChooserTargetResult = new IChooserTargetResult.Stub() {
+            @Override
+            public void sendResult(List&lt;ChooserTarget&gt; targets) throws RemoteException {
+                synchronized (mLock) {
+                    if (mChooserActivity == null) {
+                        Log.e(TAG, &quot;destroyed ChooserTargetServiceConnection received result from &quot;
+                                + mConnectedComponent + &quot;; ignoring...&quot;);
+                        return;
+                    }
+                    mChooserActivity.filterServiceTargets(
+                            mOriginalTarget.getResolveInfo().activityInfo.packageName, targets);
+                    final Message msg = Message.obtain();
+                    msg.what = CHOOSER_TARGET_SERVICE_RESULT;
+                    msg.obj = new ServiceResultInfo(mOriginalTarget, targets,
+                            ChooserTargetServiceConnection.this);
+                    mChooserActivity.mChooserHandler.sendMessage(msg);
+                }
+            }
+        };
+
+        public ChooserTargetServiceConnection(ChooserActivity chooserActivity,
+                DisplayResolveInfo dri) {
+            mChooserActivity = chooserActivity;
+            mOriginalTarget = dri;
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (DEBUG) Log.d(TAG, &quot;onServiceConnected: &quot; + name);
+            synchronized (mLock) {
+                if (mChooserActivity == null) {
+                    Log.e(TAG, &quot;destroyed ChooserTargetServiceConnection got onServiceConnected&quot;);
+                    return;
+                }
+
+                final IChooserTargetService icts = IChooserTargetService.Stub.asInterface(service);
+                try {
+                    icts.getChooserTargets(mOriginalTarget.getResolvedComponentName(),
+                            mOriginalTarget.getResolveInfo().filter, mChooserTargetResult);
+                } catch (RemoteException e) {
+                    Log.e(TAG, &quot;Querying ChooserTargetService &quot; + name + &quot; failed.&quot;, e);
+                    mChooserActivity.unbindService(this);
+                    destroy();
+                    mChooserActivity.mServiceConnections.remove(this);
+                }
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            if (DEBUG) Log.d(TAG, &quot;onServiceDisconnected: &quot; + name);
+            synchronized (mLock) {
+                if (mChooserActivity == null) {
+                    Log.e(TAG,
+                            &quot;destroyed ChooserTargetServiceConnection got onServiceDisconnected&quot;);
+                    return;
+                }
+
+                mChooserActivity.unbindService(this);
+                destroy();
+                mChooserActivity.mServiceConnections.remove(this);
+                if (mChooserActivity.mServiceConnections.isEmpty()) {
+                    mChooserActivity.mChooserHandler.removeMessages(
+                            CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
+                    mChooserActivity.sendVoiceChoicesIfNeeded();
+                }
+                mConnectedComponent = null;
+            }
+        }
+
+        public void destroy() {
+            synchronized (mLock) {
+                mChooserActivity = null;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return &quot;ChooserTargetServiceConnection{service=&quot;
+                    + mConnectedComponent + &quot;, activity=&quot;
+                    + mOriginalTarget.getResolveInfo().activityInfo.toString() + &quot;}&quot;;
+        }
+    }
+</code></pre></div>
+<p>可以看到在44行的位置通过getChooserTargets拿到了我们适配过程中SampleChooserTargetService中返回的target list。在22行的位置可以看到mChooserHandler sendMessage，接下来继续看mChooserHandler</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">private final Handler mChooserHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case CHOOSER_TARGET_SERVICE_RESULT:
+                    if (DEBUG) Log.d(TAG, &quot;CHOOSER_TARGET_SERVICE_RESULT&quot;);
+                    if (isDestroyed()) break;
+                    final ServiceResultInfo sri = (ServiceResultInfo) msg.obj;
+                    if (!mServiceConnections.contains(sri.connection)) {
+                        Log.w(TAG, &quot;ChooserTargetServiceConnection &quot; + sri.connection
+                                + &quot; returned after being removed from active connections.&quot;
+                                + &quot; Have you considered returning results faster?&quot;);
+                        break;
+                    }
+                    if (sri.resultTargets != null) {
+                        mChooserListAdapter.addServiceResults(sri.originalTarget,
+                                sri.resultTargets);
+                    }
+                    unbindService(sri.connection);
+                    sri.connection.destroy();
+                    mServiceConnections.remove(sri.connection);
+                    if (mServiceConnections.isEmpty()) {
+                        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
+                        sendVoiceChoicesIfNeeded();
+                    }
+                    break;
+
+                ...
+            }
+        }
+    };
+</code></pre></div>
+<p>在16行位置可以看到mChooserListAdapter.addServiceResults方法将resultTargets传给了adapter,接下来看addServiceResults的代码</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">public void addServiceResults(DisplayResolveInfo origTarget, List&lt;ChooserTarget&gt; targets) {
+            if (DEBUG) Log.d(TAG, &quot;addServiceResults &quot; + origTarget + &quot;, &quot; + targets.size()
+                    + &quot; targets&quot;);
+            final float parentScore = getScore(origTarget);
+            Collections.sort(targets, mBaseTargetComparator);
+            float lastScore = 0;
+            for (int i = 0, N = targets.size(); i &lt; N; i++) {
+                final ChooserTarget target = targets.get(i);
+                float targetScore = target.getScore();
+                targetScore *= parentScore;
+                targetScore *= mLateFee;
+                if (i &gt; 0 &amp;&amp; targetScore &gt;= lastScore) {
+                    // Apply a decay so that the top app can&#39;t crowd out everything else.
+                    // This incents ChooserTargetServices to define what&#39;s truly better.
+                    targetScore = lastScore * 0.95f;
+                }
+                insertServiceTarget(new ChooserTargetInfo(origTarget, target, targetScore));
+
+                if (DEBUG) {
+                    Log.d(TAG, &quot; =&gt; &quot; + target.toString() + &quot; score=&quot; + targetScore
+                            + &quot; base=&quot; + target.getScore()
+                            + &quot; lastScore=&quot; + lastScore
+                            + &quot; parentScore=&quot; + parentScore
+                            + &quot; lateFee=&quot; + mLateFee);
+                }
+
+                lastScore = targetScore;
+            }
+
+            mLateFee *= 0.95f;
+
+            notifyDataSetChanged();
+        }
+</code></pre></div>
+<p>可以看到这个方法通过循环遍历resultTargets，并将每一个target insert到mChooserAdapter中，从而实现了将用户App中的target添加到ChooserActivity中。</p>
+
+<p>至此，已经熟悉了DeepLinks的适配以及DeepLinks的实现原理，接下来看AppLinks。</p>
+
+<h1>AppLinks</h1>
+
+<p>同样以微信为例来说。比如我们的手机安装了微信，并且微信适配了Android M的AppLinks，当我们点击微信AppLinks适配的链接时，Android M系统不再弹出可以打开网页的Apps的Choose Picker，而是直接跳转到微信指定页面。</p>
+
+<h4>AppLinks适配</h4>
+
+<ul>
+<li>首先为intent-filter标签添加android:autoVerify=&quot;true&quot;的属性</li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text">&lt;activity ...&gt;
+
+    &lt;intent-filter android:autoVerify=&quot;true&quot;&gt;
+        &lt;action android:name=&quot;android.intent.action.VIEW&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+        &lt;category android:name=&quot;android.intent.category.BROWSABLE&quot; /&gt;
+        &lt;data android:scheme=&quot;http&quot; android:host=&quot;www.example.com&quot; /&gt;
+        &lt;data android:scheme=&quot;https&quot; android:host=&quot;www.example.com&quot; /&gt;
+    &lt;/intent-filter&gt;
+
+&lt;/activity&gt;
+</code></pre></div>
+<ul>
+<li>创建JSON文件，JSON文件中需要包含app的ID以及APK的公钥证书。这个地方一个App可以对应多个website，一个website也可以对应多个App。具体详情可以前往 <a href="http://developer.android.com/intl/zh-cn/training/app-links/index.html#">Android Developer</a></li>
+<li>创建完文件之后，需要上传它同时保证它可以使用这个URL访问http://example.com/.well-known/statements.json。</li>
+</ul>
+
+<h4>AppLinks分析</h4>
+
+<p>主要分析Android M Framework PackageManagerService中添加的一段代码</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">private interface IntentFilterVerifier&lt;T extends IntentFilter&gt; {
+        boolean addOneIntentFilterVerification(int verifierId, int userId, int verificationId,
+                                               T filter, String packageName);
+        void startVerifications(int userId);
+        void receiveVerificationResponse(int verificationId);
+    }
+
+    private class IntentVerifierProxy implements IntentFilterVerifier&lt;ActivityIntentInfo&gt; {
+        private Context mContext;
+        private ComponentName mIntentFilterVerifierComponent;
+        private ArrayList&lt;Integer&gt; mCurrentIntentFilterVerifications = new ArrayList&lt;Integer&gt;();
+
+        public IntentVerifierProxy(Context context, ComponentName verifierComponent) {
+            mContext = context;
+            mIntentFilterVerifierComponent = verifierComponent;
+        }
+
+        private String getDefaultScheme() {
+            return IntentFilter.SCHEME_HTTPS;
+        }
+
+        @Override
+        public void startVerifications(int userId) {
+            // Launch verifications requests
+            int count = mCurrentIntentFilterVerifications.size();
+            for (int n=0; n&lt;count; n++) {
+                int verificationId = mCurrentIntentFilterVerifications.get(n);
+                final IntentFilterVerificationState ivs =
+                        mIntentFilterVerificationStates.get(verificationId);
+
+                String packageName = ivs.getPackageName();
+
+                ArrayList&lt;PackageParser.ActivityIntentInfo&gt; filters = ivs.getFilters();
+                final int filterCount = filters.size();
+                ArraySet&lt;String&gt; domainsSet = new ArraySet&lt;&gt;();
+                for (int m=0; m&lt;filterCount; m++) {
+                    PackageParser.ActivityIntentInfo filter = filters.get(m);
+                    domainsSet.addAll(filter.getHostsList());
+                }
+                ArrayList&lt;String&gt; domainsList = new ArrayList&lt;&gt;(domainsSet);
+                synchronized (mPackages) {
+                    if (mSettings.createIntentFilterVerificationIfNeededLPw(
+                            packageName, domainsList) != null) {
+                        scheduleWriteSettingsLocked();
+                    }
+                }
+                sendVerificationRequest(userId, verificationId, ivs);
+            }
+            mCurrentIntentFilterVerifications.clear();
+        }
+
+        private void sendVerificationRequest(int userId, int verificationId,
+                IntentFilterVerificationState ivs) {
+
+            Intent verificationIntent = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
+            verificationIntent.putExtra(
+                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_ID,
+                    verificationId);
+            verificationIntent.putExtra(
+                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_URI_SCHEME,
+                    getDefaultScheme());
+            verificationIntent.putExtra(
+                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_HOSTS,
+                    ivs.getHostsString());
+            verificationIntent.putExtra(
+                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_PACKAGE_NAME,
+                    ivs.getPackageName());
+            verificationIntent.setComponent(mIntentFilterVerifierComponent);
+            verificationIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+
+            UserHandle user = new UserHandle(userId);
+            mContext.sendBroadcastAsUser(verificationIntent, user);
+            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                    &quot;Sending IntentFilter verification broadcast&quot;);
+        }
+
+        public void receiveVerificationResponse(int verificationId) {
+            IntentFilterVerificationState ivs = mIntentFilterVerificationStates.get(verificationId);
+
+            final boolean verified = ivs.isVerified();
+
+            ArrayList&lt;PackageParser.ActivityIntentInfo&gt; filters = ivs.getFilters();
+            final int count = filters.size();
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.i(TAG, &quot;Received verification response &quot; + verificationId
+                        + &quot; for &quot; + count + &quot; filters, verified=&quot; + verified);
+            }
+            for (int n=0; n&lt;count; n++) {
+                PackageParser.ActivityIntentInfo filter = filters.get(n);
+                filter.setVerified(verified);
+
+                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, &quot;IntentFilter &quot; + filter.toString()
+                        + &quot; verified with result:&quot; + verified + &quot; and hosts:&quot;
+                        + ivs.getHostsString());
+            }
+
+            mIntentFilterVerificationStates.remove(verificationId);
+
+            final String packageName = ivs.getPackageName();
+            IntentFilterVerificationInfo ivi = null;
+
+            synchronized (mPackages) {
+                ivi = mSettings.getIntentFilterVerificationLPr(packageName);
+            }
+            if (ivi == null) {
+                Slog.w(TAG, &quot;IntentFilterVerificationInfo not found for verificationId:&quot;
+                        + verificationId + &quot; packageName:&quot; + packageName);
+                return;
+            }
+            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+                    &quot;Updating IntentFilterVerificationInfo for package &quot; + packageName
+                            +&quot; verificationId:&quot; + verificationId);
+
+            synchronized (mPackages) {
+                if (verified) {
+                    ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS);
+                } else {
+                    ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK);
+                }
+                scheduleWriteSettingsLocked();
+
+                final int userId = ivs.getUserId();
+                if (userId != UserHandle.USER_ALL) {
+                    final int userStatus =
+                            mSettings.getIntentFilterVerificationStatusLPr(packageName, userId);
+
+                    int updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+                    boolean needUpdate = false;
+
+                    // We cannot override the STATUS_ALWAYS / STATUS_NEVER states if they have
+                    // already been set by the User thru the Disambiguation dialog
+                    switch (userStatus) {
+                        case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED:
+                            if (verified) {
+                                updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+                            } else {
+                                updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
+                            }
+                            needUpdate = true;
+                            break;
+
+                        case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK:
+                            if (verified) {
+                                updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+                                needUpdate = true;
+                            }
+                            break;
+
+                        default:
+                            // Nothing to do
+                    }
+
+                    if (needUpdate) {
+                        mSettings.updateIntentFilterVerificationStatusLPw(
+                                packageName, updatedStatus, userId);
+                        scheduleWritePackageRestrictionsLocked(userId);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean addOneIntentFilterVerification(int verifierUid, int userId, int verificationId,
+                    ActivityIntentInfo filter, String packageName) {
+            if (!hasValidDomains(filter)) {
+                return false;
+            }
+            IntentFilterVerificationState ivs = mIntentFilterVerificationStates.get(verificationId);
+            if (ivs == null) {
+                ivs = createDomainVerificationState(verifierUid, userId, verificationId,
+                        packageName);
+            }
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.d(TAG, &quot;Adding verification filter for &quot; + packageName + &quot; : &quot; + filter);
+            }
+            ivs.addFilter(filter);
+            return true;
+        }
+
+        private IntentFilterVerificationState createDomainVerificationState(int verifierUid,
+                int userId, int verificationId, String packageName) {
+            IntentFilterVerificationState ivs = new IntentFilterVerificationState(
+                    verifierUid, userId, packageName);
+            ivs.setPendingState();
+            synchronized (mPackages) {
+                mIntentFilterVerificationStates.append(verificationId, ivs);
+                mCurrentIntentFilterVerifications.add(verificationId);
+            }
+            return ivs;
+        }
+    }
+</code></pre></div>
+<p>这一部分主要有IntentFilterVerifier接口、实现了该接口的IntentVerifierProxy代理类。</p>
+
+<ul>
+<li>在PackageManager安装apk的过程中，会通过IntentVerifierProxy startVerifications（23行），在这个过程中会调用代理类的sendVerificationRequest（47行）。</li>
+<li>sendVerificationRequest会发出一个带有android.intent.action.INTENT<em>FILTER</em>NEEDS_VERIFICATION的广播intent，intent中还携带有该package的信息（72行）。</li>
+<li>Intent Filter Verifier的广播接收器获取这个广播，从package的<intent-filter>标签中编译出一个特有主机名的列表，verifier尝试从每个特有的主机名中获取statements.json，每一个被获取的JSON文件都会检查它的application ID和安装包的证书。当所有文件同时满足时发送成功信息到PackageManagerService的receiveVerificationResponse。</li>
+<li>在receiveVerificationResponse中通过scheduleWriteSettingsLocked保存结果（120行）。</li>
+</ul>
+
+<p>至此，也已经熟悉了AppLinks的适配以及AppLinks的实现原理。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Android Resource walkthrough]]></title>

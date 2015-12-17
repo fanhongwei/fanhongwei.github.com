@@ -1,0 +1,1248 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Android M DeepLinks AppLinks 详解 - vicvan</title>
+	<meta name="author" content="vicvan">
+
+	
+	<meta name="description" content="在Android M中Google做了很多优化性能、提升用户体验的事情，比如说：App权限、Google Now on Tap、Doze省电系统、AppLinks、DeepLinks等。最近工作接触到了AppLinks、DeepLinks这两个提升用户体验的优化， &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="vicvan" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">vicvan</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+	<li><a href="/project">Project</a></li>
+	<li><a href="/me">Me</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="https://www.google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:fanhongwei.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		
+		
+    
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="https://www.google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:fanhongwei.github.io">
+	</form>
+</nav>
+
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Android M DeepLinks AppLinks 详解</h2>
+	<div class="entry-content"><blockquote>
+<p>在Android M中Google做了很多优化性能、提升用户体验的事情，比如说：App权限、Google Now on Tap、Doze省电系统、AppLinks、DeepLinks等。最近工作接触到了AppLinks、DeepLinks这两个提升用户体验的优化，于是将自己对这两个优化的分析理解记录了下来。</p>
+</blockquote>
+
+<p><strong>DeepLinks、AppLinks是两个比较容易混淆的概念，但是在Android M中是两个完全不同的东西。</strong></p>
+
+<h1>DeepLinks</h1>
+
+<p>从概念上不容易理解DeepLinks，所以举个例子来说。比如我们的手机安装了微信，当其他App发起一个Action为android.intent.action.SEND的intent的时候，Android系统会弹出Choose Picker供用户选择被调起应用，如果微信适配了Android M的DeepLinks，给DeepLinks中添加了常用8位微信联系人，那么在系统弹出的Choose Picker中会直接显示这8位联系人，供用户选择，直接将消息发送至选择用户。</p>
+
+<!--more-->
+
+<h4>DeepLinks适配</h4>
+
+<ul>
+<li>继承自Android SDK的ChooserTargetService实现自己的Service</li>
+</ul>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public class SampleChooserTargetService extends ChooserTargetService {
+</span><span class='line'>
+</span><span class='line'>    @Override
+</span><span class='line'>    public List&lt;ChooserTarget&gt; onGetChooserTargets(ComponentName targetActivityName, IntentFilter matchedFilter) {
+</span><span class='line'>        final List&lt;ChooserTarget&gt; targets = new ArrayList&lt;&gt;();
+</span><span class='line'>        for (int i = 0; i &lt; length; i++) {
+</span><span class='line'>            // The title of the target
+</span><span class='line'>            final String title = ...
+</span><span class='line'>            // The icon to represent the target
+</span><span class='line'>            final Icon icon = ...
+</span><span class='line'>            // Ranking score for this target between 0.0f and 1.0f
+</span><span class='line'>            final float score = ...
+</span><span class='line'>            // PendingIntent to fill in and send if the user chooses this target
+</span><span class='line'>            final PendingIntent action = ...
+</span><span class='line'>            targets.add(new ChooserTarget(title, icon, score, action));
+</span><span class='line'>        }
+</span><span class='line'>        return targets;
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+<ul>
+<li>在AndroidManifest中声明Service</li>
+</ul>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;service android:name=".SampleChooserTargetService"
+</span><span class='line'>             android:label="@string/service_name"
+</span><span class='line'>             android:permission="android.permission.BIND_CHOOSER_TARGET_SERVICE"&gt;
+</span><span class='line'>         &lt;intent-filter&gt;
+</span><span class='line'>             &lt;action android:name="android.service.chooser.ChooserTargetService" /&gt;
+</span><span class='line'>         &lt;/intent-filter&gt;
+</span><span class='line'>&lt;/service&gt;</span></code></pre></td></tr></table></div></figure>
+
+<ul>
+<li>在需要响应的Activity中添加meta-data</li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text"> &lt;activity android:name=&quot;.SampleActivity&quot;
+             android:label=&quot;@string/sample_activity_label&quot;&gt;
+         &lt;intent-filter&gt;
+             &lt;action android:name=&quot;android.intent.action.SEND&quot; /&gt;
+         &lt;/intent-filter&gt;
+         &lt;meta-data android:name=&quot;android.service.chooser.chooser_target_service&quot;
+                 android:value=&quot;.SampleChooserTargetService&quot; /&gt;
+     &lt;/activity&gt;
+</code></pre></div>
+<h4>DeepLinks分析</h4>
+
+<p>DeepLinks主要涉及到Android Framework中的ResolverActivity和ChooserActivity，在API 23之前ChooserActivity几乎没有东西，但是在v23中增加了不少代码，DeepLinks逻辑一定在这一部分增加的代码中，我们结合代码详细分析。</p>
+
+<p>从ResolverActivity的onCreate开始分析</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>protected void onCreate(Bundle savedInstanceState, Intent intent,
+</span><span class='line'>            CharSequence title, int defaultTitleRes, Intent[] initialIntents,
+</span><span class='line'>            List&lt;ResolveInfo&gt; rList, boolean alwaysUseOption) {
+</span><span class='line'>        setTheme(R.style.Theme_DeviceDefault_Resolver);
+</span><span class='line'>        super.onCreate(savedInstanceState);
+</span><span class='line'>
+</span><span class='line'>        // Determine whether we should show that intent is forwarded
+</span><span class='line'>        // from managed profile to owner or other way around.
+</span><span class='line'>        setProfileSwitchMessageId(intent.getContentUserHint());
+</span><span class='line'>
+</span><span class='line'>        ...
+</span><span class='line'>
+</span><span class='line'>        // Add our initial intent as the first item, regardless of what else has already been added.
+</span><span class='line'>        mIntents.add(0, new Intent(intent));
+</span><span class='line'>
+</span><span class='line'>        final String referrerPackage = getReferrerPackageName();
+</span><span class='line'>
+</span><span class='line'>        mResolverComparator = new ResolverComparator(this, getTargetIntent(), referrerPackage);
+</span><span class='line'>
+</span><span class='line'>        if (configureContentView(mIntents, initialIntents, rList, alwaysUseOption)) {
+</span><span class='line'>            return;
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        // Prevent the Resolver window from becoming the top fullscreen window and thus from taking
+</span><span class='line'>        // control of the system bars.
+</span><span class='line'>        getWindow().clearFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR);
+</span><span class='line'>        ...
+</span><span class='line'>        
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+<p>在20行的位置调用了confiureContentView方法</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/**
+</span><span class='line'>     * Returns true if the activity is finishing and creation should halt
+</span><span class='line'>     */
+</span><span class='line'>    boolean configureContentView(List&lt;Intent&gt; payloadIntents, Intent[] initialIntents,
+</span><span class='line'>            List&lt;ResolveInfo&gt; rList, boolean alwaysUseOption) {
+</span><span class='line'>        // The last argument of createAdapter is whether to do special handling
+</span><span class='line'>        // of the last used choice to highlight it in the list.  We need to always
+</span><span class='line'>        // turn this off when running under voice interaction, since it results in
+</span><span class='line'>        // a more complicated UI that the current voice interaction flow is not able
+</span><span class='line'>        // to handle.
+</span><span class='line'>        mAdapter = createAdapter(this, payloadIntents, initialIntents, rList,
+</span><span class='line'>                mLaunchedFromUid, alwaysUseOption && !isVoiceInteraction());
+</span><span class='line'>
+</span><span class='line'>        final int layoutId;
+</span><span class='line'>        if (mAdapter.hasFilteredItem()) {
+</span><span class='line'>            layoutId = R.layout.resolver_list_with_default;
+</span><span class='line'>            alwaysUseOption = false;
+</span><span class='line'>        } else {
+</span><span class='line'>            layoutId = getLayoutResource();
+</span><span class='line'>        }
+</span><span class='line'>        mAlwaysUseOption = alwaysUseOption;
+</span><span class='line'>        ...
+</span><span class='line'>    }</span></code></pre></td></tr></table></div></figure>
+
+<p>在方法的开头调用了createAdapter这个地方应该是构造Choose Picker用到的Adapter，ChooserActivity继承自ResolverActivity，会发现ChooserActivity重写了createAdapter</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@Override
+</span><span class='line'>    ResolveListAdapter createAdapter(Context context, List&lt;Intent&gt; payloadIntents,
+</span><span class='line'>            Intent[] initialIntents, List&lt;ResolveInfo&gt; rList, int launchedFromUid,
+</span><span class='line'>            boolean filterLastUsed) {
+</span><span class='line'>        final ChooserListAdapter adapter = new ChooserListAdapter(context, payloadIntents,
+</span><span class='line'>                initialIntents, rList, launchedFromUid, filterLastUsed);
+</span><span class='line'>        if (DEBUG) Log.d(TAG, "Adapter created; querying services");
+</span><span class='line'>        queryTargetServices(adapter);
+</span><span class='line'>        return adapter;
+</span><span class='line'>    }</span></code></pre></td></tr></table></div></figure>
+
+<p>在这个地方应该注意到queryTargetServices</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>void queryTargetServices(ChooserListAdapter adapter) {
+</span><span class='line'>        final PackageManager pm = getPackageManager();
+</span><span class='line'>        int targetsToQuery = 0;
+</span><span class='line'>        for (int i = 0, N = adapter.getDisplayResolveInfoCount(); i &lt; N; i++) {
+</span><span class='line'>            final DisplayResolveInfo dri = adapter.getDisplayResolveInfo(i);
+</span><span class='line'>            final ActivityInfo ai = dri.getResolveInfo().activityInfo;
+</span><span class='line'>            final Bundle md = ai.metaData;
+</span><span class='line'>            final String serviceName = md != null ? convertServiceName(ai.packageName,
+</span><span class='line'>                    md.getString(ChooserTargetService.META_DATA_NAME)) : null;
+</span><span class='line'>            if (serviceName != null) {
+</span><span class='line'>                final ComponentName serviceComponent = new ComponentName(
+</span><span class='line'>                        ai.packageName, serviceName);
+</span><span class='line'>                final Intent serviceIntent = new Intent(ChooserTargetService.SERVICE_INTERFACE)
+</span><span class='line'>                        .setComponent(serviceComponent);
+</span><span class='line'>
+</span><span class='line'>                if (DEBUG) {
+</span><span class='line'>                    Log.d(TAG, "queryTargets found target with service " + serviceComponent);
+</span><span class='line'>                }
+</span><span class='line'>
+</span><span class='line'>                try {
+</span><span class='line'>                    final String perm = pm.getServiceInfo(serviceComponent, 0).permission;
+</span><span class='line'>                    if (!ChooserTargetService.BIND_PERMISSION.equals(perm)) {
+</span><span class='line'>                        Log.w(TAG, "ChooserTargetService " + serviceComponent + " does not require"
+</span><span class='line'>                                + " permission " + ChooserTargetService.BIND_PERMISSION
+</span><span class='line'>                                + " - this service will not be queried for ChooserTargets."
+</span><span class='line'>                                + " add android:permission=\""
+</span><span class='line'>                                + ChooserTargetService.BIND_PERMISSION + "\""
+</span><span class='line'>                                + " to the &lt;service&gt; tag for " + serviceComponent
+</span><span class='line'>                                + " in the manifest.");
+</span><span class='line'>                        continue;
+</span><span class='line'>                    }
+</span><span class='line'>                } catch (NameNotFoundException e) {
+</span><span class='line'>                    Log.e(TAG, "Could not look up service " + serviceComponent, e);
+</span><span class='line'>                    continue;
+</span><span class='line'>                }
+</span><span class='line'>
+</span><span class='line'>                final ChooserTargetServiceConnection conn =
+</span><span class='line'>                        new ChooserTargetServiceConnection(this, dri);
+</span><span class='line'>                if (bindServiceAsUser(serviceIntent, conn, BIND_AUTO_CREATE | BIND_NOT_FOREGROUND,
+</span><span class='line'>                        UserHandle.CURRENT)) {
+</span><span class='line'>                    if (DEBUG) {
+</span><span class='line'>                        Log.d(TAG, "Binding service connection for target " + dri
+</span><span class='line'>                                + " intent " + serviceIntent);
+</span><span class='line'>                    }
+</span><span class='line'>                    mServiceConnections.add(conn);
+</span><span class='line'>                    targetsToQuery++;
+</span><span class='line'>                }
+</span><span class='line'>            }
+</span><span class='line'>            if (targetsToQuery &gt;= QUERY_TARGET_SERVICE_LIMIT) {
+</span><span class='line'>                if (DEBUG) Log.d(TAG, "queryTargets hit query target limit "
+</span><span class='line'>                        + QUERY_TARGET_SERVICE_LIMIT);
+</span><span class='line'>                break;
+</span><span class='line'>            }
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        if (!mServiceConnections.isEmpty()) {
+</span><span class='line'>            if (DEBUG) Log.d(TAG, "queryTargets setting watchdog timer for "
+</span><span class='line'>                    + WATCHDOG_TIMEOUT_MILLIS + "ms");
+</span><span class='line'>            mChooserHandler.sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT,
+</span><span class='line'>                    WATCHDOG_TIMEOUT_MILLIS);
+</span><span class='line'>        } else {
+</span><span class='line'>            sendVoiceChoicesIfNeeded();
+</span><span class='line'>        }
+</span><span class='line'>    }</span></code></pre></td></tr></table></div></figure>
+
+<p>可以看到queryTargetServices主要遍历可调起Activity,并根据我们适配过程中添加的meta-data数据取到ChooserTargetService，并作一系列操作，最后将ChooserTargetServiceConnection添加到List mServiceConnections中。接下来分析ChooserTargetServiceConnection这个内部类</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>static class ChooserTargetServiceConnection implements ServiceConnection {
+</span><span class='line'>        private final DisplayResolveInfo mOriginalTarget;
+</span><span class='line'>        private ComponentName mConnectedComponent;
+</span><span class='line'>        private ChooserActivity mChooserActivity;
+</span><span class='line'>        private final Object mLock = new Object();
+</span><span class='line'>
+</span><span class='line'>        private final IChooserTargetResult mChooserTargetResult = new IChooserTargetResult.Stub() {
+</span><span class='line'>            @Override
+</span><span class='line'>            public void sendResult(List&lt;ChooserTarget&gt; targets) throws RemoteException {
+</span><span class='line'>                synchronized (mLock) {
+</span><span class='line'>                    if (mChooserActivity == null) {
+</span><span class='line'>                        Log.e(TAG, "destroyed ChooserTargetServiceConnection received result from "
+</span><span class='line'>                                + mConnectedComponent + "; ignoring...");
+</span><span class='line'>                        return;
+</span><span class='line'>                    }
+</span><span class='line'>                    mChooserActivity.filterServiceTargets(
+</span><span class='line'>                            mOriginalTarget.getResolveInfo().activityInfo.packageName, targets);
+</span><span class='line'>                    final Message msg = Message.obtain();
+</span><span class='line'>                    msg.what = CHOOSER_TARGET_SERVICE_RESULT;
+</span><span class='line'>                    msg.obj = new ServiceResultInfo(mOriginalTarget, targets,
+</span><span class='line'>                            ChooserTargetServiceConnection.this);
+</span><span class='line'>                    mChooserActivity.mChooserHandler.sendMessage(msg);
+</span><span class='line'>                }
+</span><span class='line'>            }
+</span><span class='line'>        };
+</span><span class='line'>
+</span><span class='line'>        public ChooserTargetServiceConnection(ChooserActivity chooserActivity,
+</span><span class='line'>                DisplayResolveInfo dri) {
+</span><span class='line'>            mChooserActivity = chooserActivity;
+</span><span class='line'>            mOriginalTarget = dri;
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        @Override
+</span><span class='line'>        public void onServiceConnected(ComponentName name, IBinder service) {
+</span><span class='line'>            if (DEBUG) Log.d(TAG, "onServiceConnected: " + name);
+</span><span class='line'>            synchronized (mLock) {
+</span><span class='line'>                if (mChooserActivity == null) {
+</span><span class='line'>                    Log.e(TAG, "destroyed ChooserTargetServiceConnection got onServiceConnected");
+</span><span class='line'>                    return;
+</span><span class='line'>                }
+</span><span class='line'>
+</span><span class='line'>                final IChooserTargetService icts = IChooserTargetService.Stub.asInterface(service);
+</span><span class='line'>                try {
+</span><span class='line'>                    icts.getChooserTargets(mOriginalTarget.getResolvedComponentName(),
+</span><span class='line'>                            mOriginalTarget.getResolveInfo().filter, mChooserTargetResult);
+</span><span class='line'>                } catch (RemoteException e) {
+</span><span class='line'>                    Log.e(TAG, "Querying ChooserTargetService " + name + " failed.", e);
+</span><span class='line'>                    mChooserActivity.unbindService(this);
+</span><span class='line'>                    destroy();
+</span><span class='line'>                    mChooserActivity.mServiceConnections.remove(this);
+</span><span class='line'>                }
+</span><span class='line'>            }
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        @Override
+</span><span class='line'>        public void onServiceDisconnected(ComponentName name) {
+</span><span class='line'>            if (DEBUG) Log.d(TAG, "onServiceDisconnected: " + name);
+</span><span class='line'>            synchronized (mLock) {
+</span><span class='line'>                if (mChooserActivity == null) {
+</span><span class='line'>                    Log.e(TAG,
+</span><span class='line'>                            "destroyed ChooserTargetServiceConnection got onServiceDisconnected");
+</span><span class='line'>                    return;
+</span><span class='line'>                }
+</span><span class='line'>
+</span><span class='line'>                mChooserActivity.unbindService(this);
+</span><span class='line'>                destroy();
+</span><span class='line'>                mChooserActivity.mServiceConnections.remove(this);
+</span><span class='line'>                if (mChooserActivity.mServiceConnections.isEmpty()) {
+</span><span class='line'>                    mChooserActivity.mChooserHandler.removeMessages(
+</span><span class='line'>                            CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
+</span><span class='line'>                    mChooserActivity.sendVoiceChoicesIfNeeded();
+</span><span class='line'>                }
+</span><span class='line'>                mConnectedComponent = null;
+</span><span class='line'>            }
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        public void destroy() {
+</span><span class='line'>            synchronized (mLock) {
+</span><span class='line'>                mChooserActivity = null;
+</span><span class='line'>            }
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        @Override
+</span><span class='line'>        public String toString() {
+</span><span class='line'>            return "ChooserTargetServiceConnection{service="
+</span><span class='line'>                    + mConnectedComponent + ", activity="
+</span><span class='line'>                    + mOriginalTarget.getResolveInfo().activityInfo.toString() + "}";
+</span><span class='line'>        }
+</span><span class='line'>    }</span></code></pre></td></tr></table></div></figure>
+
+<p>可以看到在44行的位置通过getChooserTargets拿到了我们适配过程中SampleChooserTargetService中返回的target list。在22行的位置可以看到mChooserHandler sendMessage，接下来继续看mChooserHandler</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>private final Handler mChooserHandler = new Handler() {
+</span><span class='line'>        @Override
+</span><span class='line'>        public void handleMessage(Message msg) {
+</span><span class='line'>            switch (msg.what) {
+</span><span class='line'>                case CHOOSER_TARGET_SERVICE_RESULT:
+</span><span class='line'>                    if (DEBUG) Log.d(TAG, "CHOOSER_TARGET_SERVICE_RESULT");
+</span><span class='line'>                    if (isDestroyed()) break;
+</span><span class='line'>                    final ServiceResultInfo sri = (ServiceResultInfo) msg.obj;
+</span><span class='line'>                    if (!mServiceConnections.contains(sri.connection)) {
+</span><span class='line'>                        Log.w(TAG, "ChooserTargetServiceConnection " + sri.connection
+</span><span class='line'>                                + " returned after being removed from active connections."
+</span><span class='line'>                                + " Have you considered returning results faster?");
+</span><span class='line'>                        break;
+</span><span class='line'>                    }
+</span><span class='line'>                    if (sri.resultTargets != null) {
+</span><span class='line'>                        mChooserListAdapter.addServiceResults(sri.originalTarget,
+</span><span class='line'>                                sri.resultTargets);
+</span><span class='line'>                    }
+</span><span class='line'>                    unbindService(sri.connection);
+</span><span class='line'>                    sri.connection.destroy();
+</span><span class='line'>                    mServiceConnections.remove(sri.connection);
+</span><span class='line'>                    if (mServiceConnections.isEmpty()) {
+</span><span class='line'>                        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
+</span><span class='line'>                        sendVoiceChoicesIfNeeded();
+</span><span class='line'>                    }
+</span><span class='line'>                    break;
+</span><span class='line'>
+</span><span class='line'>                ...
+</span><span class='line'>            }
+</span><span class='line'>        }
+</span><span class='line'>    };</span></code></pre></td></tr></table></div></figure>
+
+<p>在16行位置可以看到mChooserListAdapter.addServiceResults方法将resultTargets传给了adapter,接下来看addServiceResults的代码</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>public void addServiceResults(DisplayResolveInfo origTarget, List&lt;ChooserTarget&gt; targets) {
+</span><span class='line'>            if (DEBUG) Log.d(TAG, "addServiceResults " + origTarget + ", " + targets.size()
+</span><span class='line'>                    + " targets");
+</span><span class='line'>            final float parentScore = getScore(origTarget);
+</span><span class='line'>            Collections.sort(targets, mBaseTargetComparator);
+</span><span class='line'>            float lastScore = 0;
+</span><span class='line'>            for (int i = 0, N = targets.size(); i &lt; N; i++) {
+</span><span class='line'>                final ChooserTarget target = targets.get(i);
+</span><span class='line'>                float targetScore = target.getScore();
+</span><span class='line'>                targetScore *= parentScore;
+</span><span class='line'>                targetScore *= mLateFee;
+</span><span class='line'>                if (i &gt; 0 && targetScore &gt;= lastScore) {
+</span><span class='line'>                    // Apply a decay so that the top app can't crowd out everything else.
+</span><span class='line'>                    // This incents ChooserTargetServices to define what's truly better.
+</span><span class='line'>                    targetScore = lastScore * 0.95f;
+</span><span class='line'>                }
+</span><span class='line'>                insertServiceTarget(new ChooserTargetInfo(origTarget, target, targetScore));
+</span><span class='line'>
+</span><span class='line'>                if (DEBUG) {
+</span><span class='line'>                    Log.d(TAG, " =&gt; " + target.toString() + " score=" + targetScore
+</span><span class='line'>                            + " base=" + target.getScore()
+</span><span class='line'>                            + " lastScore=" + lastScore
+</span><span class='line'>                            + " parentScore=" + parentScore
+</span><span class='line'>                            + " lateFee=" + mLateFee);
+</span><span class='line'>                }
+</span><span class='line'>
+</span><span class='line'>                lastScore = targetScore;
+</span><span class='line'>            }
+</span><span class='line'>
+</span><span class='line'>            mLateFee *= 0.95f;
+</span><span class='line'>
+</span><span class='line'>            notifyDataSetChanged();
+</span><span class='line'>        }</span></code></pre></td></tr></table></div></figure>
+
+<p>可以看到这个方法通过循环遍历resultTargets，并将每一个target insert到mChooserAdapter中，从而实现了将用户App中的target添加到ChooserActivity中。</p>
+
+<p>至此，已经熟悉了DeepLinks的适配以及DeepLinks的实现原理，接下来看AppLinks。</p>
+
+<h1>AppLinks</h1>
+
+<p>同样以微信为例来说。比如我们的手机安装了微信，并且微信适配了Android M的AppLinks，当我们点击微信AppLinks适配的链接时，Android M系统不再弹出可以打开网页的Apps的Choose Picker，而是直接跳转到微信指定页面。</p>
+
+<h4>AppLinks适配</h4>
+
+<ul>
+<li>首先为intent-filter标签添加android:autoVerify=&quot;true&quot;的属性</li>
+</ul>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;activity ...&gt;
+</span><span class='line'>
+</span><span class='line'>    &lt;intent-filter android:autoVerify="true"&gt;
+</span><span class='line'>        &lt;action android:name="android.intent.action.VIEW" /&gt;
+</span><span class='line'>        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+</span><span class='line'>        &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+</span><span class='line'>        &lt;data android:scheme="http" android:host="www.example.com" /&gt;
+</span><span class='line'>        &lt;data android:scheme="https" android:host="www.example.com" /&gt;
+</span><span class='line'>    &lt;/intent-filter&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;/activity&gt;</span></code></pre></td></tr></table></div></figure>
+
+<ul>
+<li>创建JSON文件，JSON文件中需要包含app的ID以及APK的公钥证书。这个地方一个App可以对应多个website，一个website也可以对应多个App。具体详情可以前往 <a href="http://developer.android.com/intl/zh-cn/training/app-links/index.html#">Android Developer</a></li>
+<li>创建完文件之后，需要上传它同时保证它可以使用这个URL访问http://example.com/.well-known/statements.json。</li>
+</ul>
+
+<h4>AppLinks分析</h4>
+
+<p>主要分析Android M Framework PackageManagerService中添加的一段代码</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+<span class='line-number'>151</span>
+<span class='line-number'>152</span>
+<span class='line-number'>153</span>
+<span class='line-number'>154</span>
+<span class='line-number'>155</span>
+<span class='line-number'>156</span>
+<span class='line-number'>157</span>
+<span class='line-number'>158</span>
+<span class='line-number'>159</span>
+<span class='line-number'>160</span>
+<span class='line-number'>161</span>
+<span class='line-number'>162</span>
+<span class='line-number'>163</span>
+<span class='line-number'>164</span>
+<span class='line-number'>165</span>
+<span class='line-number'>166</span>
+<span class='line-number'>167</span>
+<span class='line-number'>168</span>
+<span class='line-number'>169</span>
+<span class='line-number'>170</span>
+<span class='line-number'>171</span>
+<span class='line-number'>172</span>
+<span class='line-number'>173</span>
+<span class='line-number'>174</span>
+<span class='line-number'>175</span>
+<span class='line-number'>176</span>
+<span class='line-number'>177</span>
+<span class='line-number'>178</span>
+<span class='line-number'>179</span>
+<span class='line-number'>180</span>
+<span class='line-number'>181</span>
+<span class='line-number'>182</span>
+<span class='line-number'>183</span>
+<span class='line-number'>184</span>
+<span class='line-number'>185</span>
+<span class='line-number'>186</span>
+<span class='line-number'>187</span>
+<span class='line-number'>188</span>
+<span class='line-number'>189</span>
+<span class='line-number'>190</span>
+<span class='line-number'>191</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>private interface IntentFilterVerifier&lt;T extends IntentFilter&gt; {
+</span><span class='line'>        boolean addOneIntentFilterVerification(int verifierId, int userId, int verificationId,
+</span><span class='line'>                                               T filter, String packageName);
+</span><span class='line'>        void startVerifications(int userId);
+</span><span class='line'>        void receiveVerificationResponse(int verificationId);
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    private class IntentVerifierProxy implements IntentFilterVerifier&lt;ActivityIntentInfo&gt; {
+</span><span class='line'>        private Context mContext;
+</span><span class='line'>        private ComponentName mIntentFilterVerifierComponent;
+</span><span class='line'>        private ArrayList&lt;Integer&gt; mCurrentIntentFilterVerifications = new ArrayList&lt;Integer&gt;();
+</span><span class='line'>
+</span><span class='line'>        public IntentVerifierProxy(Context context, ComponentName verifierComponent) {
+</span><span class='line'>            mContext = context;
+</span><span class='line'>            mIntentFilterVerifierComponent = verifierComponent;
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        private String getDefaultScheme() {
+</span><span class='line'>            return IntentFilter.SCHEME_HTTPS;
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        @Override
+</span><span class='line'>        public void startVerifications(int userId) {
+</span><span class='line'>            // Launch verifications requests
+</span><span class='line'>            int count = mCurrentIntentFilterVerifications.size();
+</span><span class='line'>            for (int n=0; n&lt;count; n++) {
+</span><span class='line'>                int verificationId = mCurrentIntentFilterVerifications.get(n);
+</span><span class='line'>                final IntentFilterVerificationState ivs =
+</span><span class='line'>                        mIntentFilterVerificationStates.get(verificationId);
+</span><span class='line'>
+</span><span class='line'>                String packageName = ivs.getPackageName();
+</span><span class='line'>
+</span><span class='line'>                ArrayList&lt;PackageParser.ActivityIntentInfo&gt; filters = ivs.getFilters();
+</span><span class='line'>                final int filterCount = filters.size();
+</span><span class='line'>                ArraySet&lt;String&gt; domainsSet = new ArraySet&lt;&gt;();
+</span><span class='line'>                for (int m=0; m&lt;filterCount; m++) {
+</span><span class='line'>                    PackageParser.ActivityIntentInfo filter = filters.get(m);
+</span><span class='line'>                    domainsSet.addAll(filter.getHostsList());
+</span><span class='line'>                }
+</span><span class='line'>                ArrayList&lt;String&gt; domainsList = new ArrayList&lt;&gt;(domainsSet);
+</span><span class='line'>                synchronized (mPackages) {
+</span><span class='line'>                    if (mSettings.createIntentFilterVerificationIfNeededLPw(
+</span><span class='line'>                            packageName, domainsList) != null) {
+</span><span class='line'>                        scheduleWriteSettingsLocked();
+</span><span class='line'>                    }
+</span><span class='line'>                }
+</span><span class='line'>                sendVerificationRequest(userId, verificationId, ivs);
+</span><span class='line'>            }
+</span><span class='line'>            mCurrentIntentFilterVerifications.clear();
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        private void sendVerificationRequest(int userId, int verificationId,
+</span><span class='line'>                IntentFilterVerificationState ivs) {
+</span><span class='line'>
+</span><span class='line'>            Intent verificationIntent = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
+</span><span class='line'>            verificationIntent.putExtra(
+</span><span class='line'>                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_ID,
+</span><span class='line'>                    verificationId);
+</span><span class='line'>            verificationIntent.putExtra(
+</span><span class='line'>                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_URI_SCHEME,
+</span><span class='line'>                    getDefaultScheme());
+</span><span class='line'>            verificationIntent.putExtra(
+</span><span class='line'>                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_HOSTS,
+</span><span class='line'>                    ivs.getHostsString());
+</span><span class='line'>            verificationIntent.putExtra(
+</span><span class='line'>                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_PACKAGE_NAME,
+</span><span class='line'>                    ivs.getPackageName());
+</span><span class='line'>            verificationIntent.setComponent(mIntentFilterVerifierComponent);
+</span><span class='line'>            verificationIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+</span><span class='line'>
+</span><span class='line'>            UserHandle user = new UserHandle(userId);
+</span><span class='line'>            mContext.sendBroadcastAsUser(verificationIntent, user);
+</span><span class='line'>            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+</span><span class='line'>                    "Sending IntentFilter verification broadcast");
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        public void receiveVerificationResponse(int verificationId) {
+</span><span class='line'>            IntentFilterVerificationState ivs = mIntentFilterVerificationStates.get(verificationId);
+</span><span class='line'>
+</span><span class='line'>            final boolean verified = ivs.isVerified();
+</span><span class='line'>
+</span><span class='line'>            ArrayList&lt;PackageParser.ActivityIntentInfo&gt; filters = ivs.getFilters();
+</span><span class='line'>            final int count = filters.size();
+</span><span class='line'>            if (DEBUG_DOMAIN_VERIFICATION) {
+</span><span class='line'>                Slog.i(TAG, "Received verification response " + verificationId
+</span><span class='line'>                        + " for " + count + " filters, verified=" + verified);
+</span><span class='line'>            }
+</span><span class='line'>            for (int n=0; n&lt;count; n++) {
+</span><span class='line'>                PackageParser.ActivityIntentInfo filter = filters.get(n);
+</span><span class='line'>                filter.setVerified(verified);
+</span><span class='line'>
+</span><span class='line'>                if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "IntentFilter " + filter.toString()
+</span><span class='line'>                        + " verified with result:" + verified + " and hosts:"
+</span><span class='line'>                        + ivs.getHostsString());
+</span><span class='line'>            }
+</span><span class='line'>
+</span><span class='line'>            mIntentFilterVerificationStates.remove(verificationId);
+</span><span class='line'>
+</span><span class='line'>            final String packageName = ivs.getPackageName();
+</span><span class='line'>            IntentFilterVerificationInfo ivi = null;
+</span><span class='line'>
+</span><span class='line'>            synchronized (mPackages) {
+</span><span class='line'>                ivi = mSettings.getIntentFilterVerificationLPr(packageName);
+</span><span class='line'>            }
+</span><span class='line'>            if (ivi == null) {
+</span><span class='line'>                Slog.w(TAG, "IntentFilterVerificationInfo not found for verificationId:"
+</span><span class='line'>                        + verificationId + " packageName:" + packageName);
+</span><span class='line'>                return;
+</span><span class='line'>            }
+</span><span class='line'>            if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
+</span><span class='line'>                    "Updating IntentFilterVerificationInfo for package " + packageName
+</span><span class='line'>                            +" verificationId:" + verificationId);
+</span><span class='line'>
+</span><span class='line'>            synchronized (mPackages) {
+</span><span class='line'>                if (verified) {
+</span><span class='line'>                    ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS);
+</span><span class='line'>                } else {
+</span><span class='line'>                    ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK);
+</span><span class='line'>                }
+</span><span class='line'>                scheduleWriteSettingsLocked();
+</span><span class='line'>
+</span><span class='line'>                final int userId = ivs.getUserId();
+</span><span class='line'>                if (userId != UserHandle.USER_ALL) {
+</span><span class='line'>                    final int userStatus =
+</span><span class='line'>                            mSettings.getIntentFilterVerificationStatusLPr(packageName, userId);
+</span><span class='line'>
+</span><span class='line'>                    int updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+</span><span class='line'>                    boolean needUpdate = false;
+</span><span class='line'>
+</span><span class='line'>                    // We cannot override the STATUS_ALWAYS / STATUS_NEVER states if they have
+</span><span class='line'>                    // already been set by the User thru the Disambiguation dialog
+</span><span class='line'>                    switch (userStatus) {
+</span><span class='line'>                        case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED:
+</span><span class='line'>                            if (verified) {
+</span><span class='line'>                                updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+</span><span class='line'>                            } else {
+</span><span class='line'>                                updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
+</span><span class='line'>                            }
+</span><span class='line'>                            needUpdate = true;
+</span><span class='line'>                            break;
+</span><span class='line'>
+</span><span class='line'>                        case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK:
+</span><span class='line'>                            if (verified) {
+</span><span class='line'>                                updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+</span><span class='line'>                                needUpdate = true;
+</span><span class='line'>                            }
+</span><span class='line'>                            break;
+</span><span class='line'>
+</span><span class='line'>                        default:
+</span><span class='line'>                            // Nothing to do
+</span><span class='line'>                    }
+</span><span class='line'>
+</span><span class='line'>                    if (needUpdate) {
+</span><span class='line'>                        mSettings.updateIntentFilterVerificationStatusLPw(
+</span><span class='line'>                                packageName, updatedStatus, userId);
+</span><span class='line'>                        scheduleWritePackageRestrictionsLocked(userId);
+</span><span class='line'>                    }
+</span><span class='line'>                }
+</span><span class='line'>            }
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        @Override
+</span><span class='line'>        public boolean addOneIntentFilterVerification(int verifierUid, int userId, int verificationId,
+</span><span class='line'>                    ActivityIntentInfo filter, String packageName) {
+</span><span class='line'>            if (!hasValidDomains(filter)) {
+</span><span class='line'>                return false;
+</span><span class='line'>            }
+</span><span class='line'>            IntentFilterVerificationState ivs = mIntentFilterVerificationStates.get(verificationId);
+</span><span class='line'>            if (ivs == null) {
+</span><span class='line'>                ivs = createDomainVerificationState(verifierUid, userId, verificationId,
+</span><span class='line'>                        packageName);
+</span><span class='line'>            }
+</span><span class='line'>            if (DEBUG_DOMAIN_VERIFICATION) {
+</span><span class='line'>                Slog.d(TAG, "Adding verification filter for " + packageName + " : " + filter);
+</span><span class='line'>            }
+</span><span class='line'>            ivs.addFilter(filter);
+</span><span class='line'>            return true;
+</span><span class='line'>        }
+</span><span class='line'>
+</span><span class='line'>        private IntentFilterVerificationState createDomainVerificationState(int verifierUid,
+</span><span class='line'>                int userId, int verificationId, String packageName) {
+</span><span class='line'>            IntentFilterVerificationState ivs = new IntentFilterVerificationState(
+</span><span class='line'>                    verifierUid, userId, packageName);
+</span><span class='line'>            ivs.setPendingState();
+</span><span class='line'>            synchronized (mPackages) {
+</span><span class='line'>                mIntentFilterVerificationStates.append(verificationId, ivs);
+</span><span class='line'>                mCurrentIntentFilterVerifications.add(verificationId);
+</span><span class='line'>            }
+</span><span class='line'>            return ivs;
+</span><span class='line'>        }
+</span><span class='line'>    }</span></code></pre></td></tr></table></div></figure>
+
+<p>这一部分主要有IntentFilterVerifier接口、实现了该接口的IntentVerifierProxy代理类。</p>
+
+<ul>
+<li>在PackageManager安装apk的过程中，会通过IntentVerifierProxy startVerifications（23行），在这个过程中会调用代理类的sendVerificationRequest（47行）。</li>
+<li>sendVerificationRequest会发出一个带有android.intent.action.INTENT<em>FILTER</em>NEEDS_VERIFICATION的广播intent，intent中还携带有该package的信息（72行）。</li>
+<li>Intent Filter Verifier的广播接收器获取这个广播，从package的<intent-filter>标签中编译出一个特有主机名的列表，verifier尝试从每个特有的主机名中获取statements.json，每一个被获取的JSON文件都会检查它的application ID和安装包的证书。当所有文件同时满足时发送成功信息到PackageManagerService的receiveVerificationResponse。</li>
+<li>在receiveVerificationResponse中通过scheduleWriteSettingsLocked保存结果（120行）。</li>
+</ul>
+
+<p>至此，也已经熟悉了AppLinks的适配以及AppLinks的实现原理。</p>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+Dec 17th, 2015</div>
+	<div class="tags">
+
+
+	<a class='category' href='/blog/categories/android/'>android</a>
+
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		
+	</div>
+	
+</div>
+
+
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2015
+
+    vicvan
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
+
+
+
+
+
+
+</body>
+</html>
